@@ -577,12 +577,19 @@ function mapErr(e){const m=String(e&&e.message||e||"");
   if(/TIPO/.test(m))return{code:"unsupported_type",message:m};
   if(/GRANDE/.test(m))return{code:"too_large",message:m};
   return{code:"unavailable",message:m}}
+const LEITURA={apiBatch:1,apiRev:1,apiQuery:1,apiGet:1,ping:1};
+const MSG_CODIGO="O Google ainda está com o código antigo. No Apps Script: Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão → Implantar.";
+const MSG_ACESSO="Não foi possível acessar o Google. Confira a internet e se a implantação do Apps Script está com 'Quem pode acessar: Qualquer pessoa'.";
 async function post(fn,args){
   let r;
-  try{r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args,pin:getPin()}),credentials:"omit",redirect:"follow",cache:"no-store"})}
-  catch(e){throw{code:"unavailable",message:"Sem conexão com o Google"}}
-  if(!r.ok)throw{code:"unavailable",message:"Google respondeu "+r.status};
-  let j;try{j=await r.json()}catch(e){throw{code:"unavailable",message:"Resposta inválida do Google. Confira se o Apps Script foi implantado como 'Qualquer pessoa'."}}
+  try{
+    if(LEITURA[fn])r=await fetch(API_URL+"?fn="+encodeURIComponent(fn)+"&args="+encodeURIComponent(JSON.stringify(args)),{credentials:"omit",redirect:"follow",cache:"no-store"});
+    else r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args,pin:getPin()}),credentials:"omit",redirect:"follow",cache:"no-store"});
+  }catch(e){throw{code:"unavailable",message:MSG_ACESSO}}
+  if(!r.ok)throw{code:"unavailable",message:(r.status===404?"Link do Google não encontrado (404). Confira o endereço do Apps Script.":"O Google respondeu com erro "+r.status+".")};
+  const txt=await r.text();
+  if(/^\s*</.test(txt))throw{code:"unavailable",message:MSG_CODIGO};
+  let j;try{j=JSON.parse(txt)}catch(e){throw{code:"unavailable",message:MSG_CODIGO}}
   if(!j.ok)throw mapErr(j.e);
   return j.v;
 }
@@ -853,11 +860,11 @@ function subscribeWeek(){
     snap.docs.forEach(d=>{if(d.exists)S.rotas.set(d.id,clean(d.data()))});
     if(!snap.metadata.fromCache){clearTimeout(loadTimer);if(!S.readOnly)banner("")}
     render();
-  },err=>{clearTimeout(loadTimer);banner("Não foi possível falar com a planilha do Google ("+(err&&err.message||err&&err.code||"erro")+"). Confira a internet e recarregue a página.","warn")});
+  },err=>{clearTimeout(loadTimer);banner(err&&err.message||"Não foi possível falar com a planilha do Google. Confira a internet e recarregue a página.","warn")});
 }
 function subscribeSeries(){
   S.serCol.onSnapshot(snap=>{S.series.clear();snap.docs.forEach(d=>{if(d.exists)S.series.set(d.id,cleanSerie(d.data()))});render()},
-    err=>banner("Não foi possível ler as rotas que se repetem ("+(err&&err.code||"erro")+").","warn"));
+    err=>banner("Não foi possível ler as rotas que se repetem: "+(err&&err.message||err&&err.code||"erro"),"warn"));
 }
 function newId(col){return col?col.doc().id:("l"+Date.now()+Math.floor(Math.random()*1e4))}
 async function put(kind,id,body){
