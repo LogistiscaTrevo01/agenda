@@ -2,7 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda Trevo">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <title>Agenda de Rotas · Trevo Resíduos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -240,7 +245,12 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .ev .addr{display:block;font-size:11.5px;opacity:.8}
 .trajeto{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px}
 .stops{display:flex;flex-direction:column;gap:6px}
-.stop{display:grid;grid-template-columns:22px 132px 1fr 1.4fr auto;gap:6px;align-items:center}
+.stop{display:grid;grid-template-columns:38px 132px 1fr 1.4fr auto;gap:6px;align-items:center;border-radius:8px}
+.shandle{display:flex;align-items:center;gap:2px;cursor:grab;touch-action:none;user-select:none;padding:4px 0}
+.sgrip{color:var(--muted);font-size:15px;line-height:1;width:12px;text-align:center}
+.shandle:hover .sgrip{color:var(--ink)}
+.stop.sdrag{background:var(--surface);box-shadow:0 6px 18px rgba(0,0,0,.18);position:relative;z-index:3;cursor:grabbing}
+.stop.sdrag .shandle{cursor:grabbing}
 .stop .sn{width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:700 12px/22px var(--f-display);text-align:center}
 .fld .stop select,.fld .stop input{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);width:100%;min-width:0}
 .stop .sbtns{display:flex;gap:2px;align-items:center}
@@ -267,7 +277,7 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .ev.has-pin{padding-right:22px}
 svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .ev .trail{display:block;font-size:11.5px;opacity:.85}
-@media (max-width:640px){.stop{grid-template-columns:22px 1fr auto;}.stop .slocal{grid-column:2/4}.stop .send{grid-column:2/4}.stop .sbtns{grid-column:3;grid-row:1}}
+@media (max-width:640px){.stop{grid-template-columns:38px 1fr auto;}.stop .slocal{grid-column:2/4}.stop .send{grid-column:2/4}.stop .sbtns{grid-column:3;grid-row:1}}
 .kpi.todaybtn{cursor:pointer;font:inherit;color:inherit;text-align:left;--edge:var(--accent)}
 .kpi.todaybtn b{font-size:20px}
 .kpi.todaybtn:hover{background:var(--accent-soft)}
@@ -403,11 +413,13 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 /* resíduos no formulário */
 .resbox{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px}
 .resrows{display:flex;flex-direction:column;gap:6px}
-.resrow{display:grid;grid-template-columns:1fr 200px auto;gap:6px;align-items:center}
+.resrow{display:grid;grid-template-columns:1fr 190px 170px auto;gap:6px;align-items:center}
+#fhExtras .resrow{grid-template-columns:1fr 130px auto}
+.fld .resrow select{padding:7px 6px;border:1px solid var(--line);border-radius:7px;background:var(--surface);width:100%;min-width:0}
 .fld .resrow input{padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);width:100%;min-width:0}
 .resrow .rm{border:0;background:transparent;color:var(--muted);width:28px;height:30px;border-radius:6px;font-size:15px}
 .resrow .rm:hover{background:var(--line-soft);color:var(--ink)}
-@media (max-width:640px){.resrow{grid-template-columns:1fr 110px auto}}
+@media (max-width:640px){.resrow{grid-template-columns:1fr 1fr auto}.resrow .rtipo{grid-column:1/3}.resrow .rm{grid-row:1;grid-column:3}#fhExtras .resrow{grid-template-columns:1fr 90px auto}#fhExtras .resrow .rtipo{grid-column:auto}}
 .stop .sbtns a.smap{display:grid;place-items:center;width:26px;height:28px;padding:0;border-radius:6px}
 .stop .sbtns a.smap:hover{background:var(--line-soft)}
 .cancelnote{display:none;margin-top:6px;font-size:13px;color:var(--cancel);font-weight:600}
@@ -503,6 +515,42 @@ a.btn{text-decoration:none}
   .mbody{padding:4px 12px 14px}
   .mapday::after{content:attr(data-s);font-size:13px}
   .top .who b{display:none}
+}
+.ctxscrim{position:fixed;inset:0;z-index:70}
+.ctxscrim.dim{background:rgba(10,16,24,.35)}
+.ctxmenu{position:fixed;z-index:71;min-width:230px;max-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.28);padding:6px;display:flex;flex-direction:column}
+.ctxmenu>button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;font-weight:500;display:flex;align-items:center;gap:8px}
+@media (hover:hover){.ctxmenu>button:hover{background:var(--accent-soft)}}
+.ctxmenu>button:focus-visible{background:var(--accent-soft)}
+.ctxmenu>button.danger{color:var(--danger)}
+.ctxmenu>button.armed{background:var(--danger);color:#fff}
+.ctxmenu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.ctxhead{padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.ctxhead small{flex-basis:100%;color:var(--muted)}
+.ctxsub{font:600 11px var(--f-display);text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:6px 10px 2px}
+.ctxst{display:flex;flex-wrap:wrap;gap:4px;padding:2px 8px 6px}
+.cst{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:600}
+.cst.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cst.canc{color:var(--cancel);border-color:var(--cancel)}
+.cst.canc.on{background:var(--cancel);color:#fff}
+.ctxmenu.sheet{left:0;right:0;bottom:0;top:auto;max-width:none;border-radius:16px 16px 0 0;padding:8px 10px calc(10px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto}
+.ctxmenu.sheet>button{padding:13px 12px;font-size:16px}
+.ctxmenu.sheet .cst{padding:8px 13px;font-size:14px}
+.ctxmenu .ctxcancel{justify-content:center;font-weight:700;background:var(--surface-2)!important;margin-top:4px}
+/* celular e iPhone: alvos de toque maiores, sem zoom automático ao digitar, sem atraso no toque */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
+.scrim,.ctxmenu.sheet{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.top{padding-top:max(10px,env(safe-area-inset-top));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.toast,.undobar{bottom:calc(18px + env(safe-area-inset-bottom))}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px!important}
+  .btn{min-height:40px}
+  .icon-btn{width:40px;height:40px}
+  .stop .sbtns button,.stop .sbtns a.smap,.resrow .rm{min-width:34px;min-height:36px}
+  .shandle{padding:8px 4px}
+  .ev .rz{height:12px}
+  .choice button{min-height:38px}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -972,9 +1020,11 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show"
 function banner(msg,kind){const b=$("#banner");if(!msg){b.className="banner";b.textContent="";return}b.className="banner show "+(kind||"info");b.textContent=msg}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const FIELDS=["caminhao","ini","fim","cliente","servico","residuo","destino","motorista","status","mtr","obs"];
-function resText(list){return list.map(x=>x.tipo+(x.qtd?" ("+x.qtd+")":"")).join("; ")}
+const CLASSES=[["","Classe…"],["Classe I","Classe I – Perigoso"],["Classe II A","Classe II A – Não inerte"],["Classe II B","Classe II B – Inerte"]];
+const resOne=x=>x.tipo+(x.classe?" – "+x.classe:"")+(x.qtd?" ("+x.qtd+")":"");
+function resText(list){return list.map(resOne).join("; ")}
 function cleanRes(r){
-  if(Array.isArray(r.residuos))return r.residuos.slice(0,12).map(x=>({tipo:String(x&&x.tipo||"").trim(),qtd:String(x&&x.qtd||"").trim()})).filter(x=>x.tipo);
+  if(Array.isArray(r.residuos))return r.residuos.slice(0,12).map(x=>({tipo:String(x&&x.tipo||"").trim(),qtd:String(x&&x.qtd||"").trim(),classe:CLASSES.some(c=>c[0]&&c[0]===(x&&x.classe))?x.classe:""})).filter(x=>x.tipo);
   return r.residuo?[{tipo:String(r.residuo),qtd:""}]:[];
 }
 function clean(r){
@@ -1377,10 +1427,14 @@ function fillMesModo(ds,modo){const sel=$("#fMesModo");if(!ds){sel.innerHTML="";
   sel.value=opts.includes(cur)?cur:"dia"}
 /* ---------- vários tipos de resíduo ---------- */
 function resRow(x){const d=document.createElement("div");d.className="resrow";
-  d.innerHTML='<input class="rtipo" list="dlRes" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo"><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
-  d.querySelector(".rtipo").value=x.tipo||"";d.querySelector(".rqtd").value=x.qtd||"";return d}
+  d.innerHTML='<input class="rtipo" list="dlRes" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo"><select class="rclasse" aria-label="Classe do resíduo">'+CLASSES.map(c=>'<option value="'+c[0]+'">'+c[1]+'</option>').join("")+'</select><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
+  d.querySelector(".rtipo").value=x.tipo||"";d.querySelector(".rqtd").value=x.qtd||"";d.querySelector(".rclasse").value=x.classe||"";return d}
+const resCad=nome=>[...S.residuos].find(([,x])=>norm(x.nome)===norm(nome))||null;
 function setRes(list){const c=$("#fRes");c.innerHTML="";(list.length?list:[{tipo:"",qtd:""}]).forEach(x=>c.appendChild(resRow(x)))}
-function getRes(){return[...document.querySelectorAll("#fRes .resrow")].map(r=>({tipo:r.querySelector(".rtipo").value.trim(),qtd:r.querySelector(".rqtd").value.trim()})).filter(x=>x.tipo)}
+function getRes(){return[...document.querySelectorAll("#fRes .resrow")].map(r=>({tipo:r.querySelector(".rtipo").value.trim(),qtd:r.querySelector(".rqtd").value.trim(),classe:r.querySelector(".rclasse").value})).filter(x=>x.tipo)}
+/* ao escolher um resíduo do cadastro, a classe guardada vem junto */
+$("#fRes").addEventListener("input",e=>{if(!e.target.classList.contains("rtipo"))return;const row=e.target.closest(".resrow");const c=resCad(e.target.value.trim());const sel=row.querySelector(".rclasse");if(c&&c[1].classe&&(!sel.value||sel.dataset.auto)){sel.value=c[1].classe;sel.dataset.auto="1"}});
+$("#fRes").addEventListener("change",e=>{if(e.target.classList.contains("rclasse"))e.target.dataset.auto=""});
 $("#addRes").addEventListener("click",()=>{const r=resRow({});$("#fRes").appendChild(r);r.querySelector(".rtipo").focus()});
 $("#fRes").addEventListener("click",e=>{const b=e.target.closest(".rm");if(!b)return;const row=b.closest(".resrow");
   if(document.querySelectorAll("#fRes .resrow").length>1)row.remove();else{row.querySelector(".rtipo").value="";row.querySelector(".rqtd").value=""}updateFormState()});
@@ -1488,7 +1542,7 @@ function validate(f,rec,needRec){
 $("#form").addEventListener("input",updateFormState);
 function stopRow(p){
   const d=document.createElement("div");d.className="stop";
-  d.innerHTML='<span class="sn"></span><select class="stipo" aria-label="Tipo da parada">'+TIPOS.map(t=>'<option'+(t===p.tipo?' selected':'')+'>'+t+'</option>').join("")+'</select>'+
+  d.innerHTML='<span class="shandle" title="Arraste para mudar a ordem"><span class="sgrip" aria-hidden="true">⠿</span><span class="sn"></span></span><select class="stipo" aria-label="Tipo da parada">'+TIPOS.map(t=>'<option'+(t===p.tipo?' selected':'')+'>'+t+'</option>').join("")+'</select>'+
     '<input class="slocal" list="dlLoc" autocomplete="off" placeholder="Local (ex.: Trevo, Inovar)" aria-label="Local">'+
     '<input class="send" autocomplete="off" placeholder="Endereço (rua, nº, cidade)" aria-label="Endereço">'+
     '<span class="sbtns"><a class="smap" target="_blank" rel="noopener" title="Abrir este endereço no Google Maps" aria-label="Abrir no Google Maps">'+PIN+'</a><button type="button" class="up" title="Subir">↑</button><button type="button" class="dn" title="Descer">↓</button><button type="button" class="rm" title="Remover">✕</button></span>';
@@ -1505,6 +1559,13 @@ $("#fStops").addEventListener("click",e=>{const row=e.target.closest(".stop");if
   if(e.target.closest(".rm")){row.remove();updateFormState()}
   else if(e.target.closest(".up")&&row.previousElementSibling){row.parentNode.insertBefore(row,row.previousElementSibling);updateFormState()}
   else if(e.target.closest(".dn")&&row.nextElementSibling){row.parentNode.insertBefore(row.nextElementSibling,row);updateFormState()}});
+/* arrastar a parada pela alça (⠿ + número) com o mouse ou o dedo */
+$("#fStops").addEventListener("pointerdown",e=>{const h=e.target.closest(".shandle");if(!h)return;e.preventDefault();
+  const row=h.closest(".stop"),box=$("#fStops");row.classList.add("sdrag");
+  const mv=ev=>{const sibs=[...box.querySelectorAll(".stop")].filter(x=>x!==row);const after=sibs.find(x=>{const r=x.getBoundingClientRect();return ev.clientY<r.top+r.height/2});
+    if(after){if(row.nextElementSibling!==after)box.insertBefore(row,after)}else if(box.lastElementChild!==row)box.appendChild(row);updateFormState()};
+  const up=ev=>{if(ev&&ev.type==="pointerup")mv(ev);row.classList.remove("sdrag");window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);window.removeEventListener("pointercancel",up);updateFormState()};
+  window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);window.addEventListener("pointercancel",up)});
 $("#fStops").addEventListener("input",e=>{const row=e.target.closest(".stop");if(!row)return;
   if(e.target.classList.contains("send"))e.target.dataset.auto="";
   if(e.target.classList.contains("slocal"))e.target.dataset.auto="";
@@ -1544,7 +1605,9 @@ function cadastroPendente(f){
     const cur=S.locais.get(k);if(cur&&cur.endereco===p.endereco)return;
     out.push({tipo:"local",nome:p.local,endereco:p.endereco,antes:cur&&cur.endereco||""})});
   const temRes=new Set([...S.residuos.values()].map(x=>norm(x.nome)));
-  if(S.residuos.size)(f.residuos||[]).forEach(x=>{const k=norm(x.tipo);if(k&&!temRes.has(k)&&!vistos.has("r:"+k)){vistos.add("r:"+k);out.push({tipo:"residuo",nome:x.tipo})}});
+  if(S.residuos.size)(f.residuos||[]).forEach(x=>{const k=norm(x.tipo);if(!k||vistos.has("r:"+k))return;vistos.add("r:"+k);
+    if(!temRes.has(k))out.push({tipo:"residuo",nome:x.tipo,classe:x.classe||""});
+    else if(x.classe){const c=resCad(x.tipo);if(c&&(c[1].classe||"")!==x.classe)out.push({tipo:"resclasse",nome:c[1].nome,classe:x.classe,antes:c[1].classe||"",id:c[0]})}});
   const temMot=new Set([...S.motoristas.values()].map(x=>norm(x.nome)));
   if(S.motoristas.size&&f.motorista&&!temMot.has(norm(f.motorista)))out.push({tipo:"motorista",nome:f.motorista,caminhao:f.caminhao});
   return out;
@@ -1555,7 +1618,8 @@ function askSave(list){SV=list;
   $("#svTitle").textContent=list.filter(x=>x.tipo==="local").length>1?"Deseja salvar os endereços desses locais?":tit;
   $("#svList").innerHTML=list.map((x,i)=>'<label class="svitem"><input type="checkbox" data-i="'+i+'" checked><span>'+
     (x.tipo==="local"?'<b>'+PIN_S+' '+esc(x.nome)+'</b><small>'+esc(x.endereco)+'</small>'+(x.antes?'<small>Endereço guardado hoje: <s>'+esc(x.antes)+'</s> (será trocado)</small>':'<small>Local novo</small>')
-    :x.tipo==="residuo"?'<b>♻ '+esc(x.nome)+'</b><small>Tipo de resíduo novo</small>':'<b>👷 '+esc(x.nome)+'</b><small>Motorista novo ('+esc(x.caminhao)+')</small>')+'</span></label>').join("");
+    :x.tipo==="residuo"?'<b>♻ '+esc(x.nome)+'</b><small>Tipo de resíduo novo'+(x.classe?' · '+esc(x.classe):'')+'</small>'
+    :x.tipo==="resclasse"?'<b>♻ '+esc(x.nome)+' – '+esc(x.classe)+'</b><small>Guardar a classe no cadastro'+(x.antes?' (hoje: '+esc(x.antes)+')':'')+'</small>':'<b>👷 '+esc(x.nome)+'</b><small>Motorista novo ('+esc(x.caminhao)+')</small>')+'</span></label>').join("");
   openModal("scrimSave")}
 $("#svNo").addEventListener("click",()=>{SV=null;closeModal("scrimSave")});
 $("#svYes").addEventListener("click",async()=>{const list=SV||[];SV=null;
@@ -1563,7 +1627,8 @@ $("#svYes").addEventListener("click",async()=>{const list=SV||[];SV=null;
   let n=0;
   for(const x of pick){
     if(x.tipo==="local"){if(await rememberAddr(x.nome,x.endereco))n++}
-    else if(x.tipo==="residuo"){if(await cadSet("residuos",null,{nome:x.nome,obs:""}))n++}
+    else if(x.tipo==="residuo"){if(await cadSet("residuos",null,{nome:x.nome,obs:"",classe:x.classe||""}))n++}
+    else if(x.tipo==="resclasse"){if(await cadSet("residuos",x.id,Object.assign({},S.residuos.get(x.id),{classe:x.classe})))n++}
     else if(x.tipo==="motorista"){if(await cadSet("motoristas",null,{nome:x.nome,caminhao:x.caminhao,telefone:""}))n++}}
   if(n)toast(n===1?"Salvo nos Cadastros":n+" itens salvos nos Cadastros");render()});
 $("#mDel").addEventListener("click",async()=>{
@@ -1701,7 +1766,7 @@ function sQuery(){
 const sEmpty=q=>!q.texto&&!q.caminhao&&!q.tipo&&!q.status&&!q.mtr&&!q.anexos&&!q.de&&!q.ate;
 function campoTxt(r,campo){
   const st=stopsOf(r);
-  const C={cliente:r.cliente,servico:r.servico,residuo:(r.residuos||[]).map(x=>x.tipo+" "+x.qtd).join(" ")+" "+(r.residuo||""),local:st.map(p=>p.local).join(" ")+" "+(r.destino||""),
+  const C={cliente:r.cliente,servico:r.servico,residuo:(r.residuos||[]).map(x=>x.tipo+" "+x.classe+" "+x.qtd).join(" ")+" "+(r.residuo||""),local:st.map(p=>p.local).join(" ")+" "+(r.destino||""),
     endereco:st.map(p=>p.endereco).join(" "),mtr:r.mtr,motorista:r.motorista,obs:r.obs,anexo:(r.anexos||[]).map(a=>a.nome).join(" ")};
   return norm(campo&&C[campo]!==undefined?C[campo]:Object.values(C).join(" | "));
 }
@@ -1844,7 +1909,7 @@ function rotasSheet(wb,list,title,sub){
     if(r.data!==last){band=!band;last=r.data}
     const es=eff(r);const d=parseIso(r.data);
     const traj=stopsOf(r).map((p,j)=>(j+1)+". "+p.tipo+": "+[p.local,p.endereco].filter(Boolean).join(" – ")).join("\n");
-    const vals=[xDate(r.data),DAYN[d.getDay()],r.caminhao,r.ini,r.fim,Math.round(hrs(r)*100)/100,r.cliente,r.servico,(r.residuos||[]).map(x=>x.tipo+(x.qtd?" ("+x.qtd+")":"")).join("\n"),r.destino,traj,r.motorista,r.mtr,es,r.serie?"Sim":"",r.obs,(r.anexos||[]).length||""];
+    const vals=[xDate(r.data),DAYN[d.getDay()],r.caminhao,r.ini,r.fim,Math.round(hrs(r)*100)/100,r.cliente,r.servico,(r.residuos||[]).map(x=>resOne(x)).join("\n"),r.destino,traj,r.motorista,r.mtr,es,r.serie?"Sim":"",r.obs,(r.anexos||[]).length||""];
     const row=ws.getRow(5+i);row.values=vals;
     let lines=1;
     vals.forEach((v,k)=>{const c=row.getCell(k+1);c.border=xBorder();c.alignment={vertical:"top",wrapText:[6,7,8,9,10,15].includes(k),horizontal:[0,3,4,5,13,14,16].includes(k)?"center":"left"};
@@ -2110,6 +2175,59 @@ $("#fhCopy").addEventListener("click",async()=>{
   fhSavePag()});
 $("#fhMail").addEventListener("click",()=>fhSavePag());
 
+/* ---------- menu da rota: botão direito (computador) ou segurar o dedo (celular) ---------- */
+const CTX={id:null,confirm:false};
+function ctxClose(){const m=$("#ctxMenu");if(m){m.remove()}document.querySelector(".ctxscrim")&&document.querySelector(".ctxscrim").remove();CTX.id=null;CTX.confirm=false}
+function ctxOpen(id,x,y,touch){
+  ctxClose();const r=S.items.get(id);if(!r)return;CTX.id=id;CTX.t=touch?Date.now():0;
+  const es=eff(r),outro=r.caminhao==="Baú"?"Poliguindaste":"Baú";const temTraj=stopsOf(r).some(p=>p.endereco||p.local);
+  const st=["Agendado","Em rota","Concluído","Cancelado"].map(v=>'<button type="button" class="cst'+(es===v&&!r.auto?" on":"")+(v==="Cancelado"?" canc":"")+'" data-act="st" data-v="'+v+'">'+(v==="Concluído"?"✓ ":v==="Cancelado"?"✕ ":v==="Em rota"?"● ":"")+v+'</button>').join("");
+  const m=document.createElement("div");m.id="ctxMenu";m.className="ctxmenu"+(touch?" sheet":"");m.setAttribute("role","menu");
+  m.innerHTML='<div class="ctxhead"><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span> <b>'+esc(r.cliente||r.servico||"Rota")+'</b><small>'+DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmm(parseIso(r.data))+' · '+esc(r.ini)+'–'+esc(r.fim)+(r.serie?' · ↻ repete':'')+'</small></div>'+
+    '<button type="button" data-act="open">✏️ Abrir / editar</button>'+
+    '<div class="ctxsub">Status</div><div class="ctxst">'+st+'<button type="button" class="cst'+(r.auto?" on":"")+'" data-act="auto">⏱ Automático</button></div>'+
+    '<hr><button type="button" data-act="dup">📋 Duplicar…</button>'+
+    '<button type="button" data-act="tomorrow">📅 Copiar para o dia seguinte</button>'+
+    '<button type="button" data-act="truck">🚚 Passar para o '+outro+'</button>'+
+    '<button type="button" data-act="wa">📲 Mandar no WhatsApp</button>'+
+    (temTraj?'<button type="button" data-act="map">'+PIN_S+' Trajeto no Google Maps</button>':'')+
+    '<hr><button type="button" class="danger" data-act="del">🗑 '+(r.serie?"Excluir só este dia":"Excluir")+'</button>'+
+    (touch?'<button type="button" class="ctxcancel" data-act="close">Fechar</button>':'');
+  const sc=document.createElement("div");sc.className="ctxscrim"+(touch?" dim":"");sc.addEventListener("pointerdown",e=>{e.preventDefault();ctxClose()});
+  document.body.appendChild(sc);document.body.appendChild(m);
+  if(!touch){const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(6,Math.min(x,innerWidth-w-6))+"px";m.style.top=Math.max(6,Math.min(y,innerHeight-h-6))+"px"}
+  m.querySelector("button").focus({preventScroll:true});
+}
+/* altera a rota (ou só este dia, se for de uma repetição) */
+async function ctxSave(id,changes,msg){
+  const r=S.items.get(id);if(!r||!guard())return;const body=Object.assign(clean(r),changes);let ok,sn;
+  if(r.virtual){const rid=newId(S.col);sn=[snapDoc("rotas",rid),snapDoc("series",r.serie)];ok=await saveOccurrence(r,body,rid)}
+  else{sn=[snapDoc("rotas",id)];ok=await put("rotas",id,body)}
+  if(ok)offerUndo(msg,sn);
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("#ctxMenu [data-act]");if(!b||Date.now()-(CTX.t||0)<350)return;const id=CTX.id;const r=S.items.get(id);if(!r){ctxClose();return}
+  const a=b.dataset.act;
+  if(a==="del"&&!CTX.confirm){CTX.confirm=true;b.textContent="Confirmar: "+(r.serie?"excluir só este dia":"excluir rota");b.classList.add("armed");return}
+  ctxClose();
+  if(a==="close")return;
+  if(a==="open")return openForm(id);
+  if(a==="dup"){openForm(id);$("#mDup").click();return}
+  if(a==="wa")return openWA(r.data,r.caminhao,Object.assign({id},r));
+  if(a==="map"){window.open(routeOne(r).url,"_blank","noopener");return}
+  if(a==="st")return ctxSave(id,{status:b.dataset.v,auto:false},"Status: "+b.dataset.v);
+  if(a==="auto")return ctxSave(id,{status:"Agendado",auto:true},"Status automático pelo horário");
+  if(a==="truck"){const c=r.caminhao==="Baú"?"Poliguindaste":"Baú";return ctxSave(id,{caminhao:c},"Passada para o "+c)}
+  if(a==="tomorrow"){if(!guard())return;const body=clean(r);delete body.serie;delete body.serieData;body.data=iso(addDays(parseIso(r.data),1));body.status="Agendado";body.auto=true;body.anexos=[];
+    const nid=newId(S.col);const sn=[snapDoc("rotas",nid)];if(await put("rotas",nid,body))offerUndo("Copiada para "+ddmm(parseIso(body.data)),sn);return}
+  if(a==="del"){if(!guard())return;let ok,sn;
+    if(r.virtual){sn=[snapDoc("series",r.serie)];ok=await excludeDate(r.serie,r.serieData);if(ok)offerUndo("Removida só deste dia",sn)}
+    else{sn=[snapDoc("rotas",id)];ok=await del("rotas",id);if(ok)offerUndo(r.serie?"Removida só deste dia":"Rota excluída",sn)}}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&CTX.id)ctxClose()});
+window.addEventListener("resize",()=>{if(CTX.id&&!$("#ctxMenu.sheet"))ctxClose()});
+$("#calScroll").addEventListener("scroll",()=>{if(CTX.id&&!$("#ctxMenu.sheet"))ctxClose()},{passive:true});
+
 /* ---------- Cadastros: locais, resíduos, motoristas, repetições e segurança ---------- */
 const CAD={open:false,tab:"locais",q:"",edit:null,confirm:null,info:null,overr:null};
 function usoN(g,nome){if(!S.uso)return null;const x=(S.uso[g]||{})[norm(nome)];return x?x.n:0}
@@ -2165,9 +2283,10 @@ function renderCad(){
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
-    const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: Classe I, perigoso"></td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
-    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe / observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
+    const csel=v=>'<select id="eCla">'+CLASSES.map(c=>'<option value="'+c[0]+'"'+(c[0]===v?" selected":"")+'>'+(c[0]?c[1]:"—")+'</option>').join("")+'</select>';
+    const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td>'+csel(x?x.classe:"")+'</td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: perigoso, tambores de 200 L"></td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
+    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
     const sc=semCadastro("residuos",list.map(([,x])=>x.nome));
     if(sc.length)h+='<h4 class="csec">Usados nas rotas e ainda sem cadastro</h4><div>'+sc.slice(0,40).map(x=>'<span class="chipx">'+esc(x.nome)+' <small>('+x.n+')</small><button type="button" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ cadastrar</button></span>').join("")+'</div>';
     h+='<p class="cnote">Excluir um tipo daqui só tira ele das sugestões. As rotas que já usaram esse resíduo continuam iguais.</p>';
@@ -2224,7 +2343,7 @@ $("#cBody").addEventListener("click",async e=>{
     const nome=($("#eNome").value||"").trim();if(!nome){toast("Informe o nome");$("#eNome").focus();return}
     const eid=CAD.edit&&CAD.edit.id;let ok;
     if(tab==="locais")ok=await saveLocal(eid||null,nome,($("#eEnd").value||"").trim(),($("#eObs").value||"").trim());
-    else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}ok=await cadSet("residuos",eid||null,{nome,obs:($("#eObs").value||"").trim()})}
+    else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}ok=await cadSet("residuos",eid||null,Object.assign({},eid&&S.residuos.get(eid)||{},{nome,obs:($("#eObs").value||"").trim(),classe:$("#eCla").value}))}
     else{const dup=[...S.motoristas].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse motorista já existe");return}ok=await cadSet("motoristas",eid||null,Object.assign({},eid&&S.motoristas.get(eid)||{},{nome,caminhao:$("#eCam").value,telefone:($("#eTel").value||"").trim()}))}
     if(ok!==false){CAD.edit=null;renderCad();toast("Salvo")}return}
   if(a==="del"){CAD.confirm=null;if(await cadDel(tab,id))toast("Excluído");return}
@@ -2321,7 +2440,7 @@ cal.addEventListener("pointerup",async e=>{
   }
   clearTimeout(d.timer);d.ev&&d.ev.classList.remove("armed");
   if(d.target)d.target.classList.remove("drop");
-  if(!d.started){openForm(d.id);return}
+  if(!d.started){if(d.touch&&d.armed)ctxOpen(d.id,0,0,true);else openForm(d.id);return}
   const r=Object.assign({},d.r);
   if(d.type==="resize"){if(d.newFim==null)return render();r.fim=toHM(d.newFim)}
   else{const tl=d.target||d.lane;const ni=d.newIni==null?d.ini:d.newIni;const dur=d.fim-d.ini;r.ini=toHM(ni);r.fim=toHM(ni+dur);r.data=tl.dataset.day;r.caminhao=tl.dataset.truck}
@@ -2333,7 +2452,7 @@ cal.addEventListener("pointerup",async e=>{
 });
 cal.addEventListener("pointercancel",()=>{if(drag){clearTimeout(drag.timer);const was=drag.started;drag=null;if(was)render();else document.querySelectorAll(".ev.armed").forEach(x=>x.classList.remove("armed"))}});
 document.addEventListener("touchmove",e=>{if(drag&&drag.armed&&drag.touch)e.preventDefault()},{passive:false});
-cal.addEventListener("contextmenu",e=>{if(e.target.closest(".ev"))e.preventDefault()});
+cal.addEventListener("contextmenu",e=>{const ev=e.target.closest(".ev");if(!ev)return;e.preventDefault();if(drag&&drag.touch)return;drag=null;ctxOpen(ev.dataset.id,e.clientX,e.clientY,false)});
 
 /* relógio: status automático e linha da hora atual */
 S.lastDay=iso(new Date());
@@ -2364,7 +2483,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="5.6";
+const VERSAO_TELA="5.8";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -2384,7 +2503,7 @@ async function startData(){
   S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");
   subscribeWeek();subscribeSeries();
   S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
-  S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
+  S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.motCol.onSnapshot(snap=>{S.motoristas.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.motoristas.set(d.id,{nome:String(x.nome),caminhao:String(x.caminhao||""),telefone:String(x.telefone||""),pagamento:String(x.pagamento||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.cfgDoc.onSnapshot(d=>{S.cfg=d.exists?Object.assign({},d.data()||{}):{};S.patio=String(S.cfg.patio||"");render();if(CAD.open)renderCad();if(!S.cfgOk){S.cfgOk=true;seedV5()}},()=>{});
   loadUso();
