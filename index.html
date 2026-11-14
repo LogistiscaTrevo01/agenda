@@ -256,6 +256,13 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .gapchip span{overflow:hidden;text-overflow:ellipsis}
 .ev .gpin{position:absolute;top:1px;right:1px;z-index:3;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgba(255,255,255,.85);box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .ev .gpin:hover{background:#fff}
+.ev .gpin.wide{width:auto;padding:0 7px 0 4px;gap:3px;display:inline-flex;align-items:center;font:600 11.5px/1 var(--f-cond);color:#2a2650;text-decoration:none;border:1px solid rgba(36,31,89,.18)}
+.lane{container-type:inline-size}
+.ev.has-pin:not(.short){padding-right:6px}
+.ev.has-pin:not(.short) .t{display:block;padding-right:104px}
+.ev.short .gpin.wide span{display:none}
+.ev.short .gpin.wide{width:20px;padding:0;justify-content:center}
+@container (max-width:240px){.ev .gpin.wide{width:20px;padding:0;justify-content:center}.ev .gpin.wide span{display:none}.ev.has-pin:not(.short) .t{padding-right:20px}}
 .ev.has-pin{padding-right:22px}
 svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .ev .trail{display:block;font-size:11.5px;opacity:.85}
@@ -1204,7 +1211,13 @@ function hourRange(){return[0,24*60]}
 function layoutLane(list){
   const items=list.map(r=>({r,s:toMin(r.ini),e:toMin(r.fim),col:0,cols:1}));
   let cluster=[],end=-1;const done=[];
-  const flush=()=>{const cols=[];cluster.forEach(it=>{let c=cols.findIndex(x=>x<=it.s);if(c<0){c=cols.length;cols.push(0)}cols[c]=it.e;it.col=c});cluster.forEach(it=>it.cols=cols.length);done.push(...cluster);cluster=[]};
+  /* rotas canceladas que caem no mesmo horário de uma rota ativa ficam lado a lado, à direita, sem tampar a ativa */
+  const place=(arr,base)=>{const cols=[];arr.forEach(it=>{let c=cols.findIndex(x=>x<=it.s);if(c<0){c=cols.length;cols.push(0)}cols[c]=it.e;it.col=base+c});return cols.length};
+  const flush=()=>{const act=cluster.filter(it=>active(it.r)),can=cluster.filter(it=>!active(it.r));
+    if(act.length&&can.length){const na=place(act,0);const nc=place(can,0);const cw=Math.min(32,60/nc);
+      act.forEach(it=>{it.cols=na;it.area=100-nc*cw});can.forEach(it=>{it.cw=cw;it.cx=100-nc*cw+it.col*cw;it.col=na+it.col;it.cols=na})}
+    else{const n=place(cluster,0);cluster.forEach(it=>it.cols=n)}
+    done.push(...cluster);cluster=[]};
   items.forEach(it=>{if(it.s>=end&&cluster.length)flush();cluster.push(it);end=Math.max(end,it.e)});
   if(cluster.length)flush();return done;
 }
@@ -1231,12 +1244,7 @@ function renderCal(){
       for(let j=1;j<act.length;j++){const pv=act[j-1],nx=act[j];const fa=lastAddr(pv),ta=firstAddr(nx);
         if(!fa||!ta||fa===ta)continue;
         const url=mapsPath([fa,ta]).url;const tip='Deslocamento de '+(stopsOf(pv).slice(-1)[0].local||fa)+' até '+(stopsOf(nx)[0].local||ta)+' — abre no Google Maps com o tempo';
-        /* maior espaço livre entre as duas rotas (rotas canceladas também ocupam lugar na tela) */
-        let segs=[[toMin(pv.fim),toMin(nx.ini)]];
-        rsl.forEach(o=>{const a=toMin(o.ini),z=toMin(o.fim);segs=segs.flatMap(([x,y])=>z<=x||a>=y?[[x,y]]:[[x,a],[z,y]].filter(([p,q])=>q>p))});
-        const best=segs.sort((u,v)=>(v[1]-v[0])-(u[1]-u[0]))[0];
-        if(best&&best[1]-best[0]>=24)h+='<a class="gapchip" style="top:'+(((best[0]+best[1])/2-hs)/60*HOUR)+'px" target="_blank" rel="noopener" href="'+esc(url)+'" title="'+esc(tip)+'">'+PIN_S+'<span>'+(S.view==="dia"?"Deslocamento":"Desloc.")+'</span></a>';
-        else pins[nx.id]={url,tip}}
+        pins[nx.id]={url,tip}}
       layoutLane(rsl).forEach(it=>{h+=evHtml(it,hs,pins[it.r.id])});
       if(ds===today){const now=new Date();const nm=now.getHours()*60+now.getMinutes();if(nm>=hs&&nm<=he)h+='<div class="nowline" style="top:'+((nm-hs)/60*HOUR)+'px"></div>'}
       h+='</div>';
@@ -1262,7 +1270,7 @@ function evHtml(it,hs,pin){
   const ser=r.serie&&S.series.get(r.serie);
   const tip=[title,sub,r.ini+" – "+r.fim,r.destino&&("Destino: "+r.destino),stopsOf(r).map((p,i)=>(i+1)+". "+p.tipo+": "+[p.local,p.endereco].filter(Boolean).join(" — ")).join("\n"),r.residuo&&("Resíduos: "+r.residuo),r.motorista&&("Motorista: "+r.motorista),r.mtr&&("MTR: "+r.mtr),r.obs,
     "Status: "+es+(r.auto?" (automático pelo horário)":" (definido manualmente)"),ser&&("↻ "+recSummary(ser)),conf&&"⚠ Conflito de horário"].filter(Boolean).join("\n");
-  return '<div class="'+cls.join(" ")+'" data-id="'+esc(r.id)+'" tabindex="0" role="button" title="'+esc(tip)+'" style="top:'+top+'px;height:'+ht+'px;left:'+(2+off)+'px;right:auto;width:calc(100% - '+(4+off)+'px);z-index:'+(2+it.col)+'">'+
+  return '<div class="'+cls.join(" ")+'" data-id="'+esc(r.id)+'" tabindex="0" role="button" title="'+esc(tip)+'" style="top:'+top+'px;height:'+ht+'px;'+(it.cw?'left:calc('+it.cx+'% + 1px);right:auto;width:calc('+it.cw+'% - 3px)':'left:'+(2+off)+'px;right:auto;width:calc('+(it.area||100)+'% - '+(4+off)+'px)')+';z-index:'+(2+it.col)+'">'+
     (conf?'<span class="flag">⚠ </span>':'')+(r.serie?'<span class="rec" aria-label="Repete">↻ </span>':'')+'<span class="t">'+esc(title)+'</span>'+
     (sub?'<span class="s">'+esc(sub)+'</span>':'')+
     '<span class="m">'+esc(meta)+'</span>'+
@@ -1270,7 +1278,7 @@ function evHtml(it,hs,pin){
     (r.residuos||[]).slice(0,3).map(x=>'<span class="chip">'+esc(x.tipo)+'</span> ').join("")+((r.residuos||[]).length>3?'<span class="chip">+'+(r.residuos.length-3)+'</span> ':'')+
     (r.motorista?' <span class="chip">'+esc(r.motorista)+'</span>':'')+
     (r.anexos&&r.anexos.length?' <span class="chip" title="Anexos">📎 '+r.anexos.length+'</span>':'')+
-    (pin?'<a class="gpin" target="_blank" rel="noopener" href="'+esc(pin.url)+'" title="'+esc(pin.tip)+'" aria-label="Ver deslocamento no Google Maps">'+PIN_S+'</a>':'')+
+    (pin?'<a class="gpin wide" target="_blank" rel="noopener" href="'+esc(pin.url)+'" title="'+esc(pin.tip)+'" aria-label="Ver deslocamento no Google Maps">'+PIN_S+'<span>Deslocamento</span></a>':'')+
     '<span class="rz" data-rz="1"></span></div>';
 }
 function renderList(wd){
@@ -2201,7 +2209,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="5.2";
+const VERSAO_TELA="5.3";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
