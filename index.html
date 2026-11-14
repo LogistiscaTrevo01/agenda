@@ -3,16 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agenda de Rotas Baú e Poliguindaste</title>
+<title>Agenda de Rotas · Trevo Resíduos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<meta name="theme-color" content="#241F59">
 <style>
 /* Layout: barra de comando no topo, resumo da semana, grade de horas com cada dia dividido em Baú | Poliguindaste. */
 :root{
-  --top:#12324a; --top-ink:#ffffff;
-  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#f8f9fb; --ink:#1c2533; --muted:#5d6b7e; --line:#dfe4ea; --line-soft:#eef1f5;
-  --accent:#0f6cbd; --accent-ink:#ffffff; --accent-soft:#e8f1fb;
+  /* Trevo Resíduos: azul-marinho, amarelo e verde da marca */
+  --navy:#241F59; --navy-2:#1a1645; --amarelo:#FDB913; --verde:#00AE42;
+  --top:#241F59; --top-ink:#ffffff;
+  --bg:#f4f4f8; --surface:#ffffff; --surface-2:#f8f8fb; --ink:#1d1b3a; --muted:#5f5e78; --line:#e0dfea; --line-soft:#efeef5;
+  --accent:#241F59; --accent-ink:#ffffff; --accent-soft:#ebeaf6; --hoje:rgba(253,185,19,.09);
   --bau:#c6ebbe; --bau-edge:#2e8b3e; --bau-ink:#13471f; --bau-done:#eaf6e7;
   --poli:#d3e5f9; --poli-edge:#1f6fc5; --poli-ink:#0b3a6e; --poli-done:#ecf3fc;
   --rota:#ffe7a3; --rota-edge:#c98a00; --rota-ink:#5c3d00;
@@ -20,17 +25,17 @@
   --cancel:#d92d20; --cancel-edge:#7a1610; --cancel-ink:#ffffff;
   --night:rgba(30,50,80,.045);
   --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);
-  --f-display:"Barlow Semi Condensed","Segoe UI",system-ui,sans-serif;
-  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --f-display:"Poppins","Segoe UI",system-ui,sans-serif;
+  --f-body:"Poppins","Segoe UI",system-ui,sans-serif;
+  --f-cond:"Barlow Semi Condensed","Segoe UI",system-ui,sans-serif;
   --hour:64px;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --top:#163a5f; --top-ink:#ffffff;
-    --top:#163a5f; --top-ink:#ffffff;
-  --bg:#11161d; --surface:#18202a; --surface-2:#1d2631; --ink:#e6ebf2; --muted:#9aa7b8; --line:#2b3644; --line-soft:#222c38;
-    --accent:#4c9be8; --accent-ink:#0b1622; --accent-soft:#1b2c40;
+  --top:#1a1645; --top-ink:#ffffff;
+  --bg:#12111f; --surface:#1b1a2e; --surface-2:#211f36; --ink:#ebeaf5; --muted:#a3a1bd; --line:#302e4a; --line-soft:#26243d;
+  --accent:#FDB913; --accent-ink:#241F59; --accent-soft:#2f2a1a; --hoje:rgba(253,185,19,.07);
     --bau:#244a2a; --bau-edge:#5cc26c; --bau-ink:#d6f3d9; --bau-done:#1c2e21;
     --poli:#1f3a5c; --poli-edge:#5fa4ec; --poli-ink:#d8e8fb; --poli-done:#1a2737;
     --rota:#5a4512; --rota-edge:#e4b23a; --rota-ink:#fff0c7;
@@ -41,9 +46,9 @@
   }
 }
 :root[data-theme="dark"]{
-  --top:#163a5f; --top-ink:#ffffff;
-  --bg:#11161d; --surface:#18202a; --surface-2:#1d2631; --ink:#e6ebf2; --muted:#9aa7b8; --line:#2b3644; --line-soft:#222c38;
-  --accent:#4c9be8; --accent-ink:#0b1622; --accent-soft:#1b2c40;
+  --top:#1a1645; --top-ink:#ffffff;
+  --bg:#12111f; --surface:#1b1a2e; --surface-2:#211f36; --ink:#ebeaf5; --muted:#a3a1bd; --line:#302e4a; --line-soft:#26243d;
+  --accent:#FDB913; --accent-ink:#241F59; --accent-soft:#2f2a1a; --hoje:rgba(253,185,19,.07);
   --bau:#244a2a; --bau-edge:#5cc26c; --bau-ink:#d6f3d9; --bau-done:#1c2e21;
   --poli:#1f3a5c; --poli-edge:#5fa4ec; --poli-ink:#d8e8fb; --poli-done:#1a2737;
   --rota:#5a4512; --rota-edge:#e4b23a; --rota-ink:#fff0c7;
@@ -54,23 +59,29 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:15px/1.4 var(--f-body);display:flex;flex-direction:column}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body);display:flex;flex-direction:column}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* topo */
 .top{background:var(--top);color:var(--top-ink);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{font:700 20px/1 var(--f-display);letter-spacing:.2px;display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand{font:600 18px/1.1 var(--f-display);display:flex;align-items:center;gap:14px;margin-right:auto}
+.brand .logo{height:56px;width:auto;display:block;margin:-10px -4px -10px -6px}
+.brand .logotxt{font:700 18px var(--f-display)}
+.brand .bsep{width:2px;height:30px;background:var(--amarelo);border-radius:2px}
+.brand .btitle{display:flex;flex-direction:column;gap:2px}
+.top{border-bottom:4px solid;border-image:linear-gradient(90deg,var(--verde) 0 33.3%,var(--amarelo) 33.3% 66.6%,#4a43a8 66.6%) 1}
 .brand svg{flex:none}
-.brand small{font:500 13px var(--f-body);opacity:.85}
+.brand small{font:400 12px var(--f-body);opacity:.8;letter-spacing:.3px}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap}
 .btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
 .btn.primary:hover{filter:brightness(1.07)}
 .top .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:var(--top-ink)}
 .top .btn:hover{background:rgba(255,255,255,.24)}
-.top .btn.primary{background:#fff;color:#14532d;border-color:#fff}
+.top .btn.primary{background:var(--amarelo);color:var(--navy);border-color:var(--amarelo);font-weight:700}
+.top .btn.primary:hover{filter:brightness(1.05)}
 .btn.danger{color:var(--danger);border-color:var(--danger)}
 .btn.ghost{border-color:transparent;background:transparent}
 .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -90,7 +101,7 @@ button{cursor:pointer}
 
 .summary{display:flex;gap:10px;flex-wrap:wrap;padding:10px 16px}
 .kpi{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--edge,var(--line));border-radius:10px;padding:8px 14px;box-shadow:var(--shadow)}
-.kpi b{font:700 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.kpi b{font:700 22px/1 var(--f-cond);font-variant-numeric:tabular-nums}
 .kpi span{color:var(--muted);font-size:13px;line-height:1.2}
 .kpi.bau{--edge:var(--bau-edge)} .kpi.poli{--edge:var(--poli-edge)}
 .kpi.alert{--edge:var(--ok)} .kpi.alert.bad{--edge:var(--danger);background:var(--danger-soft)}
@@ -111,30 +122,30 @@ button{cursor:pointer}
 .cal .head{position:sticky;top:0;z-index:5;background:var(--surface)}
 .dayhead{border-left:2px solid var(--line);text-align:center;padding:8px 4px 6px;cursor:pointer;background:var(--surface-2)}
 .dayhead:hover .dn{color:var(--accent)}
-.dayhead .dn{font:700 13px var(--f-display);letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
-.dayhead .dd{font:700 24px/1.05 var(--f-display);font-variant-numeric:tabular-nums}
-.dayhead.today{background:var(--accent);color:var(--accent-ink)}
-.dayhead.today .dn{color:var(--accent-ink);opacity:.9}
-.lanehead{font:700 12px var(--f-display);text-align:center;padding:4px 2px;letter-spacing:.3px;text-transform:uppercase;border-bottom:2px solid}
+.dayhead .dn{font:700 13px var(--f-cond);letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.dayhead .dd{font:700 24px/1.05 var(--f-cond);font-variant-numeric:tabular-nums}
+.dayhead.today{background:var(--navy);color:#fff;box-shadow:inset 0 -4px 0 var(--amarelo)}
+.dayhead.today .dn{color:var(--amarelo);opacity:1}
+.lanehead{font:700 12px var(--f-cond);text-align:center;padding:4px 2px;letter-spacing:.3px;text-transform:uppercase;border-bottom:2px solid}
 .lanehead.bau{background:var(--bau);color:var(--bau-ink);border-color:var(--bau-edge)}
 .lanehead.poli{background:var(--poli);color:var(--poli-ink);border-color:var(--poli-edge)}
 .lanehead.first{border-left:2px solid var(--line)}
 .corner{background:var(--surface-2);position:sticky;left:0;z-index:6}
 .gutter{position:sticky;left:0;z-index:4;background:var(--surface-2);border-right:1px solid var(--line)}
-.gutter div{height:var(--hour);font:600 12px var(--f-display);color:var(--muted);text-align:right;padding:0 8px;transform:translateY(-8px);font-variant-numeric:tabular-nums}
+.gutter div{height:var(--hour);font:600 12px var(--f-cond);color:var(--muted);text-align:right;padding:0 8px;transform:translateY(-8px);font-variant-numeric:tabular-nums}
 .gutter div:first-child{transform:none;padding-top:2px}
 .lane{position:relative;border-left:1px solid var(--line-soft);
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(var(--night) 0 25%,transparent 25% 83.333%,var(--night) 83.333%);
   background-size:100% var(--hour),100% calc(var(--hour)/2),100% 100%;cursor:copy}
 .lane.first{border-left:2px solid var(--line)}
-.lane.today{background-color:var(--accent-soft)}
+.lane.today{background-color:var(--hoje)}
 .lane.weekend{background-color:var(--surface-2)}
 .lane.drop{outline:2px dashed var(--accent);outline-offset:-2px}
 .nowline{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--danger);z-index:3;pointer-events:none}
 .nowline::before{content:"";position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--danger)}
 
 .ev{position:absolute;left:2px;right:2px;border-radius:6px;padding:3px 6px 4px 8px;overflow:hidden;cursor:grab;
-  font:500 13px/1.22 var(--f-display);border-left:4px solid var(--edge);background:var(--fill);color:var(--evink);
+  font:500 13px/1.22 var(--f-cond);border-left:4px solid var(--edge);background:var(--fill);color:var(--evink);
   box-shadow:0 1px 2px rgba(0,0,0,.08);touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;z-index:2}
 .ev:hover{box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:4}
 .ev.bau{--fill:var(--bau);--edge:var(--bau-edge);--evink:var(--bau-ink)}
@@ -167,7 +178,7 @@ button{cursor:pointer}
 .list tr{cursor:pointer}
 .list tbody tr:hover{background:var(--surface-2)}
 .list .num{font-variant-numeric:tabular-nums;white-space:nowrap}
-.pill{display:inline-block;padding:1px 8px;border-radius:999px;font:600 12px var(--f-display);border-left:3px solid}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font:600 12px var(--f-cond);border-left:3px solid}
 .pill.bau{background:var(--bau);color:var(--bau-ink);border-color:var(--bau-edge)}
 .pill.poli{background:var(--poli);color:var(--poli-ink);border-color:var(--poli-edge)}
 .st{font-size:12px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
@@ -240,7 +251,7 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .fromprev{font-size:13px;color:var(--muted);margin-bottom:6px;display:none}
 .fromprev.show{display:block}
 .fromprev a{color:var(--accent);font-weight:600;text-decoration:none}
-.gapchip{position:absolute;left:50%;z-index:3;display:inline-flex;align-items:center;gap:3px;max-width:calc(100% - 6px);overflow:hidden;font:600 11.5px/1 var(--f-display);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 8px 3px 5px;text-decoration:none;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:var(--shadow)}
+.gapchip{position:absolute;left:50%;z-index:3;display:inline-flex;align-items:center;gap:3px;max-width:calc(100% - 6px);overflow:hidden;font:600 11.5px/1 var(--f-cond);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 8px 3px 5px;text-decoration:none;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:var(--shadow)}
 .gapchip:hover{border-color:#EA4335;color:#b3261e}
 .gapchip span{overflow:hidden;text-overflow:ellipsis}
 .ev .gpin{position:absolute;top:1px;right:1px;z-index:3;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgba(255,255,255,.85);box-shadow:0 1px 2px rgba(0,0,0,.2)}
@@ -284,6 +295,8 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .sempty{color:var(--muted);padding:12px 0}
 @media (max-width:640px){
   .top{padding:8px 12px}
+  .brand .logo{height:46px}
+  .brand .bsep,.brand small{display:none}
   .brand{font-size:18px}
   .bar{padding:8px 12px;gap:8px}
   .nav{width:100%;gap:6px}
@@ -359,11 +372,16 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .lhmap{display:grid;place-items:center;width:20px;height:20px;padding:0}
 .lg.cancel i{background:var(--cancel);border-color:var(--cancel-edge)}
 /* login */
-.login{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:16px;background:radial-gradient(1200px 600px at 20% 0%,#1d4b6e 0%,#12324a 45%,#0b1f2e 100%)}
+.login{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:16px;overflow:hidden;background:radial-gradient(900px 600px at 15% 0%,#3a3388 0%,#241F59 50%,#16123d 100%)}
+.login::before{content:"";position:absolute;width:min(70vw,620px);aspect-ratio:1;right:-12%;bottom:-18%;background:url(favicon.png) center/contain no-repeat;opacity:.13;pointer-events:none}
+.login::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:linear-gradient(90deg,var(--verde) 0 33.3%,var(--amarelo) 33.3% 66.6%,#4a43a8 66.6%)}
+.llogo{height:120px;width:auto;position:relative;z-index:1}
+.lbox{position:relative;z-index:1}
 .login.open{display:flex}
 .lbox{background:var(--surface);color:var(--ink);width:min(400px,100%);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.45);padding:26px 24px 22px}
 .lbrand{display:flex;align-items:center;gap:10px;font:700 22px/1.1 var(--f-display);margin-bottom:4px}
-.lbrand svg{color:var(--accent)}
+.lbrand svg{color:var(--navy)}
+.lbox .btn.primary{background:var(--amarelo);border-color:var(--amarelo);color:var(--navy);font-weight:700}
 .lsub{color:var(--muted);margin:0 0 18px;font-size:14px}
 .lbox .fld{margin-bottom:12px}
 .lbox .fld input{font-size:16px;padding:10px 12px}
@@ -477,8 +495,9 @@ a.btn{text-decoration:none}
 <body>
 <div class="top">
   <div class="brand">
-    <svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true"><rect x="1" y="3" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 7h6l4 4v4h-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="18" r="2.6" fill="currentColor"/><circle cx="23" cy="18" r="2.6" fill="currentColor"/></svg>
-    <span>Agenda de Rotas <small>Baú · Poliguindaste</small></span>
+    <img class="logo" src="logo-trevo.png" alt="Trevo Resíduos" onerror="this.replaceWith(Object.assign(document.createElement('b'),{className:'logotxt',textContent:'Trevo Resíduos'}))">
+    <span class="bsep" aria-hidden="true"></span>
+    <span class="btitle">Agenda de Rotas <small>Baú · Poliguindaste</small></span>
   </div>
   <span class="who" id="who" hidden>👤 <b id="whoName">LogisticaTrevo</b><button class="btn sair" id="btnLogout" type="button" title="Sair deste aparelho">Sair</button></span>
   <button class="btn primary" id="btnNew" type="button">＋ Nova rota</button>
@@ -750,9 +769,10 @@ a.btn{text-decoration:none}
   </div>
 </div>
 <div class="login" id="login" aria-hidden="true">
+  <img class="llogo" src="logo-trevo.png" alt="Trevo Resíduos" onerror="this.remove()">
   <form class="lbox" id="lForm" novalidate>
     <div class="lbrand"><svg width="34" height="24" viewBox="0 0 30 22" aria-hidden="true"><rect x="1" y="3" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 7h6l4 4v4h-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="18" r="2.6" fill="currentColor"/><circle cx="23" cy="18" r="2.6" fill="currentColor"/></svg>Agenda de Rotas</div>
-    <p class="lsub">Trevo Resíduos · Baú e Poliguindaste</p>
+    <p class="lsub">Baú e Poliguindaste · equipe de logística</p>
     <div class="lerr" id="lErr" role="alert"></div>
     <div class="fld"><label for="lUser">Usuário</label><input id="lUser" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
     <div class="fld"><label for="lPass">Senha</label><div class="pwwrap"><input id="lPass" type="password" autocomplete="current-password" required><button type="button" id="lShow">mostrar</button></div></div>
@@ -2181,7 +2201,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="5.1";
+const VERSAO_TELA="5.2";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
