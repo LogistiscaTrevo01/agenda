@@ -2178,6 +2178,16 @@ $("#lForm").addEventListener("submit",async e=>{e.preventDefault();
 window.addEventListener("agenda-auth",()=>showLogin("Sua sessão terminou. Entre novamente para continuar."));
 $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 
+/* ---------- atualização automática da tela ----------
+   Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
+   Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
+const VERSAO_TELA="5.1";
+(async()=>{try{if(location.protocol!=="https:")return;
+  const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
+  const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
+  if(m&&m[1]!==VERSAO_TELA&&sessionStorage.getItem("agenda.recarregou")!==m[1]){sessionStorage.setItem("agenda.recarregou",m[1]);location.reload()}
+}catch(e){}})();
+
 /* ---------- início ---------- */
 render();
 async function startData(){
