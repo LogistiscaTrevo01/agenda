@@ -106,6 +106,7 @@ button{cursor:pointer}
 .datein{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface)}
 
 .summary{display:flex;gap:10px;flex-wrap:wrap;padding:10px 16px}
+.top,.bar,.summary,#banner,.banner{flex:none}
 .kpi{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--edge,var(--line));border-radius:10px;padding:8px 14px;box-shadow:var(--shadow)}
 .kpi b{font:700 22px/1 var(--f-cond);font-variant-numeric:tabular-nums}
 .kpi span{color:var(--muted);font-size:13px;line-height:1.2}
@@ -503,6 +504,19 @@ a.btn{text-decoration:none}
 .svitem small{display:block;color:var(--muted);font-size:13px}
 .svitem small s{opacity:.8}
 .recprev{font-size:13px;color:var(--muted)}
+svg.ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;stroke-width:2}
+.btn svg.ic,.tabs svg.ic,.ctxmenu svg.ic{opacity:.9}
+.tags .tg{display:inline-flex;align-items:center;gap:3px;margin-right:12px}
+.tags .tg svg{width:13px;height:13px}
+.chip svg.ic{width:12px;height:12px;vertical-align:-1px}
+.seccard h4 svg.ic{color:var(--accent)}
+.infobtn{border:1px solid var(--line);background:var(--surface);color:var(--accent);border-radius:999px;font:600 11.5px var(--f-body);padding:1px 8px;margin-left:6px;text-transform:none;letter-spacing:0;cursor:pointer}
+.clegenda{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:2px 0 8px;font-size:13px}
+.clegenda p{margin:4px 0}
+.clegenda b{display:inline-block;min-width:82px;padding:1px 7px;border-radius:6px;margin-right:4px;font-size:12px;text-align:center}
+.clegenda .clClasseI{background:#fde3e5;color:#9b1c13}.clegenda .clClasseIIA{background:#fff4d6;color:#6b4e00}.clegenda .clClasseIIB{background:#dff3e6;color:#1e6b34}
+.fixrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;border:1px dashed var(--line);border-radius:8px;padding:6px 8px;margin-bottom:6px}
+.fixrow select{border:1px solid var(--line);border-radius:7px;padding:5px 6px;background:var(--surface);max-width:220px}
 .recprev b{color:var(--ink);font-weight:600}
 @media (max-width:640px){
   .ctable thead{display:none}
@@ -528,6 +542,9 @@ a.btn{text-decoration:none}
 .ctxhead{padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
 .ctxhead small{flex-basis:100%;color:var(--muted)}
 .ctxsub{font:600 11px var(--f-display);text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:6px 10px 2px}
+.ctxtime{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:2px 8px 6px;font-size:13px;color:var(--muted)}
+.ctxtime label{display:flex;align-items:center;gap:4px}
+.ctxtime input{border:1px solid var(--line);border-radius:7px;padding:4px 6px;background:var(--surface);color:var(--ink);width:112px}
 .ctxst{display:flex;flex-wrap:wrap;gap:4px;padding:2px 8px 6px}
 .cst{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:600}
 .cst.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -549,7 +566,8 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   .icon-btn{width:40px;height:40px}
   .stop .sbtns button,.stop .sbtns a.smap,.resrow .rm{min-width:34px;min-height:36px}
   .shandle{padding:8px 4px}
-  .ev .rz{height:12px}
+  .ev .rz{height:16px}
+  .ev:not(.short) .rz::after{content:"";position:absolute;left:50%;bottom:4px;width:30px;height:4px;border-radius:2px;background:currentColor;opacity:.35;transform:translateX(-50%)}
   .choice button{min-height:38px}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
@@ -562,7 +580,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <span class="bsep" aria-hidden="true"></span>
     <span class="btitle">Agenda de Rotas <small>Baú · Poliguindaste</small></span>
   </div>
-  <span class="who" id="who" hidden>👤 <b id="whoName">LogisticaTrevo</b><button class="btn sair" id="btnLogout" type="button" title="Sair deste aparelho">Sair</button></span>
+  <span class="who" id="who" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> <b id="whoName">LogisticaTrevo</b><button class="btn sair" id="btnLogout" type="button" title="Sair deste aparelho">Sair</button></span>
   <button class="btn primary" id="btnNew" type="button">＋ Nova rota</button>
 </div>
 
@@ -584,11 +602,11 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <label class="chk"><input type="checkbox" id="chkWeekend" checked> Sáb e dom</label>
     <a class="btn mapday" id="mapBau" data-s="Baú" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg><span class="lbl"> Rota do Baú</span></a>
     <a class="btn mapday" id="mapPoli" data-s="Poli" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg><span class="lbl"> Rota do Poliguindaste</span></a>
-    <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp">📲<span class="lbl"> WhatsApp</span></button>
-    <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…">🔎<span class="lbl"> Buscar</span></button>
-    <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa">⬇<span class="lbl"> Exportar</span></button>
-    <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana">🧾<span class="lbl"> Fechamento</span></button>
-    <button class="btn" id="btnCad" type="button" title="Locais e endereços, resíduos, motoristas, repetições e segurança">🗂<span class="lbl"> Cadastros</span></button>
+    <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg><span class="lbl"> WhatsApp</span></button>
+    <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
+    <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
+    <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
+    <button class="btn" id="btnCad" type="button" title="Locais e endereços, resíduos, motoristas, repetições e segurança"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span class="lbl"> Cadastros</span></button>
   </div>
 </div>
 
@@ -596,7 +614,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   <div class="kpi bau"><b id="kBauN">0</b><span>rotas Baú<br><em id="kBauH">0 h na semana</em></span></div>
   <div class="kpi poli"><b id="kPoliN">0</b><span>rotas Poliguindaste<br><em id="kPoliH">0 h na semana</em></span></div>
   <div class="kpi alert" id="kAlert"><b id="kConf">✓</b><span id="kConfTxt">Sem conflitos<br>de horário</span></div>
-  <button type="button" class="kpi todaybtn" id="kToday" title="Voltar para o dia de hoje"><b>📅</b><span>Hoje<br><em id="kTodayTxt"></em></span></button>
+  <button type="button" class="kpi todaybtn" id="kToday" title="Voltar para o dia de hoje"><b><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></b><span>Hoje<br><em id="kTodayTxt"></em></span></button>
   <div class="legend">
     <span class="lg"><i style="background:var(--bau);border-color:var(--bau-edge)"></i>Baú</span>
     <span class="lg"><i style="background:var(--poli);border-color:var(--poli-edge)"></i>Poliguindaste</span>
@@ -653,19 +671,20 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         </div>
       </div>
       <div class="fld routelinkwrap"><a class="btn maproute" id="lnkRoute" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Ver trajeto e tempo no Google Maps</a><span class="hint" id="routeHint"></span></div>
-      <div class="fld resbox"><label>♻ Tipos de resíduo</label>
+      <div class="fld resbox"><label><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Tipos de resíduo <button type="button" class="infobtn" id="resInfo" title="O que é cada classe?">ⓘ Classes</button></label>
+        <div id="resLeg" hidden></div>
         <div class="resrows" id="fRes"></div>
         <div class="stopbtns"><button type="button" class="btn sm" id="addRes">＋ Resíduo</button><span class="hint">Coloque um por linha. A quantidade é opcional.</span></div>
       </div>
       <div class="fld c3"><label for="fMot">Motorista</label><input id="fMot" list="dlMot" autocomplete="off"></div>
       <div class="fld docs" id="fDocs">
-        <label>📄 MTR e anexos</label>
+        <label><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> MTR e anexos</label>
         <div class="docrow">
           <div class="mtrbox"><span class="sublbl">Nº MTR</span><input id="fMtr" autocomplete="off" placeholder="Ex.: 240012345" aria-label="Número do MTR"></div>
           <div class="anxwrap">
             <span class="sublbl">Fotos e arquivos</span>
             <div class="anxlist" id="fAnx"></div>
-            <div class="anxbtns"><button type="button" class="btn sm" id="addAnx">📎 Adicionar foto ou arquivo</button><span class="hint" id="anxHint">MTR assinado, foto da caçamba, comprovante em PDF</span></div>
+            <div class="anxbtns"><button type="button" class="btn sm" id="addAnx"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Adicionar foto ou arquivo</button><span class="hint" id="anxHint">MTR assinado, foto da caçamba, comprovante em PDF</span></div>
             <input type="file" id="fFile" multiple accept="image/*,application/pdf,video/mp4,video/webm" hidden>
           </div>
         </div>
@@ -712,7 +731,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <button type="button" class="btn danger" id="mDel">Excluir</button>
         <button type="button" class="btn" id="mEnd">Encerrar série a partir deste dia</button>
         <button type="button" class="btn" id="mDup">Duplicar</button>
-        <button type="button" class="btn" id="mWa" title="Mandar esta rota para o motorista">📲 WhatsApp</button>
+        <button type="button" class="btn" id="mWa" title="Mandar esta rota para o motorista"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg> WhatsApp</button>
         <div class="spacer"></div>
         <button type="button" class="btn ghost" id="mCancel">Cancelar</button>
         <button type="submit" class="btn primary" id="mSave">Salvar</button>
@@ -734,12 +753,12 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="sTitle">
     <header><h2 id="sTitle">Buscar rotas</h2><button class="icon-btn" type="button" data-close="scrimSearch" aria-label="Fechar">✕</button></header>
     <form id="sForm" class="mbody" novalidate style="display:block">
-      <div class="choice smode" id="sMode" style="margin:10px 0 6px"><button type="button" data-v="rotas" aria-pressed="true">🔎 Rotas</button><button type="button" data-v="mtr" aria-pressed="false">📄 Lista de MTRs</button></div>
+      <div class="choice smode" id="sMode" style="margin:10px 0 6px"><button type="button" data-v="rotas" aria-pressed="true"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Rotas</button><button type="button" data-v="mtr" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> Lista de MTRs</button></div>
       <div class="sgrid">
         <div class="fld"><label for="sTxt">O que procurar</label><input id="sTxt" type="search" autocomplete="off" placeholder="Ex.: Petronas, borra oleosa, 240012345, Contagem, João"></div>
         <div class="fld"><label for="sCampo">Procurar em</label>
           <select id="sCampo"><option value="">Tudo</option><option value="cliente">Cliente</option><option value="servico">Serviço / descrição</option><option value="residuo">Tipo de resíduo</option><option value="local">Local do trajeto / destino</option><option value="endereco">Endereço</option><option value="mtr">Nº do MTR</option><option value="motorista">Motorista</option><option value="obs">Observações</option><option value="anexo">Nome do anexo</option></select></div>
-        <div class="fld" style="justify-content:flex-end"><button type="submit" class="btn primary" id="sGo">🔎 Buscar</button></div>
+        <div class="fld" style="justify-content:flex-end"><button type="submit" class="btn primary" id="sGo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Buscar</button></div>
       </div>
       <div class="sfilters">
         <div class="grp"><span>Caminhão</span><div class="choice sm" id="sTruck"><button type="button" data-v="" aria-pressed="true">Os dois</button><button type="button" class="bau" data-v="Baú" aria-pressed="false">Baú</button><button type="button" class="poli" data-v="Poliguindaste" aria-pressed="false">Poli</button></div></div>
@@ -751,7 +770,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <input type="date" id="sDe" aria-label="De" hidden><input type="date" id="sAte" aria-label="Até" hidden></div>
       </div>
       <div class="quick" id="sQuick">
-        <button type="button" data-q="saida">🚚 Saídas</button><button type="button" data-q="coleta">📦 Coletas</button><button type="button" data-q="descarte">♻ Descartes</button><button type="button" data-q="mtr">📄 Com MTR</button><button type="button" data-q="semmtr">⚠ Concluídas sem MTR</button><button type="button" data-q="anexos">📎 Com anexos</button><button type="button" data-q="cancel">✕ Canceladas</button><button type="button" data-q="limpar">Limpar filtros</button>
+        <button type="button" data-q="saida"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg> Saídas</button><button type="button" data-q="coleta"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg> Coletas</button><button type="button" data-q="descarte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Descartes</button><button type="button" data-q="mtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> Com MTR</button><button type="button" data-q="semmtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4M12 17h.01"/></svg> Concluídas sem MTR</button><button type="button" data-q="anexos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Com anexos</button><button type="button" data-q="cancel">✕ Canceladas</button><button type="button" data-q="limpar">Limpar filtros</button>
       </div>
       <div id="sOut" class="sout"></div>
     </form>
@@ -767,7 +786,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <button type="button" data-v="mes" aria-pressed="false">Mês na tela</button>
           <button type="button" data-v="mesant" aria-pressed="false">Mês anterior</button>
           <button type="button" data-v="custom" aria-pressed="false">Escolher datas</button>
-          <button type="button" data-v="tudo" aria-pressed="false">📦 Agenda completa</button>
+          <button type="button" data-v="tudo" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></svg> Agenda completa</button>
         </div>
       </div>
       <div class="fld c3"><label for="xDe">De</label><input type="date" id="xDe"></div>
@@ -780,7 +799,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         </div>
       </div>
       <p class="hint" id="xHint" style="grid-column:span 6;margin:0">A planilha tem duas abas: <b>Rotas</b> (uma linha por rota, com trajeto, resíduos, MTR e status) e <b>Resumo</b> (rotas e horas por caminhão, cliente, resíduo e status).</p>
-      <div class="actions"><span class="hint" id="xInfo"></span><div class="spacer"></div><button type="button" class="btn ghost" data-close="scrimExport">Cancelar</button><button type="submit" class="btn primary" id="xGo">⬇ Baixar Excel</button></div>
+      <div class="actions"><span class="hint" id="xInfo"></span><div class="spacer"></div><button type="button" class="btn ghost" data-close="scrimExport">Cancelar</button><button type="submit" class="btn primary" id="xGo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Baixar Excel</button></div>
     </form>
   </div>
 </div>
@@ -800,11 +819,11 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="cTitle">
     <header><h2 id="cTitle">Cadastros</h2><button class="icon-btn" type="button" data-close="scrimCad" aria-label="Fechar">✕</button></header>
     <div class="tabs" role="tablist" id="cTabs">
-      <button type="button" role="tab" data-tab="locais" aria-selected="true">📍 Locais e endereços<span class="n" id="nLoc"></span></button>
-      <button type="button" role="tab" data-tab="residuos" aria-selected="false">♻ Resíduos<span class="n" id="nRes"></span></button>
-      <button type="button" role="tab" data-tab="motoristas" aria-selected="false">👷 Motoristas<span class="n" id="nMot"></span></button>
-      <button type="button" role="tab" data-tab="series" aria-selected="false">↻ Repetições<span class="n" id="nSer"></span></button>
-      <button type="button" role="tab" data-tab="seg" aria-selected="false">🛡 Segurança e backup</button>
+      <button type="button" role="tab" data-tab="locais" aria-selected="true"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Locais e endereços<span class="n" id="nLoc"></span></button>
+      <button type="button" role="tab" data-tab="residuos" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Resíduos<span class="n" id="nRes"></span></button>
+      <button type="button" role="tab" data-tab="motoristas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Motoristas<span class="n" id="nMot"></span></button>
+      <button type="button" role="tab" data-tab="series" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Repetições<span class="n" id="nSer"></span></button>
+      <button type="button" role="tab" data-tab="seg" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Segurança e backup</button>
     </div>
     <div class="mbody" id="cBody"></div>
   </div>
@@ -818,7 +837,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <div class="fld c4"><label>Caminhão</label><div class="choice" id="waTruck"><button type="button" class="bau" data-v="Baú" aria-pressed="true">Baú</button><button type="button" class="poli" data-v="Poliguindaste" aria-pressed="false">Poliguindaste</button><button type="button" data-v="" aria-pressed="false">Os dois</button></div></div>
         <div class="fld"><div class="chkrow"><label><input type="checkbox" id="waEnd" checked> Endereços e links do Maps</label><label><input type="checkbox" id="waObs" checked> Observações</label><label><input type="checkbox" id="waCanc" checked> Avisar canceladas</label></div></div>
         <div class="fld"><label for="waTxt">Mensagem (dá para editar antes de enviar)</label><textarea id="waTxt" class="watext" spellcheck="false"></textarea></div>
-        <div class="fld"><div class="wabtns"><button type="button" class="btn" id="waCopy">📋 Copiar</button><a class="btn wa" id="waOpen" target="_blank" rel="noopener">📲 Abrir no WhatsApp</a><span id="waDirect"></span><span class="hint" id="waInfo"></span></div></div>
+        <div class="fld"><div class="wabtns"><button type="button" class="btn" id="waCopy"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg> Copiar</button><a class="btn wa" id="waOpen" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg> Abrir no WhatsApp</a><span id="waDirect"></span><span class="hint" id="waInfo"></span></div></div>
       </div>
     </div>
   </div>
@@ -839,7 +858,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <div class="fld"><label for="fhPag">Dados para pagamento (CPF, banco, pix)</label><textarea id="fhPag" rows="3" placeholder="CPF: ...&#10;Banco: ...&#10;Nome completo: ...&#10;Pix: ..."></textarea>
           <label class="autochk"><input type="checkbox" id="fhPagSave" checked> <span>Guardar no cadastro deste motorista</span></label></div>
         <div class="fld"><label for="fhTxt">E-mail (dá para editar antes de enviar)</label><input id="fhAssunto" style="margin-bottom:6px"><textarea id="fhTxt" class="watext" spellcheck="false"></textarea></div>
-        <div class="fld"><div class="wabtns"><button type="button" class="btn primary" id="fhCopy">📋 Copiar e-mail (com negrito)</button><a class="btn" id="fhMail">✉ Abrir no programa de e-mail</a><span class="hint" id="fhInfo"></span></div></div>
+        <div class="fld"><div class="wabtns"><button type="button" class="btn primary" id="fhCopy"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg> Copiar e-mail (com negrito)</button><a class="btn" id="fhMail"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg> Abrir no programa de e-mail</a><span class="hint" id="fhInfo"></span></div></div>
       </div>
     </div>
   </div>
@@ -992,6 +1011,8 @@ const DEST_DEF=["Inovar","CTR Santa Luzia","J&E","Classe A"];
 const $=s=>document.querySelector(s);
 const HOUR=64;
 const PIN='<svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg>';
+const ICP={"user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/>", "wa": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/><path d=\"M9 10h.01M12 10h.01M15 10h.01\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m21 21-4.3-4.3\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"8\" ry=\"3\"/><path d=\"M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5\"/><path d=\"M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "calplus": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5\"/>", "recycle": "<path d=\"M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5\"/><path d=\"M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1\"/><path d=\"m14 16-3 3 3 3\"/><path d=\"M8.3 13.6 7.2 9.5 3.1 10.6\"/><path d=\"m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8\"/><path d=\"m13.4 9.6 4.1 1.1 1.1-4.1\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v5h5\"/><path d=\"M16 13H8M16 17H8M10 9H8\"/>", "clip": "<path d=\"m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5\"/>", "truck": "<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>", "exit": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "box": "<path d=\"M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12\"/>", "alert": "<path d=\"m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3\"/><path d=\"M12 9v4M12 17h.01\"/>", "archive": "<rect x=\"2\" y=\"3\" width=\"20\" height=\"5\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"14\" height=\"14\" rx=\"2\"/><path d=\"M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>", "edit": "<path d=\"M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z\"/>", "trash": "<path d=\"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9v12h14V9\"/><path d=\"M10 21v-6h4v6\"/>", "save": "<path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\"/><path d=\"M17 21v-8H7v8M7 3v5h8\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "stop": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" rx=\"1\"/>", "film": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4\"/>"};
+const ic=n=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICP[n]+'</svg>';
 const PIN_S=PIN.replace('width="16" height="16"','width="14" height="14"');
 const norm=s=>String(s||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 
@@ -1021,6 +1042,13 @@ function banner(msg,kind){const b=$("#banner");if(!msg){b.className="banner";b.t
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const FIELDS=["caminhao","ini","fim","cliente","servico","residuo","destino","motorista","status","mtr","obs"];
 const CLASSES=[["","Classe…"],["Classe I","Classe I – Perigoso"],["Classe II A","Classe II A – Não inerte"],["Classe II B","Classe II B – Inerte"]];
+/* explicação de cada classe (ABNT NBR 10004) — aparece ao passar o mouse e no botão "ⓘ" */
+const CLASSE_INFO={
+  "Classe I":"Perigosos: oferecem risco à saúde ou ao meio ambiente por serem inflamáveis, corrosivos, reativos, tóxicos ou contaminados por agentes que causam doenças. Ex.: óleo usado, borra oleosa, solventes, tintas, embalagens e EPIs contaminados com químicos, lâmpadas fluorescentes, baterias.",
+  "Classe II A":"Não perigosos e não inertes: não oferecem risco como os da Classe I, mas se decompõem, queimam ou se dissolvem na água. Ex.: lixo comum, orgânicos e restos de comida, papel e papelão, madeira, poda, tecidos, lodo sem contaminação.",
+  "Classe II B":"Não perigosos e inertes: não se decompõem nem soltam substâncias na água. Ex.: entulho e RCC limpo (concreto, tijolo, areia), vidro, alguns plásticos e borrachas, sucata metálica sem contaminação."};
+const classeTip=c=>c&&CLASSE_INFO[c]?c+" – "+CLASSE_INFO[c]:"Escolha a classe do resíduo. Passe o mouse em cada opção (ou toque em ⓘ) para ver a explicação.";
+const classeLegenda=()=>'<div class="clegenda">'+["Classe I","Classe II A","Classe II B"].map(c=>'<p><b class="cl'+c.replace(/\s/g,"")+'">'+c+'</b> '+esc(CLASSE_INFO[c])+'</p>').join("")+'<p class="hint">Na dúvida, confira o laudo ou a ficha (FISPQ) do resíduo.</p></div>';
 const resOne=x=>x.tipo+(x.classe?" – "+x.classe:"")+(x.qtd?" ("+x.qtd+")":"");
 function resText(list){return list.map(resOne).join("; ")}
 function cleanRes(r){
@@ -1359,10 +1387,10 @@ function evHtml(it,hs,pin){
     (conf?'<span class="flag">⚠ </span>':'')+(r.serie?'<span class="rec" aria-label="Repete">↻ </span>':'')+'<span class="t">'+esc(title)+'</span>'+
     (sub?'<span class="s">'+esc(sub)+'</span>':'')+
     '<span class="m">'+esc(meta)+'</span>'+
-    (stopsOf(r).length?'<span class="trail">📍 '+esc(trail(r))+'</span>':'')+
+    (stopsOf(r).length?'<span class="trail">'+PIN_S+' '+esc(trail(r))+'</span>':'')+
     (r.residuos||[]).slice(0,3).map(x=>'<span class="chip">'+esc(x.tipo)+'</span> ').join("")+((r.residuos||[]).length>3?'<span class="chip">+'+(r.residuos.length-3)+'</span> ':'')+
     (r.motorista?' <span class="chip">'+esc(r.motorista)+'</span>':'')+
-    (r.anexos&&r.anexos.length?' <span class="chip" title="Anexos">📎 '+r.anexos.length+'</span>':'')+
+    (r.anexos&&r.anexos.length?' <span class="chip" title="Anexos">'+ic("clip")+' '+r.anexos.length+'</span>':'')+
     (pin?'<a class="gpin wide" target="_blank" rel="noopener" href="'+esc(pin.url)+'" title="'+esc(pin.tip)+'" aria-label="Ver deslocamento no Google Maps">'+PIN_S+'<span>Deslocamento</span></a>':'')+
     '<span class="rz" data-rz="1"></span></div>';
 }
@@ -1371,7 +1399,7 @@ function renderList(wd){
   wd.forEach(d=>{const ds=iso(d);const rs=routesOn(ds);if(!rs.length)return;any=true;
     h+='<h3>'+DAYN[d.getDay()]+' · '+ddmm(d)+(ds===today?' · hoje':'')+'</h3><table><thead><tr><th>Horário</th><th>Caminhão</th><th>Cliente</th><th>Serviço</th><th>Destino</th><th>Trajeto</th><th>Resíduos</th><th>Motorista</th><th>MTR</th><th>Status</th></tr></thead><tbody>';
     rs.forEach(r=>{const c=conflictsOf(r.id,r).length;const es=eff(r);const sc=es==="Em rota"?"rota":es==="Concluído"?"done":es==="Cancelado"?"cancel":"";
-      h+='<tr data-id="'+esc(r.id)+'" class="'+(r.status==="Cancelado"?"cancel":"")+'"><td class="num">'+(c?'⚠ ':'')+(r.serie?'↻ ':'')+esc(r.ini)+'–'+esc(r.fim)+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span></td><td>'+esc(r.cliente)+'</td><td>'+esc(r.servico)+'</td><td>'+esc(r.destino)+'</td><td>'+(stopsOf(r).length?'<a href="'+esc(routeOne(r).url)+'" target="_blank" rel="noopener" class="maplink" style="float:none">'+PIN_S+' '+esc(trail(r))+'</a>':'')+'</td><td>'+esc(r.residuo)+'</td><td>'+esc(r.motorista)+'</td><td>'+esc(r.mtr)+(r.anexos&&r.anexos.length?' <span title="Anexos">📎'+r.anexos.length+'</span>':'')+'</td><td><span class="st '+sc+'" title="'+(r.auto?"Automático pelo horário":"Definido manualmente")+'">'+esc(es)+(r.auto&&es!=="Cancelado"?" ⏱":"")+'</span></td></tr>'});
+      h+='<tr data-id="'+esc(r.id)+'" class="'+(r.status==="Cancelado"?"cancel":"")+'"><td class="num">'+(c?'⚠ ':'')+(r.serie?'↻ ':'')+esc(r.ini)+'–'+esc(r.fim)+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span></td><td>'+esc(r.cliente)+'</td><td>'+esc(r.servico)+'</td><td>'+esc(r.destino)+'</td><td>'+(stopsOf(r).length?'<a href="'+esc(routeOne(r).url)+'" target="_blank" rel="noopener" class="maplink" style="float:none">'+PIN_S+' '+esc(trail(r))+'</a>':'')+'</td><td>'+esc(r.residuo)+'</td><td>'+esc(r.motorista)+'</td><td>'+esc(r.mtr)+(r.anexos&&r.anexos.length?' <span title="Anexos">'+ic("clip")+r.anexos.length+'</span>':'')+'</td><td><span class="st '+sc+'" title="'+(r.auto?"Automático pelo horário":"Definido manualmente")+'">'+esc(es)+(r.auto&&es!=="Cancelado"?" "+ic("clock"):"")+'</span></td></tr>'});
     h+='</tbody></table>'});
   let sh="";
   if(S.series.size){sh='<h3>↻ Rotas que se repetem</h3><table><thead><tr><th>Caminhão</th><th>Cliente / serviço</th><th>Repetição</th></tr></thead><tbody>';
@@ -1427,14 +1455,15 @@ function fillMesModo(ds,modo){const sel=$("#fMesModo");if(!ds){sel.innerHTML="";
   sel.value=opts.includes(cur)?cur:"dia"}
 /* ---------- vários tipos de resíduo ---------- */
 function resRow(x){const d=document.createElement("div");d.className="resrow";
-  d.innerHTML='<input class="rtipo" list="dlRes" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo"><select class="rclasse" aria-label="Classe do resíduo">'+CLASSES.map(c=>'<option value="'+c[0]+'">'+c[1]+'</option>').join("")+'</select><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
-  d.querySelector(".rtipo").value=x.tipo||"";d.querySelector(".rqtd").value=x.qtd||"";d.querySelector(".rclasse").value=x.classe||"";return d}
+  d.innerHTML='<input class="rtipo" list="dlRes" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo"><select class="rclasse" aria-label="Classe do resíduo">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'">'+c[1]+'</option>').join("")+'</select><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
+  d.querySelector(".rtipo").value=x.tipo||"";d.querySelector(".rqtd").value=x.qtd||"";const sel=d.querySelector(".rclasse");sel.value=x.classe||"";sel.title=classeTip(sel.value);return d}
 const resCad=nome=>[...S.residuos].find(([,x])=>norm(x.nome)===norm(nome))||null;
 function setRes(list){const c=$("#fRes");c.innerHTML="";(list.length?list:[{tipo:"",qtd:""}]).forEach(x=>c.appendChild(resRow(x)))}
 function getRes(){return[...document.querySelectorAll("#fRes .resrow")].map(r=>({tipo:r.querySelector(".rtipo").value.trim(),qtd:r.querySelector(".rqtd").value.trim(),classe:r.querySelector(".rclasse").value})).filter(x=>x.tipo)}
 /* ao escolher um resíduo do cadastro, a classe guardada vem junto */
 $("#fRes").addEventListener("input",e=>{if(!e.target.classList.contains("rtipo"))return;const row=e.target.closest(".resrow");const c=resCad(e.target.value.trim());const sel=row.querySelector(".rclasse");if(c&&c[1].classe&&(!sel.value||sel.dataset.auto)){sel.value=c[1].classe;sel.dataset.auto="1"}});
-$("#fRes").addEventListener("change",e=>{if(e.target.classList.contains("rclasse"))e.target.dataset.auto=""});
+$("#fRes").addEventListener("change",e=>{if(e.target.classList.contains("rclasse")){e.target.dataset.auto="";e.target.title=classeTip(e.target.value)}});
+$("#resInfo").addEventListener("click",()=>{const b=$("#resLeg");b.hidden=!b.hidden;if(!b.innerHTML)b.innerHTML=classeLegenda()});
 $("#addRes").addEventListener("click",()=>{const r=resRow({});$("#fRes").appendChild(r);r.querySelector(".rtipo").focus()});
 $("#fRes").addEventListener("click",e=>{const b=e.target.closest(".rm");if(!b)return;const row=b.closest(".resrow");
   if(document.querySelectorAll("#fRes .resrow").length>1)row.remove();else{row.querySelector(".rtipo").value="";row.querySelector(".rqtd").value=""}updateFormState()});
@@ -1553,8 +1582,8 @@ function setStops(list){const c=$("#fStops");c.innerHTML="";list.forEach(p=>c.ap
 function getStops(){return[...document.querySelectorAll("#fStops .stop")].map(r=>({tipo:r.querySelector(".stipo").value,local:r.querySelector(".slocal").value.trim(),endereco:r.querySelector(".send").value.trim()})).filter(p=>p.local||p.endereco)}
 function addStop(p,atStart){const c=$("#fStops");const row=stopRow(p);if(atStart)c.prepend(row);else c.appendChild(row);updateFormState();if(!p.local&&!p.endereco)row.querySelector(".slocal").focus()}
 $("#addStop").addEventListener("click",()=>addStop({tipo:"Parada",local:"",endereco:""}));
-$("#addPatioStart").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço em ⚙ Galpão Trevo");return}addStop({tipo:"Saída",local:"Galpão Trevo",endereco:S.patio},true)});
-$("#addPatioEnd").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço em ⚙ Galpão Trevo");return}addStop({tipo:"Retorno",local:"Galpão Trevo",endereco:S.patio})});
+$("#addPatioStart").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço do Galpão em Cadastros → Locais");return}addStop({tipo:"Saída",local:"Galpão Trevo",endereco:S.patio},true)});
+$("#addPatioEnd").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço do Galpão em Cadastros → Locais");return}addStop({tipo:"Retorno",local:"Galpão Trevo",endereco:S.patio})});
 $("#fStops").addEventListener("click",e=>{const row=e.target.closest(".stop");if(!row)return;
   if(e.target.closest(".rm")){row.remove();updateFormState()}
   else if(e.target.closest(".up")&&row.previousElementSibling){row.parentNode.insertBefore(row,row.previousElementSibling);updateFormState()}
@@ -1618,8 +1647,8 @@ function askSave(list){SV=list;
   $("#svTitle").textContent=list.filter(x=>x.tipo==="local").length>1?"Deseja salvar os endereços desses locais?":tit;
   $("#svList").innerHTML=list.map((x,i)=>'<label class="svitem"><input type="checkbox" data-i="'+i+'" checked><span>'+
     (x.tipo==="local"?'<b>'+PIN_S+' '+esc(x.nome)+'</b><small>'+esc(x.endereco)+'</small>'+(x.antes?'<small>Endereço guardado hoje: <s>'+esc(x.antes)+'</s> (será trocado)</small>':'<small>Local novo</small>')
-    :x.tipo==="residuo"?'<b>♻ '+esc(x.nome)+'</b><small>Tipo de resíduo novo'+(x.classe?' · '+esc(x.classe):'')+'</small>'
-    :x.tipo==="resclasse"?'<b>♻ '+esc(x.nome)+' – '+esc(x.classe)+'</b><small>Guardar a classe no cadastro'+(x.antes?' (hoje: '+esc(x.antes)+')':'')+'</small>':'<b>👷 '+esc(x.nome)+'</b><small>Motorista novo ('+esc(x.caminhao)+')</small>')+'</span></label>').join("");
+    :x.tipo==="residuo"?'<b>'+ic("recycle")+' '+esc(x.nome)+'</b><small>Tipo de resíduo novo'+(x.classe?' · '+esc(x.classe):'')+'</small>'
+    :x.tipo==="resclasse"?'<b>'+ic("recycle")+' '+esc(x.nome)+' – '+esc(x.classe)+'</b><small>Guardar a classe no cadastro'+(x.antes?' (hoje: '+esc(x.antes)+')':'')+'</small>':'<b>'+ic("user")+' '+esc(x.nome)+'</b><small>Motorista novo ('+esc(x.caminhao)+')</small>')+'</span></label>').join("");
   openModal("scrimSave")}
 $("#svNo").addEventListener("click",()=>{SV=null;closeModal("scrimSave")});
 $("#svYes").addEventListener("click",async()=>{const list=SV||[];SV=null;
@@ -1628,7 +1657,7 @@ $("#svYes").addEventListener("click",async()=>{const list=SV||[];SV=null;
   for(const x of pick){
     if(x.tipo==="local"){if(await rememberAddr(x.nome,x.endereco))n++}
     else if(x.tipo==="residuo"){if(await cadSet("residuos",null,{nome:x.nome,obs:"",classe:x.classe||""}))n++}
-    else if(x.tipo==="resclasse"){if(await cadSet("residuos",x.id,Object.assign({},S.residuos.get(x.id),{classe:x.classe})))n++}
+    else if(x.tipo==="resclasse"){if(await cadSet("residuos",x.id,Object.assign({},S.residuos.get(x.id),{classe:x.classe}))){n++;await propagar("residuo",x.nome,x.nome,{classe:x.classe})}}
     else if(x.tipo==="motorista"){if(await cadSet("motoristas",null,{nome:x.nome,caminhao:x.caminhao,telefone:""}))n++}}
   if(n)toast(n===1?"Salvo nos Cadastros":n+" itens salvos nos Cadastros");render()});
 $("#mDel").addEventListener("click",async()=>{
@@ -1679,7 +1708,7 @@ const isImg=a=>/^image\//.test(a.tipo),isPdf=a=>a.tipo==="application/pdf",isVid
 function renderAnexos(){
   const box=$("#fAnx");if(!box||!E)return;const list=E.anexos||[];
   box.innerHTML=list.map((a,i)=>'<div class="anx" role="button" tabindex="0" data-i="'+i+'" title="'+esc(a.nome)+'">'+
-    (isImg(a)?'<img src="'+esc(blobUrl(a.id))+'" alt="'+esc(a.nome)+'" loading="lazy">':'<span>'+(isPdf(a)?"📄":isVid(a)?"🎬":"📎")+'</span><small>'+esc(a.nome)+'</small>')+
+    (isImg(a)?'<img src="'+esc(blobUrl(a.id))+'" alt="'+esc(a.nome)+'" loading="lazy">':'<span>'+(isPdf(a)?ic("file"):isVid(a)?ic("film"):ic("clip"))+'</span><small>'+esc(a.nome)+'</small>')+
     (S.assets&&!S.readOnly?'<button type="button" class="rmx" data-rm="'+i+'" aria-label="Remover anexo">✕</button>':'')+'</div>').join("")+
     (E.uploading?'<div class="anx loading">Enviando '+E.uploading+'…</div>':'');
   $("#addAnx").style.display=S.assets&&!S.readOnly?"":"none";
@@ -1744,7 +1773,7 @@ function openDayRoute(ds,truck){
   if(o.parts.length===1)h+='<div class="rtbtns"><a class="btn primary big" target="_blank" rel="noopener" href="'+esc(o.parts[0].url)+'">'+PIN+' Abrir no Google Maps</a></div>';
   else{h+='<p class="hint">O Google Maps abre até 10 pontos por vez, então o dia foi dividido. Abra os trechos <b>na ordem</b>; cada trecho começa onde o anterior termina.</p><div class="rtbtns">'+
     o.parts.map((p,i)=>'<a class="btn primary" target="_blank" rel="noopener" href="'+esc(p.url)+'">'+PIN+' Trecho '+(i+1)+' · pontos '+(p.i0+1)+' a '+(p.i1+1)+'</a>').join("")+'</div>'}
-  h+='<div class="rtbtns"><button type="button" class="btn wa" id="rtCopy">📲 Mandar para o motorista no WhatsApp</button></div>';
+  h+='<div class="rtbtns"><button type="button" class="btn wa" id="rtCopy">'+ic("wa")+' Mandar para o motorista no WhatsApp</button></div>';
   $("#rtBody").innerHTML=h;
   $("#rtCopy").addEventListener("click",()=>{closeModal("scrimRoute");openWA(ds,truck)});
   openModal("scrimRoute");
@@ -1784,16 +1813,17 @@ function matchQ(r,q){
 function hl(txt,q){let h=esc(txt);const ts=String(q&&q.texto||"").split(/\s+/).filter(x=>x.length>1);
   ts.forEach(t=>{try{h=h.replace(new RegExp("("+esc(t).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi"),"<mark>$1</mark>")}catch(e){}});return h}
 function resRowS(id,r,q){const es=eff(r);const d=parseIso(r.data);
-  const tags=[(r.residuos||[]).length?"♻ "+resText(r.residuos):"",stopsOf(r).length?"📍 "+trail(r):"",r.mtr?"📄 MTR "+r.mtr:"",r.motorista?"👷 "+r.motorista:"",(r.anexos||[]).length?"📎 "+r.anexos.length:""].filter(Boolean).join("  ·  ");
+  const tags=[[(r.residuos||[]).length,"recycle",resText(r.residuos||[])],[stopsOf(r).length,"pin",trail(r)],[r.mtr,"file","MTR "+r.mtr],[r.motorista,"user",r.motorista],[(r.anexos||[]).length,"clip",String((r.anexos||[]).length)]]
+    .filter(x=>x[0]).map(x=>'<span class="tg">'+(x[1]==="pin"?PIN_S:ic(x[1]))+' '+hl(x[2],q)+'</span>').join("");
   return '<div class="sres'+(es==="Cancelado"?" cancel":"")+'" data-go="'+esc(r.data)+'" data-id="'+esc(id)+'"><span class="num">'+DAYN[d.getDay()].slice(0,3)+' '+ddmm(d)+'/'+d.getFullYear()+'</span><span class="num">'+esc(r.ini)+'–'+esc(r.fim)+'</span><span class="pill '+truckCls(r.caminhao)+' tr">'+esc(r.caminhao)+'</span><span class="sv">'+(r.serie?'↻ ':'')+'<b>'+hl(r.cliente||r.servico||"(sem título)",q)+'</b>'+(r.cliente&&r.servico?' · '+hl(r.servico,q):'')+'</span><span class="st stt '+(es==="Em rota"?"rota":es==="Concluído"?"done":es==="Cancelado"?"cancel":"")+'">'+esc(es)+'</span>'+
-    (tags?'<span class="tags">'+hl(tags,q)+'</span>':'')+'</div>'}
+    (tags?'<span class="tags">'+tags+'</span>':'')+'</div>'}
 let sSeq=0;S.sLast=null;
 const sMode=()=>picked("#sMode")||"rotas";
 const isNA=t=>/^(n\.?\s*a\.?|n\/a|nao se aplica|nao tem|sem mtr|-+)$/.test(norm(t));
 const splitMtr=t=>isNA(t)?[]:String(t||"").split(/[,;\n]+|\s\/\s/).map(x=>x.trim()).filter(x=>x&&!isNA(x));
 async function runSearch(){
   const q=sQuery();const out=$("#sOut");const mm=sMode()==="mtr";
-  if(!mm&&sEmpty(q)){out.innerHTML='<p class="sempty">Digite algo ou escolha um filtro. Dá para buscar por cliente, tipo de resíduo, nº do MTR, motorista, endereço, local, observação ou nome de anexo — ou usar os atalhos acima. Para ver só os MTRs, use “📄 Lista de MTRs”.</p>';S.sLast=null;return}
+  if(!mm&&sEmpty(q)){out.innerHTML='<p class="sempty">Digite algo ou escolha um filtro. Dá para buscar por cliente, tipo de resíduo, nº do MTR, motorista, endereço, local, observação ou nome de anexo — ou usar os atalhos acima. Para ver só os MTRs, use “Lista de MTRs”.</p>';S.sLast=null;return}
   if(q.de&&q.ate&&q.ate<q.de){out.innerHTML='<p class="sempty">A data final está antes da inicial.</p>';return}
   const seq=++sSeq;out.innerHTML='<p class="sempty">Buscando em todas as rotas…</p>';
   let res,pend=null;
@@ -1815,7 +1845,7 @@ async function runSearch(){
   S.sLast={q,list:fut.concat(past).map(([,r])=>r)};
   const total=(res.total||0)+nv;const lim=150;
   const cnt=k=>all.filter(([,r])=>r.caminhao===k).length;
-  let h='<div class="shead"><b>'+total+' rota(s) encontrada(s)</b><span class="hint">Baú '+cnt("Baú")+' · Poli '+cnt("Poliguindaste")+'</span>'+(res.total>(res.itens||[]).length?'<span class="hint">mostrando as '+(res.itens||[]).length+' mais recentes — use os filtros para refinar</span>':'')+'<span class="spacer"></span>'+(all.length?'<button type="button" class="btn sm" id="sExp">⬇ Exportar resultado (Excel)</button>':'')+'</div>';
+  let h='<div class="shead"><b>'+total+' rota(s) encontrada(s)</b><span class="hint">Baú '+cnt("Baú")+' · Poli '+cnt("Poliguindaste")+'</span>'+(res.total>(res.itens||[]).length?'<span class="hint">mostrando as '+(res.itens||[]).length+' mais recentes — use os filtros para refinar</span>':'')+'<span class="spacer"></span>'+(all.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Exportar resultado (Excel)</button>':'')+'</div>';
   h+='<h4>Próximas ('+fut.length+')</h4>'+(fut.length?fut.slice(0,lim).map(([id,r])=>resRowS(id,r,q)).join("")+(fut.length>lim?'<p class="sempty">… e mais '+(fut.length-lim)+'. Exporte para ver todas.</p>':''):'<p class="sempty">Nenhuma rota daqui para frente.</p>');
   h+='<h4>Anteriores ('+past.length+')</h4>'+(past.length?past.slice(0,lim).map(([id,r])=>resRowS(id,r,q)).join("")+(past.length>lim?'<p class="sempty">… e mais '+(past.length-lim)+'. Exporte para ver todas.</p>':''):'<p class="sempty">Nenhuma rota anterior.</p>');
   out.innerHTML=h;
@@ -1828,12 +1858,12 @@ function renderMtr(q,withM,pend,tot,ptot){
   vis.sort((a,b)=>(b.r.data+b.r.ini).localeCompare(a.r.data+a.r.ini));
   const cont={};linhas.forEach(l=>{cont[l.n]=(cont[l.n]||0)+1});
   S.sLast={q,mtr:vis,pend};
-  let h='<div class="shead"><b>'+vis.length+' MTR(s)</b><span class="hint">em '+(tot-na)+' rota(s)'+(na?' · '+na+' marcada(s) como “não se aplica”':'')+(tot>withM.length?' · mostrando as '+withM.length+' mais recentes':'')+'</span><span class="spacer"></span>'+(vis.length||pend.length?'<button type="button" class="btn sm" id="sExp">⬇ Exportar lista de MTRs (Excel)</button>':'')+'</div>';
+  let h='<div class="shead"><b>'+vis.length+' MTR(s)</b><span class="hint">em '+(tot-na)+' rota(s)'+(na?' · '+na+' marcada(s) como “não se aplica”':'')+(tot>withM.length?' · mostrando as '+withM.length+' mais recentes':'')+'</span><span class="spacer"></span>'+(vis.length||pend.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Exportar lista de MTRs (Excel)</button>':'')+'</div>';
   if(vis.length){h+='<div class="cscroll" style="max-height:44vh;margin-top:8px"><table class="ctable"><thead><tr><th>Nº MTR</th><th>Data</th><th>Caminhão</th><th>Cliente / serviço</th><th>Resíduos</th><th>Destino</th><th>Anexos</th><th>Status</th></tr></thead><tbody>'+
-    vis.map(l=>{const r=l.r,es=eff(r),d=parseIso(r.data);return'<tr class="go" data-go="'+esc(r.data)+'" data-id="'+esc(l.id)+'"><td><span class="mtrnum">'+hl(l.n,q)+'<button type="button" data-copy="'+esc(l.n)+'" title="Copiar nº">⧉</button></span>'+(cont[l.n]>1?'<div class="mtrdup">⚠ repetido em '+cont[l.n]+' rotas</div>':'')+'</td><td class="uso">'+ddmm(d)+'/'+d.getFullYear()+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></td><td><b>'+esc(r.cliente||r.servico)+'</b>'+(r.cliente&&r.servico?'<br><span class="addr">'+esc(r.servico)+'</span>':'')+'</td><td class="addr">'+esc(resText(r.residuos||[]))+'</td><td class="addr">'+esc(r.destino||"")+'</td><td>'+((r.anexos||[]).length?(r.anexos||[]).slice(0,3).map(x=>'<a target="_blank" rel="noopener" href="'+esc(driveView(x.id))+'" title="'+esc(x.nome)+'">📎</a>').join(" "):'<span class="uso">—</span>')+'</td><td><span class="st stt '+(es==="Em rota"?"rota":es==="Concluído"?"done":es==="Cancelado"?"cancel":"")+'">'+esc(es)+'</span></td></tr>'}).join("")+'</tbody></table></div>'}
+    vis.map(l=>{const r=l.r,es=eff(r),d=parseIso(r.data);return'<tr class="go" data-go="'+esc(r.data)+'" data-id="'+esc(l.id)+'"><td><span class="mtrnum">'+hl(l.n,q)+'<button type="button" data-copy="'+esc(l.n)+'" title="Copiar nº">⧉</button></span>'+(cont[l.n]>1?'<div class="mtrdup">'+ic("alert")+' repetido em '+cont[l.n]+' rotas</div>':'')+'</td><td class="uso">'+ddmm(d)+'/'+d.getFullYear()+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></td><td><b>'+esc(r.cliente||r.servico)+'</b>'+(r.cliente&&r.servico?'<br><span class="addr">'+esc(r.servico)+'</span>':'')+'</td><td class="addr">'+esc(resText(r.residuos||[]))+'</td><td class="addr">'+esc(r.destino||"")+'</td><td>'+((r.anexos||[]).length?(r.anexos||[]).slice(0,3).map(x=>'<a target="_blank" rel="noopener" href="'+esc(driveView(x.id))+'" title="'+esc(x.nome)+'">'+ic("clip")+'</a>').join(" "):'<span class="uso">—</span>')+'</td><td><span class="st stt '+(es==="Em rota"?"rota":es==="Concluído"?"done":es==="Cancelado"?"cancel":"")+'">'+esc(es)+'</span></td></tr>'}).join("")+'</tbody></table></div>'}
   else h+='<p class="sempty">Nenhum MTR encontrado com esses filtros.</p>';
   if(pend.length){pend.sort((a,b)=>(b[1].data+b[1].ini).localeCompare(a[1].data+a[1].ini));
-    h+='<h4>⚠ Concluídas sem MTR ('+(ptot||pend.length)+') — digite o número e salve aqui mesmo</h4><div class="cscroll" style="max-height:30vh"><table class="ctable"><tbody>'+
+    h+='<h4>'+ic("alert")+' Concluídas sem MTR ('+(ptot||pend.length)+') — digite o número e salve aqui mesmo</h4><div class="cscroll" style="max-height:30vh"><table class="ctable"><tbody>'+
     pend.slice(0,150).map(([id,r])=>{const d=parseIso(r.data);return'<tr class="pendrow"><td class="uso">'+ddmm(d)+'/'+d.getFullYear()+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></td><td><b>'+esc(r.cliente||r.servico)+'</b>'+(r.cliente&&r.servico?' · <span class="addr">'+esc(r.servico)+'</span>':'')+'</td><td class="act"><input placeholder="Nº do MTR" data-mtrin="'+esc(id)+'"> <button type="button" class="btn sm primary" data-mtrsave="'+esc(id)+'">Salvar</button> <button type="button" class="btn sm" data-go="'+esc(r.data)+'" data-id="'+esc(id)+'">Abrir</button></td></tr>'}).join("")+'</tbody></table></div>'}
   $("#sOut").innerHTML=h;
 }
@@ -1979,7 +2009,7 @@ function setPeriod(p){pick("#xPer",p);const a=S.anchor;let de,ate;
   $("#xDe").disabled=$("#xAte").disabled=p!=="custom";
   $("#xDe").closest(".fld").style.display=$("#xAte").closest(".fld").style.display=$("#xTruck").closest(".fld").style.display=all?"none":"";
   $("#xHint").innerHTML=all?"Baixa <b>tudo</b> o que está guardado: todas as rotas (de todas as datas), repetições, locais e endereços, resíduos, motoristas e uma aba com os dados completos. Bom para guardar uma cópia no computador.":"A planilha tem duas abas: <b>Rotas</b> (uma linha por rota, com trajeto, resíduos, MTR e status) e <b>Resumo</b> (rotas e horas por caminhão, cliente, resíduo e status).";
-  $("#xGo").textContent=all?"⬇ Baixar agenda completa":"⬇ Baixar Excel";xInfo()}
+  $("#xGo").innerHTML=ic("download")+(all?" Baixar agenda completa":" Baixar Excel");xInfo()}
 function xInfo(){const p=picked("#xPer");const a=$("#xDe").value,b=$("#xAte").value;$("#xInfo").textContent=p==="tudo"?"":a&&b?(b<a?"A data final é antes da inicial":"De "+ddmmyy(a)+" a "+ddmmyy(b)):""}
 $("#btnExport").addEventListener("click",()=>{openModal("scrimExport");setPeriod("semana");pick("#xTruck","")});
 $("#xPer").addEventListener("click",e=>{const b=e.target.closest("button");if(b)setPeriod(b.dataset.v)});
@@ -2086,7 +2116,7 @@ async function waBuild(){
 function waLinks(mots){
   const t=$("#waTxt").value;$("#waOpen").href="https://wa.me/?text="+enc(t);
   const box=$("#waDirect");const ls=[];
-  (mots||WA.mots||new Set()).forEach(n=>{const m=[...S.motoristas.values()].find(x=>norm(x.nome)===norm(n));const ph=m&&digits(m.telefone);if(ph)ls.push('<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/'+ph+'?text='+enc(t)+'">📲 Enviar para '+esc(n)+'</a>')});
+  (mots||WA.mots||new Set()).forEach(n=>{const m=[...S.motoristas.values()].find(x=>norm(x.nome)===norm(n));const ph=m&&digits(m.telefone);if(ph)ls.push('<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/'+ph+'?text='+enc(t)+'">'+ic("wa")+' Enviar para '+esc(n)+'</a>')});
   if(mots)WA.mots=mots;box.innerHTML=ls.join(" ");
 }
 function openWA(ds,truck,only){
@@ -2179,19 +2209,20 @@ $("#fhMail").addEventListener("click",()=>fhSavePag());
 const CTX={id:null,confirm:false};
 function ctxClose(){const m=$("#ctxMenu");if(m){m.remove()}document.querySelector(".ctxscrim")&&document.querySelector(".ctxscrim").remove();CTX.id=null;CTX.confirm=false}
 function ctxOpen(id,x,y,touch){
-  ctxClose();const r=S.items.get(id);if(!r)return;CTX.id=id;CTX.t=touch?Date.now():0;
+  ctxClose();const r=S.items.get(id);if(!r)return;CTX.id=id;CTX.t=touch?performance.now():0;
   const es=eff(r),outro=r.caminhao==="Baú"?"Poliguindaste":"Baú";const temTraj=stopsOf(r).some(p=>p.endereco||p.local);
   const st=["Agendado","Em rota","Concluído","Cancelado"].map(v=>'<button type="button" class="cst'+(es===v&&!r.auto?" on":"")+(v==="Cancelado"?" canc":"")+'" data-act="st" data-v="'+v+'">'+(v==="Concluído"?"✓ ":v==="Cancelado"?"✕ ":v==="Em rota"?"● ":"")+v+'</button>').join("");
   const m=document.createElement("div");m.id="ctxMenu";m.className="ctxmenu"+(touch?" sheet":"");m.setAttribute("role","menu");
   m.innerHTML='<div class="ctxhead"><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span> <b>'+esc(r.cliente||r.servico||"Rota")+'</b><small>'+DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmm(parseIso(r.data))+' · '+esc(r.ini)+'–'+esc(r.fim)+(r.serie?' · ↻ repete':'')+'</small></div>'+
-    '<button type="button" data-act="open">✏️ Abrir / editar</button>'+
-    '<div class="ctxsub">Status</div><div class="ctxst">'+st+'<button type="button" class="cst'+(r.auto?" on":"")+'" data-act="auto">⏱ Automático</button></div>'+
-    '<hr><button type="button" data-act="dup">📋 Duplicar…</button>'+
-    '<button type="button" data-act="tomorrow">📅 Copiar para o dia seguinte</button>'+
-    '<button type="button" data-act="truck">🚚 Passar para o '+outro+'</button>'+
-    '<button type="button" data-act="wa">📲 Mandar no WhatsApp</button>'+
+    '<button type="button" data-act="open">'+ic("edit")+' Abrir / editar</button>'+
+    '<div class="ctxsub">Horário</div><div class="ctxtime"><label>Início <input type="time" step="300" id="ctxIni" value="'+esc(r.ini)+'"></label><label>Fim <input type="time" step="300" id="ctxFim" value="'+esc(r.fim)+'"></label><button type="button" class="cst" data-act="time">Aplicar</button></div>'+
+    '<div class="ctxsub">Status</div><div class="ctxst">'+st+'<button type="button" class="cst'+(r.auto?" on":"")+'" data-act="auto">'+ic("clock")+' Automático</button></div>'+
+    '<hr><button type="button" data-act="dup">'+ic("copy")+' Duplicar…</button>'+
+    '<button type="button" data-act="tomorrow">'+ic("calplus")+' Copiar para o dia seguinte</button>'+
+    '<button type="button" data-act="truck">'+ic("truck")+' Passar para o '+outro+'</button>'+
+    '<button type="button" data-act="wa">'+ic("wa")+' Mandar no WhatsApp</button>'+
     (temTraj?'<button type="button" data-act="map">'+PIN_S+' Trajeto no Google Maps</button>':'')+
-    '<hr><button type="button" class="danger" data-act="del">🗑 '+(r.serie?"Excluir só este dia":"Excluir")+'</button>'+
+    '<hr><button type="button" class="danger" data-act="del">'+ic("trash")+' '+(r.serie?"Excluir só este dia":"Excluir")+'</button>'+
     (touch?'<button type="button" class="ctxcancel" data-act="close">Fechar</button>':'');
   const sc=document.createElement("div");sc.className="ctxscrim"+(touch?" dim":"");sc.addEventListener("pointerdown",e=>{e.preventDefault();ctxClose()});
   document.body.appendChild(sc);document.body.appendChild(m);
@@ -2206,8 +2237,10 @@ async function ctxSave(id,changes,msg){
   if(ok)offerUndo(msg,sn);
 }
 document.addEventListener("click",async e=>{
-  const b=e.target.closest("#ctxMenu [data-act]");if(!b||Date.now()-(CTX.t||0)<350)return;const id=CTX.id;const r=S.items.get(id);if(!r){ctxClose();return}
+  const b=e.target.closest("#ctxMenu [data-act]");if(!b||(CTX.t&&performance.now()-CTX.t<350))return;const id=CTX.id;const r=S.items.get(id);if(!r){ctxClose();return}
   const a=b.dataset.act;
+  if(a==="time"){const ni=$("#ctxIni").value,nf=$("#ctxFim").value;if(!ni||!nf||toMin(nf)<=toMin(ni)){toast("O fim precisa ser depois do início");return}
+    ctxClose();if(ni===r.ini&&nf===r.fim)return;return ctxSave(id,{ini:ni,fim:nf},"Horário: "+ni+"–"+nf)}
   if(a==="del"&&!CTX.confirm){CTX.confirm=true;b.textContent="Confirmar: "+(r.serie?"excluir só este dia":"excluir rota");b.classList.add("armed");return}
   ctxClose();
   if(a==="close")return;
@@ -2260,8 +2293,8 @@ async function loadInfo(){try{CAD.info=await API.call("apiInfo",[])}catch(e){CAD
 async function loadOverr(){const ids=[...S.series.keys()];if(!ids.length){CAD.overr=new Set();return}
   try{const sn=await S.col.where("serie","in",ids).get();CAD.overr=new Set(sn.docs.map(d=>{const x=d.data()||{};return x.serie+"|"+x.serieData}))}catch(e){CAD.overr=null}
   if(CAD.open&&CAD.tab==="series")renderCad()}
-const actBtns=(id,extra)=>(extra||"")+'<button type="button" class="btn sm" data-act="edit" data-id="'+esc(id)+'">✏️ Editar</button> '+
-  (CAD.confirm===id?'<button type="button" class="btn sm danger" data-act="del" data-id="'+esc(id)+'">Confirmar exclusão</button> <button type="button" class="btn sm ghost" data-act="nodel">Não</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(id)+'" title="Excluir">🗑</button>');
+const actBtns=(id,extra)=>(extra||"")+'<button type="button" class="btn sm" data-act="edit" data-id="'+esc(id)+'">'+ic("edit")+' Editar</button> '+
+  (CAD.confirm===id?'<button type="button" class="btn sm danger" data-act="del" data-id="'+esc(id)+'">Confirmar exclusão</button> <button type="button" class="btn sm ghost" data-act="nodel">Não</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(id)+'" title="Excluir">'+ic("trash")+'</button>');
 const editBtns='<button type="button" class="btn sm primary" data-act="save">Salvar</button> <button type="button" class="btn sm ghost" data-act="cancel">Cancelar</button>';
 function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm));return Object.values(S.uso[g]||{}).filter(x=>!k.has(norm(x.nome))&&x.nome!=="Galpão Trevo").sort((a,b)=>b.n-a.n)}
 function renderCad(){
@@ -2271,25 +2304,25 @@ function renderCad(){
   const box=$("#cBody");let h="";const ed=CAD.edit;
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
   if(CAD.tab==="locais"){
-    h+='<div class="galp"><b>🏠 Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
+    h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
     h+=bar("Procurar local ou endereço","Novo local");
     const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
     const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local"></td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
       return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
     const sc=semCadastro("locais",list.map(x=>x.nome));
-    if(sc.length)h+='<h4 class="csec">Usados nas rotas e ainda sem endereço salvo</h4><div>'+sc.slice(0,40).map(x=>'<span class="chipx">'+esc(x.nome)+' <small>('+x.n+')</small><button type="button" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ cadastrar</button></span>').join("")+'</div>';
+    h+=fixHtml("local",sc,list.map(x=>x.nome),"Locais usados nas rotas e ainda sem cadastro");
     h+='<p class="cnote">Os endereços salvos aqui aparecem sozinhos quando você digita o nome do local no trajeto. Um endereço novo só é guardado quando você confirma.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
-    const csel=v=>'<select id="eCla">'+CLASSES.map(c=>'<option value="'+c[0]+'"'+(c[0]===v?" selected":"")+'>'+(c[0]?c[1]:"—")+'</option>').join("")+'</select>';
+    const csel=v=>'<select id="eCla" title="'+esc(classeTip(v))+'">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'"'+(c[0]===v?" selected":"")+'>'+(c[0]?c[1]:"—")+'</option>').join("")+'</select>';
     const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td>'+csel(x?x.classe:"")+'</td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: perigoso, tambores de 200 L"></td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
       return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
     const sc=semCadastro("residuos",list.map(([,x])=>x.nome));
-    if(sc.length)h+='<h4 class="csec">Usados nas rotas e ainda sem cadastro</h4><div>'+sc.slice(0,40).map(x=>'<span class="chipx">'+esc(x.nome)+' <small>('+x.n+')</small><button type="button" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ cadastrar</button></span>').join("")+'</div>';
-    h+='<p class="cnote">Excluir um tipo daqui só tira ele das sugestões. As rotas que já usaram esse resíduo continuam iguais.</p>';
+    h+=fixHtml("residuo",sc,list.map(([,x])=>x.nome),"Resíduos usados nas rotas e ainda sem cadastro");
+    h+='<p class="cnote">Corrigir o nome ou a classe aqui corrige também todas as rotas que usam esse resíduo. Excluir só tira das sugestões: as rotas continuam iguais.</p><details class="cnote"><summary>ⓘ O que é cada classe?</summary>'+classeLegenda()+'</details>';
   }else if(CAD.tab==="motoristas"){
     h+=bar("Procurar motorista","Novo motorista");
     const list=[...S.motoristas].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
@@ -2297,7 +2330,8 @@ function renderCad(){
     const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome"></td><td>'+tsel(x?x.caminhao:"")+'</td><td><input id="eTel" value="'+esc(x?x.telefone:"")+'" placeholder="(31) 99999-9999" inputmode="tel"></td><td>'+(x?usoHtml("motoristas",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
       return'<tr data-k="'+esc(norm(x.nome+" "+x.caminhao+" "+x.telefone))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.caminhao?'<span class="pill '+truckCls(x.caminhao)+'">'+esc(x.caminhao)+'</span>':'')+'</td><td class="addr">'+esc(x.telefone)+'</td><td>'+usoHtml("motoristas",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Motorista</th><th>Caminhão</th><th>WhatsApp</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum motorista salvo.</p>')+'</div>';
-    h+='<p class="cnote">Com o WhatsApp do motorista salvo, a mensagem das rotas ganha o botão “Enviar para…” direto para ele.</p>';
+    h+=fixHtml("motorista",semCadastro("motoristas",list.map(([,x])=>x.nome)),list.map(([,x])=>x.nome),"Nomes usados nas rotas e que não estão no cadastro");
+    h+='<p class="cnote">Corrigir o nome aqui corrige também todas as rotas desse motorista. Com o WhatsApp do motorista salvo, a mensagem das rotas ganha o botão “Enviar para…” direto para ele.</p>';
   }else if(CAD.tab==="series"){
     const list=[...S.series].sort((a,b)=>(a[1].caminhao+a[1].ini).localeCompare(b[1].caminhao+b[1].ini));const td=iso(new Date());
     h+='<p class="cnote" style="margin-top:12px">Rotas que se repetem sozinhas na agenda. Para criar uma nova, abra “＋ Nova rota” e escolha em “↻ Repetir”.</p>';
@@ -2307,25 +2341,34 @@ function renderCad(){
         const pul=s.excluidas.filter(ds=>!(CAD.overr&&CAD.overr.has(sid+"|"+ds))).sort();
         h+='<tr><td><span class="pill '+truckCls(s.caminhao)+'">'+esc(s.caminhao)+'</span></td><td><b>'+esc(s.cliente||s.servico)+'</b>'+(s.cliente&&s.servico?'<br><span class="addr">'+esc(s.servico)+'</span>':'')+'</td><td class="addr">'+esc(recSummary(s))+'</td><td class="uso">'+(nx?'<b>'+ddmm(parseIso(nx))+'</b>':(end&&end<td?'encerrada':'—'))+'</td><td>'+
           (CAD.overr===null?'<span class="uso">…</span>':pul.length?pul.map(ds=>'<span class="chipx">'+ddmm(parseIso(ds))+'<button type="button" data-act="restore" data-id="'+esc(sid)+'" data-ds="'+ds+'" title="Voltar a repetir neste dia">restaurar</button></span>').join(""):'<span class="uso">nenhum</span>')+'</td><td class="act">'+
-          '<button type="button" class="btn sm" data-act="sedit" data-id="'+esc(sid)+'">✏️ Editar</button> '+
-          (CAD.confirm==="end:"+sid?'<button type="button" class="btn sm danger" data-act="send" data-id="'+esc(sid)+'">Confirmar: encerrar hoje</button> ':'<button type="button" class="btn sm" data-act="askend" data-id="'+esc(sid)+'" title="Para de repetir a partir de hoje (o que já passou fica)">⏹ Encerrar</button> ')+
-          (CAD.confirm===sid?'<button type="button" class="btn sm danger" data-act="sdel" data-id="'+esc(sid)+'">Confirmar exclusão</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(sid)+'" title="Excluir a série inteira">🗑</button>')+'</td></tr>'});
+          '<button type="button" class="btn sm" data-act="sedit" data-id="'+esc(sid)+'">'+ic("edit")+' Editar</button> '+
+          (CAD.confirm==="end:"+sid?'<button type="button" class="btn sm danger" data-act="send" data-id="'+esc(sid)+'">Confirmar: encerrar hoje</button> ':'<button type="button" class="btn sm" data-act="askend" data-id="'+esc(sid)+'" title="Para de repetir a partir de hoje (o que já passou fica)">'+ic("stop")+' Encerrar</button> ')+
+          (CAD.confirm===sid?'<button type="button" class="btn sm danger" data-act="sdel" data-id="'+esc(sid)+'">Confirmar exclusão</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(sid)+'" title="Excluir a série inteira">'+ic("trash")+'</button>')+'</td></tr>'});
       h+='</tbody></table></div>'}
   }else{
     const I=CAD.info;
     h+='<div class="secgrid">';
     if(!I)h+='<div class="seccard"><h4>Verificando…</h4><p>Consultando o Google.</p></div>';
     else if(I.erro)h+='<div class="seccard"><h4>Não foi possível verificar</h4><p>'+esc(I.erro)+'</p></div>';
-    else h+='<div class="seccard"><h4>💾 Backup automático</h4><p class="big">'+(I.ultimoBackup?esc(I.ultimoBackup):"ainda não feito")+'</p><p>'+I.backups+' cópia(s) guardada(s) na pasta “Agenda de Rotas – backups” do Google Drive. Uma por dia, as últimas '+I.guardados+'.</p></div>'+
-      '<div class="seccard"><h4>🗄 Seus dados</h4><p class="big">'+I.rotas+' rotas</p><p>Guardadas na planilha “Agenda de Rotas – dados” do Google Drive, com histórico de versões.</p></div>';
-    h+='<div class="seccard"><h4>🔒 Acesso</h4><p class="secok">Só entra quem tem usuário e senha.</p><p>A senha é conferida no Google, não fica escrita no site. Cada aparelho fica conectado por até 30 dias.</p></div>'+
-      '<div class="seccard"><h4>⏳ O site expira?</h4><p class="secok">Não.</p><p>GitHub Pages e Google Apps Script são gratuitos e sem prazo. O que precisa de cuidado é a conta Google da logística: deixe a verificação em duas etapas ligada.</p></div></div>';
-    h+='<div class="secbtns"><button type="button" class="btn primary" data-act="backup">💾 Fazer backup agora</button><button type="button" class="btn" data-act="full">⬇ Baixar agenda completa (Excel)</button><button type="button" class="btn" data-act="logout">Sair deste aparelho</button></div>';
+    else h+='<div class="seccard"><h4>'+ic("save")+' Backup automático</h4><p class="big">'+(I.ultimoBackup?esc(I.ultimoBackup):"ainda não feito")+'</p><p>'+I.backups+' cópia(s) guardada(s) na pasta “Agenda de Rotas – backups” do Google Drive. Uma por dia, as últimas '+I.guardados+'.</p></div>'+
+      '<div class="seccard"><h4>'+ic("database")+' Seus dados</h4><p class="big">'+I.rotas+' rotas</p><p>Guardadas na planilha “Agenda de Rotas – dados” do Google Drive, com histórico de versões.</p></div>';
+    h+='<div class="seccard"><h4>'+ic("lock")+' Acesso</h4><p class="secok">Só entra quem tem usuário e senha.</p><p>A senha é conferida no Google, não fica escrita no site. Cada aparelho fica conectado por até 30 dias.</p></div>'+
+      '<div class="seccard"><h4>'+ic("clock")+' O site expira?</h4><p class="secok">Não.</p><p>GitHub Pages e Google Apps Script são gratuitos e sem prazo. O que precisa de cuidado é a conta Google da logística: deixe a verificação em duas etapas ligada.</p></div></div>';
+    h+='<div class="secbtns"><button type="button" class="btn primary" data-act="backup">'+ic("save")+' Fazer backup agora</button><button type="button" class="btn" data-act="full">'+ic("download")+' Baixar agenda completa (Excel)</button><button type="button" class="btn" data-act="logout">Sair deste aparelho</button></div>';
   }
   box.innerHTML=h;
   const q=$("#cQ");if(q){filterCad();q.addEventListener("input",()=>{CAD.q=q.value;filterCad()})}
   const f=box.querySelector("[data-edit] input");if(f&&!box.contains(document.activeElement))f.focus();
 }
+/* nomes que aparecem nas rotas mas não estão no cadastro (ex.: escrito errado): corrigir em todas as rotas ou cadastrar */
+function fixHtml(g,sc,nomes,titulo){if(!sc.length)return"";
+  const opts='<option value="">Trocar por…</option>'+nomes.slice().sort((a,b)=>a.localeCompare(b,"pt")).map(n=>'<option>'+esc(n)+'</option>').join("");
+  return'<h4 class="csec">'+titulo+'</h4><p class="cnote" style="margin-top:0">Se for o mesmo que já está cadastrado com outro nome (erro de digitação), escolha o nome certo e clique em <b>Corrigir nas rotas</b>.</p>'+
+    sc.slice(0,40).map(x=>'<div class="fixrow"><b>'+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><select aria-label="Nome certo">'+opts+'</select><button type="button" class="btn sm primary" data-act="fix" data-g="'+g+'" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ Cadastrar</button></div>').join("")}
+/* corrige o nome (e o que mudou) em todas as rotas e repetições */
+async function propagar(tipo,de,para,ex){
+  try{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);if(r&&r.alteradas)toast("Corrigido também em "+r.alteradas+" rota(s)");API.refresh();loadUso();return true}
+  catch(e){if(e&&e.code==="invalid_request")toast("Atualize o Code.gs no Google para corrigir as rotas automaticamente");else writeErr(e);return false}}
 function filterCad(){const k=norm(CAD.q);document.querySelectorAll("#cBody tr[data-k]").forEach(tr=>{tr.hidden=!!k&&!tr.dataset.k.includes(k)})}
 $("#cBody").addEventListener("keydown",e=>{if(!e.target.closest("[data-edit]"))return;if(e.key==="Enter"){e.preventDefault();$("#cBody [data-act=save]").click()}else if(e.key==="Escape"){e.stopPropagation();CAD.edit=null;renderCad()}});
 $("#cBody").addEventListener("click",async e=>{
@@ -2337,14 +2380,25 @@ $("#cBody").addEventListener("click",async e=>{
   if(a==="ask"){CAD.confirm=id;renderCad();return}
   if(a==="askend"){CAD.confirm="end:"+id;renderCad();return}
   if(a==="nodel"){CAD.confirm=null;renderCad();return}
+  if(a==="fix"){const sel=b.closest(".fixrow").querySelector("select");const para=sel.value;if(!para){sel.focus();toast("Escolha o nome certo na lista");return}if(!guard())return;
+    b.disabled=true;b.textContent="Corrigindo…";const g=b.dataset.g;let ex={};
+    if(g==="local"){const l=S.locais.get(locKey(para));if(l&&l.endereco)ex={enderecoDe:"",enderecoPara:l.endereco}}
+    if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
+    await propagar(g,b.dataset.de,para,ex);return}
   if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
     const nome=($("#eNome").value||"").trim();if(!nome){toast("Informe o nome");$("#eNome").focus();return}
     const eid=CAD.edit&&CAD.edit.id;let ok;
-    if(tab==="locais")ok=await saveLocal(eid||null,nome,($("#eEnd").value||"").trim(),($("#eObs").value||"").trim());
-    else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}ok=await cadSet("residuos",eid||null,Object.assign({},eid&&S.residuos.get(eid)||{},{nome,obs:($("#eObs").value||"").trim(),classe:$("#eCla").value}))}
-    else{const dup=[...S.motoristas].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse motorista já existe");return}ok=await cadSet("motoristas",eid||null,Object.assign({},eid&&S.motoristas.get(eid)||{},{nome,caminhao:$("#eCam").value,telefone:($("#eTel").value||"").trim()}))}
+    if(tab==="locais"){const old=eid?[...S.locais.values()].find(x=>x._id===eid):null;const end=($("#eEnd").value||"").trim();
+      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim());
+      if(ok&&old&&(old.nome!==nome||old.endereco!==end))await propagar("local",old.nome,nome,old.endereco!==end?{enderecoDe:old.endereco,enderecoPara:end}:{})}
+    else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}const old=eid&&S.residuos.get(eid)?Object.assign({},S.residuos.get(eid)):null;const cla=$("#eCla").value;
+      ok=await cadSet("residuos",eid||null,Object.assign({},old||{},{nome,obs:($("#eObs").value||"").trim(),classe:cla}));
+      if(ok&&old&&(old.nome!==nome||(old.classe||"")!==cla))await propagar("residuo",old.nome,nome,(old.classe||"")!==cla?{classe:cla}:{})}
+    else{const dup=[...S.motoristas].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse motorista já existe");return}const old=eid&&S.motoristas.get(eid)?Object.assign({},S.motoristas.get(eid)):null;
+      ok=await cadSet("motoristas",eid||null,Object.assign({},old||{},{nome,caminhao:$("#eCam").value,telefone:($("#eTel").value||"").trim()}));
+      if(ok&&old&&old.nome!==nome)await propagar("motorista",old.nome,nome)}
     if(ok!==false){CAD.edit=null;renderCad();toast("Salvo")}return}
   if(a==="del"){CAD.confirm=null;if(await cadDel(tab,id))toast("Excluído");return}
   if(a==="sedit"){closeModal("scrimCad");openSeries(id);return}
@@ -2354,8 +2408,8 @@ $("#cBody").addEventListener("click",async e=>{
     if(ok){offerUndo("A série parou de repetir a partir de hoje",sn);renderCad()}return}
   if(a==="restore"){const s=S.series.get(id);if(!s)return;const sn=[snapDoc("series",id)];
     if(await put("series",id,Object.assign({},s,{excluidas:s.excluidas.filter(x=>x!==b.dataset.ds)}))){offerUndo("A rota voltou a aparecer em "+ddmm(parseIso(b.dataset.ds)),sn);renderCad()}return}
-  if(a==="backup"){b.disabled=true;b.textContent="Fazendo backup…";try{const r=await API.call("apiBackup",[]);toast("Backup feito: "+r.em);await loadInfo()}catch(x){toast(x&&x.code==="invalid_request"?"Atualize o Code.gs no Google para usar este botão":"Não foi possível fazer o backup agora")}finally{b.disabled=false;b.textContent="💾 Fazer backup agora"}return}
-  if(a==="full"){b.disabled=true;b.textContent="Gerando…";try{await exportFull()}finally{b.disabled=false;b.textContent="⬇ Baixar agenda completa (Excel)"}return}
+  if(a==="backup"){b.disabled=true;b.textContent="Fazendo backup…";try{const r=await API.call("apiBackup",[]);toast("Backup feito: "+r.em);await loadInfo()}catch(x){toast(x&&x.code==="invalid_request"?"Atualize o Code.gs no Google para usar este botão":"Não foi possível fazer o backup agora")}finally{b.disabled=false;b.innerHTML=ic("save")+" Fazer backup agora"}return}
+  if(a==="full"){b.disabled=true;b.textContent="Gerando…";try{await exportFull()}finally{b.disabled=false;b.innerHTML=ic("download")+" Baixar agenda completa (Excel)"}return}
   if(a==="logout"){API.logout();location.reload()}
 });
 /* primeira vez na versão 5: cria as listas de resíduos e motoristas com o que já foi usado */
@@ -2483,7 +2537,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="5.8";
+const VERSAO_TELA="6.0";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
