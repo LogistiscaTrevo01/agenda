@@ -510,6 +510,24 @@ svg.ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;stroke-width:2}
 .tags .tg svg{width:13px;height:13px}
 .chip svg.ic{width:12px;height:12px;vertical-align:-1px}
 .seccard h4 svg.ic{color:var(--accent)}
+#scrimHelp{z-index:120}
+.hvideo[hidden],.hpassos[hidden],.hpassos details[hidden],.hint[hidden]{display:none!important}
+.hvideo{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:12px}
+.hvideo video{width:min(100%,400px);max-height:68vh;aspect-ratio:9/16;background:#000;border-radius:14px;box-shadow:var(--shadow)}
+.hchap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;font-size:13px;color:var(--muted)}
+.hchap button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-weight:600;font-size:13px}
+.hchap button:hover{border-color:var(--accent);color:var(--accent)}
+.hpassos{padding-top:12px}
+.hpassos input[type=search]{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);margin-bottom:10px}
+.hpassos details{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--surface)}
+.hpassos summary{cursor:pointer;padding:12px 14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+.hpassos summary::-webkit-details-marker{display:none}
+.hpassos summary::after{content:"＋";margin-left:auto;color:var(--muted)}
+.hpassos details[open] summary::after{content:"－"}
+.hpassos summary b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--navy);color:#fff;font-size:13px}
+.hpassos ol{margin:0;padding:0 18px 14px 44px;display:flex;flex-direction:column;gap:7px;line-height:1.5}
+.hpassos li.hide{display:none}
+.lfoot a{color:var(--accent);font-weight:600}
 .infobtn{border:1px solid var(--line);background:var(--surface);color:var(--accent);border-radius:999px;font:600 11.5px var(--f-body);padding:1px 8px;margin-left:6px;text-transform:none;letter-spacing:0;cursor:pointer}
 .clegenda{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:2px 0 8px;font-size:13px}
 .clegenda p{margin:4px 0}
@@ -606,6 +624,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
     <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
+    <button class="btn" id="btnHelp" type="button" title="Vídeo e passo a passo de como usar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span class="lbl"> Ajuda</span></button>
     <button class="btn" id="btnCad" type="button" title="Locais e endereços, resíduos, motoristas, repetições e segurança"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span class="lbl"> Cadastros</span></button>
   </div>
 </div>
@@ -863,6 +882,80 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     </div>
   </div>
 </div>
+<div class="scrim" id="scrimHelp" aria-hidden="true">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="hTitle">
+    <header><h2 id="hTitle">Ajuda · como usar a agenda</h2><button class="icon-btn" type="button" data-close="scrimHelp" aria-label="Fechar">✕</button></header>
+    <div class="tabs" role="tablist" id="hTabs">
+      <button type="button" role="tab" data-ht="video" aria-selected="true">▶ Vídeo (3 min)</button>
+      <button type="button" role="tab" data-ht="passos" aria-selected="false">Passo a passo</button>
+    </div>
+    <div class="mbody">
+      <div id="hVideo" class="hvideo">
+        <video id="hVid" controls playsinline preload="none" poster="capa-tutorial.jpg"><source src="tutorial.mp4" type="video/mp4"></video>
+        <div class="hchap"><span>Pular para:</span>
+          <button type="button" data-seek="11">1 · Entrar</button><button type="button" data-seek="34">2 · Criar a rota</button><button type="button" data-seek="80">3 · Dia a dia</button><button type="button" data-seek="109">4 · Buscar e cadastrar</button><button type="button" data-seek="137">5 · Mandar e exportar</button>
+        </div>
+        <p class="hint" id="hVidErr" hidden>O vídeo ainda não foi enviado para o site. Use o passo a passo ao lado.</p>
+      </div>
+      <div id="hPassos" class="hpassos" hidden>
+        <input type="search" id="hBusca" placeholder="Procurar na ajuda (ex.: MTR, cancelar, WhatsApp)" autocomplete="off">
+        <details open><summary><b>1</b> Entrar e instalar no celular</summary><ol>
+          <li>Abra <b>logistiscatrevo01.github.io/agenda</b> no computador ou no celular.</li>
+          <li>Digite o usuário <b>LogisticaTrevo</b> e a senha da equipe. Deixe marcado <b>Manter conectado</b> para não precisar entrar de novo por 30 dias.</li>
+          <li><b>iPhone:</b> no Safari, toque em <b>Compartilhar</b> → <b>Adicionar à Tela de Início</b>. <b>Android:</b> no Chrome, menu <b>⋮</b> → <b>Adicionar à tela inicial</b>. A agenda vira um ícone com o símbolo da Trevo.</li>
+          <li>Para sair de um aparelho, use o botão <b>Sair</b>, no topo.</li></ol></details>
+        <details><summary><b>2</b> Criar uma rota</summary><ol>
+          <li>Clique em <b>＋ Nova rota</b> (botão amarelo). No computador, também dá para clicar num horário vazio da agenda.</li>
+          <li>Escolha o caminhão: <b>Baú (verde)</b> ou <b>Poliguindaste (azul)</b>. Preencha data, início, fim, cliente e serviço.</li>
+          <li><b>Trajeto:</b> monte as paradas na ordem em que o caminhão passa (Saída, Coleta, Descarte, Retorno…). Os botões <b>Sair do Galpão Trevo</b> e <b>Voltar ao Galpão Trevo</b> já colocam o endereço do galpão.</li>
+          <li>Digitou o nome de um local já salvo? O endereço aparece sozinho. Para mudar a ordem, <b>segure a alça ⠿</b> e arraste (ou use as setas).</li>
+          <li><b>Resíduos:</b> coloque o tipo, a <b>classe</b> e a quantidade, um por linha. Passe o mouse na classe ou toque em <b>ⓘ Classes</b> para ver a explicação de cada uma.</li>
+          <li><b>MTR e anexos:</b> digite o nº do MTR e anexe fotos ou PDFs (MTR assinado, foto da caçamba…).</li>
+          <li><b>Repetir:</b> se a rota acontece sempre, escolha diariamente, dias úteis, semanalmente ou mensalmente. A tela mostra as próximas datas antes de salvar.</li>
+          <li>Clique em <b>Salvar</b>. Se o endereço, resíduo ou motorista for novo, a agenda pergunta se você quer guardar nos Cadastros.</li></ol></details>
+        <details><summary><b>3</b> Usar a agenda no dia a dia</summary><ol>
+          <li>Escolha a visão: <b>Semana</b>, <b>Dia</b> ou <b>Lista</b>. Use <b>Hoje</b>, ‹ › ou a data para navegar.</li>
+          <li><b>Mudar horário:</b> no computador, arraste o card; para esticar, puxe a borda de baixo. No celular, <b>segure o dedo</b> no card até ele ficar tracejado e arraste; para esticar, segure a <b>barrinha de baixo</b>.</li>
+          <li><b>Menu da rota:</b> botão direito (computador) ou segurar o dedo e soltar (celular). Nele você muda status, horário e caminhão, duplica, copia para o dia seguinte, manda no WhatsApp, abre o trajeto ou exclui.</li>
+          <li><b>Status:</b> fica automático pelo horário (Agendado → Em rota → Concluído). Você pode marcar manualmente. <b>Cancelado</b> fica em vermelho e continua salvo; para tirar de vez, use Excluir.</li>
+          <li>O <b>alfinete vermelho</b> abre no Google Maps o deslocamento entre uma rota e a próxima. O alfinete no nome do caminhão abre a rota do dia inteira.</li>
+          <li>Um aviso vermelho de <b>conflito</b> aparece quando duas rotas do mesmo caminhão caem no mesmo horário.</li>
+          <li>Errou? Use <b>Desfazer</b>, no aviso que aparece embaixo depois de cada mudança.</li></ol></details>
+        <details><summary><b>4</b> Buscar rotas e Lista de MTRs</summary><ol>
+          <li>Clique em <b>Buscar</b>. Digite cliente, resíduo, nº do MTR, motorista, endereço… A busca roda enquanto você digita, em <b>todas</b> as rotas.</li>
+          <li>Use os filtros (caminhão, tipo de parada, status, MTR, anexos, período) ou os atalhos: Saídas, Coletas, Descartes, Canceladas…</li>
+          <li>Clique num resultado para <b>abrir a rota</b>. O botão <b>Exportar resultado</b> gera um Excel.</li>
+          <li><b>Lista de MTRs:</b> mostra um MTR por linha, marca os <b>repetidos</b> e lista as <b>rotas concluídas sem MTR</b>, onde você digita o número e salva ali mesmo.</li></ol></details>
+        <details><summary><b>5</b> Cadastros (locais, resíduos, motoristas)</summary><ol>
+          <li>Clique em <b>Cadastros</b>. Nas abas você vê, procura, edita e exclui locais e endereços, resíduos (com classe), motoristas (com WhatsApp) e as rotas que se repetem.</li>
+          <li><b>Corrigiu um nome ou endereço?</b> A agenda corrige também em todas as rotas que usam aquele item.</li>
+          <li>Em "Nomes usados nas rotas e que não estão no cadastro", escolha o nome certo e clique em <b>Corrigir nas rotas</b> para arrumar erros de digitação antigos.</li>
+          <li>O endereço do <b>Galpão Trevo</b> fica no topo da aba Locais.</li></ol></details>
+        <details><summary><b>6</b> Mandar a rota no WhatsApp</summary><ol>
+          <li>Clique em <b>WhatsApp</b>, escolha <b>Hoje</b> ou <b>Amanhã</b> e o caminhão.</li>
+          <li>A mensagem já vem com horário, cliente, serviço, resíduos, MTR, cada parada com endereço e link do Maps, observações e as canceladas.</li>
+          <li>Dá para editar o texto. Depois, <b>Copiar</b>, <b>Abrir no WhatsApp</b> ou <b>Enviar para</b> o motorista (se o WhatsApp dele estiver no cadastro).</li>
+          <li>Para mandar só uma rota, use o botão WhatsApp dentro da rota ou no menu da rota.</li></ol></details>
+        <details><summary><b>7</b> Exportar para o Excel</summary><ol>
+          <li>Clique em <b>Exportar</b> e escolha o período (semana, mês, mês anterior ou datas) e o caminhão.</li>
+          <li>A planilha vem com a aba <b>Rotas</b> (uma linha por rota, com trajeto, resíduos, MTR e status) e a aba <b>Resumo</b> (por caminhão, cliente, resíduo e status).</li>
+          <li><b>Agenda completa:</b> baixa tudo o que está guardado (rotas, repetições, locais, resíduos, motoristas). Bom para guardar uma cópia por mês no computador.</li></ol></details>
+        <details><summary><b>8</b> Fechamento da semana do motorista</summary><ol>
+          <li>Clique em <b>Fechamento</b>, escolha a semana, o caminhão e o motorista.</li>
+          <li>A agenda conta as diárias. Confira o valor da diária e adicione reembolsos ou descontos.</li>
+          <li>Os dados de pagamento ficam guardados no cadastro do motorista.</li>
+          <li><b>Copiar e-mail</b> leva o texto com negrito para o Outlook; ou use <b>Abrir no programa de e-mail</b>.</li></ol></details>
+        <details><summary><b>9</b> Segurança, backup e dúvidas</summary><ol>
+          <li>Todo dia o sistema faz uma <b>cópia automática</b> da planilha no Google Drive (pasta "Agenda de Rotas – backups", as últimas 45). Em <b>Cadastros → Segurança e backup</b> dá para ver e fazer uma cópia na hora.</li>
+          <li>Se outra pessoa alterou a mesma rota ao mesmo tempo, a agenda avisa e não apaga a mudança dela. Confira e salve de novo.</li>
+          <li><b>A tela parece antiga?</b> Feche e abra a agenda (no computador, Ctrl+Shift+R). Ela se atualiza sozinha.</li>
+          <li><b>"Sessão terminou"</b>: entre de novo com usuário e senha. <b>"Muitas tentativas"</b>: espere 15 minutos naquele aparelho.</li>
+          <li>O site não expira: a página fica no GitHub e os dados no Google, sem custo e sem prazo.</li></ol></details>
+        <p class="hint" id="hNada" hidden>Nada encontrado. Tente outra palavra.</p>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="scrim" id="scrimSave" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="svTitle" style="width:min(560px,100%)">
     <header><h2 id="svTitle">Deseja salvar o endereço desse local?</h2></header>
@@ -883,7 +976,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <div class="fld"><label for="lPass">Senha</label><div class="pwwrap"><input id="lPass" type="password" autocomplete="current-password" required><button type="button" id="lShow">mostrar</button></div></div>
     <label class="lkeep"><input type="checkbox" id="lKeep" checked> Manter conectado neste aparelho (30 dias)</label>
     <button type="submit" class="btn primary" id="lGo">Entrar</button>
-    <div class="lfoot">Acesso restrito à equipe da Trevo Resíduos</div>
+    <div class="lfoot">Acesso restrito à equipe da Trevo Resíduos · <a href="#" id="lHelp">Como usar a agenda?</a></div>
   </form>
 </div>
 <datalist id="dlLoc"></datalist><datalist id="dlCli"></datalist><datalist id="dlDest"></datalist><datalist id="dlRes"></datalist><datalist id="dlMot"></datalist>
@@ -1692,9 +1785,9 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("#scrim"
 
 /* ---------- janelas auxiliares ---------- */
 function openModal(id){const m=$("#"+id);m.classList.add("open");m.setAttribute("aria-hidden","false")}
-function closeModal(id){const m=$("#"+id);m.classList.remove("open");m.setAttribute("aria-hidden","true");if(id==="scrimCad")CAD.open=false}
+function closeModal(id){const m=$("#"+id);m.classList.remove("open");m.setAttribute("aria-hidden","true");if(id==="scrimCad")CAD.open=false;if(id==="scrimHelp"){const v=$("#hVid");v&&v.pause()}}
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
-const AUX=["scrimSearch","scrimExport","scrimRoute","scrimCad","scrimWA","scrimFech"];
+const AUX=["scrimSearch","scrimExport","scrimRoute","scrimCad","scrimWA","scrimFech","scrimHelp"];
 AUX.forEach(id=>{$("#"+id).addEventListener("pointerdown",e=>{if(e.target.id===id)closeModal(id)})});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){AUX.forEach(id=>{if($("#"+id).classList.contains("open"))closeModal(id)});if($("#scrimSave").classList.contains("open"))$("#svNo").click()}});
 function flash(id){const el=document.querySelector('.ev[data-id="'+CSS.escape(id)+'"]');if(el){el.scrollIntoView({block:"center",inline:"center",behavior:"smooth"});el.animate([{transform:"scale(1)"},{transform:"scale(1.06)"},{transform:"scale(1)"}],{duration:500,iterations:2})}}
@@ -2261,6 +2354,22 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&CTX.id)ctxClose()})
 window.addEventListener("resize",()=>{if(CTX.id&&!$("#ctxMenu.sheet"))ctxClose()});
 $("#calScroll").addEventListener("scroll",()=>{if(CTX.id&&!$("#ctxMenu.sheet"))ctxClose()},{passive:true});
 
+/* ---------- Ajuda: vídeo e passo a passo ---------- */
+function openHelp(tab){openModal("scrimHelp");hTab(tab||"video")}
+function hTab(t){document.querySelectorAll("#hTabs [data-ht]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.ht===t)));$("#hVideo").hidden=t!=="video";$("#hPassos").hidden=t!=="passos";if(t!=="video")$("#hVid").pause()}
+$("#btnHelp").addEventListener("click",()=>openHelp());
+$("#lHelp").addEventListener("click",e=>{e.preventDefault();openHelp()});
+$("#hTabs").addEventListener("click",e=>{const b=e.target.closest("[data-ht]");if(b)hTab(b.dataset.ht)});
+document.querySelectorAll("[data-seek]").forEach(b=>b.addEventListener("click",()=>{const v=$("#hVid");v.currentTime=+b.dataset.seek;v.play().catch(()=>{})}));
+$("#hVid").addEventListener("error",()=>{$("#hVidErr").hidden=false},true);
+$("#hVid").querySelector("source").addEventListener("error",()=>{$("#hVidErr").hidden=false});
+$("#hBusca").addEventListener("input",()=>{const q=norm($("#hBusca").value);let n=0;
+  document.querySelectorAll("#hPassos details").forEach(d=>{let vis=0;d.querySelectorAll("li").forEach(li=>{const ok=!q||norm(li.textContent+" "+d.querySelector("summary").textContent).includes(q);li.classList.toggle("hide",!ok);if(ok)vis++});
+    d.hidden=!vis;if(q&&vis)d.open=true;n+=vis});$("#hNada").hidden=n>0});
+const _closeM=closeModal;
+/* primeira vez neste aparelho: lembra que existe a Ajuda */
+function dicaAjuda(){try{if(localStorage.getItem("agenda.dicaAjuda"))return;localStorage.setItem("agenda.dicaAjuda","1")}catch(e){return}setTimeout(()=>toast("Novo por aqui? Clique em Ajuda para ver o vídeo e o passo a passo."),1500)}
+
 /* ---------- Cadastros: locais, resíduos, motoristas, repetições e segurança ---------- */
 const CAD={open:false,tab:"locais",q:"",edit:null,confirm:null,info:null,overr:null};
 function usoN(g,nome){if(!S.uso)return null;const x=(S.uso[g]||{})[norm(nome)];return x?x.n:0}
@@ -2537,7 +2646,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.0";
+const VERSAO_TELA="6.1";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -2560,7 +2669,7 @@ async function startData(){
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.motCol.onSnapshot(snap=>{S.motoristas.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.motoristas.set(d.id,{nome:String(x.nome),caminhao:String(x.caminhao||""),telefone:String(x.telefone||""),pagamento:String(x.pagamento||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.cfgDoc.onSnapshot(d=>{S.cfg=d.exists?Object.assign({},d.data()||{}):{};S.patio=String(S.cfg.patio||"");render();if(CAD.open)renderCad();if(!S.cfgOk){S.cfgOk=true;seedV5()}},()=>{});
-  loadUso();
+  loadUso();dicaAjuda();
 }
 if(API.hasToken()){hideLogin();startData()}else showLogin("");
 })();
