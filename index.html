@@ -370,6 +370,8 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 #vPos{opacity:.7;font-size:14px}
 .vbody{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 56px 16px}
 .vbody img,.vbody video{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.vbody video{background:#000;width:min(100%,960px)}
+.vfail{color:#fff;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;max-width:420px;padding:20px}
 .vbody iframe{width:100%;height:100%;border:0;background:#fff;border-radius:6px}
 .vnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:30px}
 .vnav.prev{left:8px}.vnav.next{right:8px}
@@ -400,6 +402,8 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
   .lhmap{position:relative}
   .lhmap::after{content:"";position:absolute;inset:-9px}
 }
+.lfilt{margin:0 0 8px}.pill.ltipo.cliente{border-left-color:var(--brand,#241F59)}.pill.ltipo.destino{border-left-color:var(--accent,#FDB913)}.pill.ltipo.ambos{border-left-color:var(--ok)}
+.secwarn{color:#8a5a00;background:#fff1d6;border-radius:8px;padding:8px 10px;font-weight:600}
 /* ===== v5 ===== */
 .top .who{display:inline-flex;align-items:center;gap:8px;font-size:13px;opacity:.9}
 .top .who b{font-weight:600}
@@ -432,6 +436,16 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .resbox{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px}
 .resrows{display:flex;flex-direction:column;gap:6px}
 .resrow{display:grid;grid-template-columns:1fr 190px 170px auto;gap:6px;align-items:center}
+.rwrap{position:relative;min-width:0}.fld .resrow .rwrap input{padding-right:34px}
+.rlist{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:30px;height:28px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:14px;cursor:pointer}
+.rlist:hover{background:var(--hover,rgba(0,0,0,.06));color:var(--ink)}
+.respop{position:fixed;z-index:95;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.22);overflow:auto;padding:4px}
+.respop[hidden]{display:none}
+.ropt{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:14px}
+.ropt:hover,.ropt.on{background:var(--hover,rgba(36,31,89,.08))}
+.ropt small{font:600 11px var(--f-body);color:var(--muted);white-space:nowrap}.ropt small.c1{color:var(--danger)}
+.rhint{font-size:12px;color:var(--muted);padding:6px 10px}
+@media (pointer:coarse){.rlist{width:38px;height:36px}.ropt{padding:11px 10px}}
 #fhExtras .resrow{grid-template-columns:1fr 130px auto}
 .fld .resrow select{padding:7px 6px;border:1px solid var(--line);border-radius:7px;background:var(--surface);width:100%;min-width:0}
 .fld .resrow input{padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);width:100%;min-width:0}
@@ -869,7 +883,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="cTitle">
     <header><h2 id="cTitle">Cadastros</h2><button class="icon-btn" type="button" data-close="scrimCad" aria-label="Fechar">✕</button></header>
     <div class="tabs" role="tablist" id="cTabs">
-      <button type="button" role="tab" data-tab="locais" aria-selected="true"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Locais e endereços<span class="n" id="nLoc"></span></button>
+      <button type="button" role="tab" data-tab="locais" aria-selected="true"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Clientes e destinos<span class="n" id="nLoc"></span></button>
       <button type="button" role="tab" data-tab="residuos" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Resíduos<span class="n" id="nRes"></span></button>
       <button type="button" role="tab" data-tab="motoristas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Motoristas<span class="n" id="nMot"></span></button>
       <button type="button" role="tab" data-tab="series" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Repetições<span class="n" id="nSer"></span></button>
@@ -1258,7 +1272,7 @@ function lookupAddr(nome){const k=locKey(nome);const l=k&&S.locais.get(k);return
 async function rememberAddr(nome,endereco){
   const k=locKey(nome);if(!k||!endereco)return true;
   const cur=S.locais.get(k);
-  const body={nome:String(nome),endereco:String(endereco),obs:cur&&cur.obs||""};
+  const body={nome:String(nome),endereco:String(endereco),obs:cur&&cur.obs||"",tipo:cur&&cur.tipo||""};
   const id=cur&&cur._id||k;S.locais.set(k,Object.assign({_id:id},body));
   if(S.locCol){try{await S.locCol.doc(id).set(body)}catch(e){return writeErr(e)}}
   return true;
@@ -1597,6 +1611,7 @@ function fillLists(){
   for(const x of S.motoristas.values())if(x.nome)sets.mot.add(x.nome);
   if(S.uso)Object.values(S.uso.clientes||{}).forEach(x=>sets.cli.add(x.nome));
   const put=(id,s)=>{$(id).innerHTML=[...s].sort((a,b)=>a.localeCompare(b,"pt")).map(v=>'<option value="'+esc(v)+'">').join("")};
+  for(const l of S.locais.values()){if(!l.nome||l.nome==="Galpão Trevo")continue;if(l.tipo!=="destino")sets.cli.add(l.nome);if(l.tipo==="destino"||l.tipo==="ambos")sets.dest.add(l.nome)}
   const locs=new Set([...sets.cli,...sets.dest]);for(const l of S.locais.values())if(l.nome)locs.add(l.nome);
   put("#dlLoc",locs);put("#dlCli",sets.cli);put("#dlDest",sets.dest);put("#dlRes",sets.res);put("#dlMot",sets.mot);
 }
@@ -1636,7 +1651,7 @@ function fillMesModo(ds,modo){const sel=$("#fMesModo");if(!ds){sel.innerHTML="";
   sel.value=opts.includes(cur)?cur:"dia"}
 /* ---------- vários tipos de resíduo ---------- */
 function resRow(x){const d=document.createElement("div");d.className="resrow";
-  d.innerHTML='<input class="rtipo" list="dlRes" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo"><select class="rclasse" aria-label="Classe do resíduo">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'">'+c[1]+'</option>').join("")+'</select><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
+  d.innerHTML='<div class="rwrap"><input class="rtipo" autocomplete="off" placeholder="Tipo de resíduo (ex.: Borra oleosa)" aria-label="Tipo de resíduo" role="combobox" aria-expanded="false" aria-autocomplete="list"><button type="button" class="rlist" tabindex="-1" title="Ver os resíduos cadastrados" aria-label="Ver os resíduos cadastrados">▾</button></div><select class="rclasse" aria-label="Classe do resíduo">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'">'+c[1]+'</option>').join("")+'</select><input class="rqtd" autocomplete="off" placeholder="Qtd. (ex.: 2 tambores)" aria-label="Quantidade"><button type="button" class="rm" title="Remover">✕</button>';
   d.querySelector(".rtipo").value=x.tipo||"";d.querySelector(".rqtd").value=x.qtd||"";const sel=d.querySelector(".rclasse");sel.value=x.classe||"";sel.title=classeTip(sel.value);return d}
 const resCad=nome=>[...S.residuos].find(([,x])=>norm(x.nome)===norm(nome))||null;
 function setRes(list){const c=$("#fRes");c.innerHTML="";(list.length?list:[{tipo:"",qtd:""}]).forEach(x=>c.appendChild(resRow(x)))}
@@ -1644,6 +1659,34 @@ function getRes(){return[...document.querySelectorAll("#fRes .resrow")].map(r=>(
 /* ao escolher um resíduo do cadastro, a classe guardada vem junto */
 $("#fRes").addEventListener("input",e=>{if(!e.target.classList.contains("rtipo"))return;const row=e.target.closest(".resrow");const c=resCad(e.target.value.trim());const sel=row.querySelector(".rclasse");if(c&&c[1].classe&&(!sel.value||sel.dataset.auto)){sel.value=c[1].classe;sel.dataset.auto="1"}});
 $("#fRes").addEventListener("change",e=>{if(e.target.classList.contains("rclasse")){e.target.dataset.auto="";e.target.title=classeTip(e.target.value)}});
+/* lista de resíduos cadastrados (abre na setinha ▾ ou ao digitar) */
+const RP={inp:null,i:-1,items:[]};
+function resOpts(q){const base=S.residuos.size?[...S.residuos.values()].map(x=>({nome:x.nome,classe:x.classe||""})):RES_DEF.map(n=>({nome:n,classe:""}));
+  const k=norm(q||"");return base.filter(x=>x.nome&&(!k||norm(x.nome).includes(k))).sort((a,b)=>{const pa=norm(a.nome).startsWith(k)?0:1,pb=norm(b.nome).startsWith(k)?0:1;return pa-pb||a.nome.localeCompare(b.nome,"pt")})}
+function resPopClose(){const p=$("#resPop");if(p){p.hidden=true}if(RP.inp)RP.inp.setAttribute("aria-expanded","false");RP.inp=null;RP.i=-1}
+function resPopOpen(inp,all){let p=$("#resPop");if(!p){p=document.createElement("div");p.id="resPop";p.className="respop";p.setAttribute("role","listbox");document.body.appendChild(p);
+    p.addEventListener("mousedown",e=>e.preventDefault());
+    p.addEventListener("click",e=>{const o=e.target.closest("[data-i]");if(o)resPick(+o.dataset.i)})}
+  RP.inp=inp;RP.items=resOpts(all?"":inp.value);RP.i=-1;
+  if(!RP.items.length){p.hidden=true;inp.setAttribute("aria-expanded","false");return}
+  p.innerHTML=RP.items.map((x,i)=>'<div class="ropt" role="option" data-i="'+i+'"><span>'+esc(x.nome)+'</span>'+(x.classe?'<small class="'+(x.classe==="Classe I"?"c1":"")+'">'+esc(x.classe)+'</small>':'')+'</div>').join("")+
+    (S.residuos.size?'':'<div class="rhint">Cadastre os resíduos em Cadastros → Resíduos</div>');
+  const r=inp.getBoundingClientRect();const below=innerHeight-r.bottom;p.style.left=Math.max(8,r.left)+"px";p.style.width=Math.max(r.width+34,220)+"px";
+  if(below<220&&r.top>below){p.style.top="";p.style.bottom=(innerHeight-r.top+4)+"px";p.style.maxHeight=Math.min(300,r.top-12)+"px"}else{p.style.bottom="";p.style.top=(r.bottom+4)+"px";p.style.maxHeight=Math.min(300,below-12)+"px"}
+  p.hidden=false;inp.setAttribute("aria-expanded","true")}
+function resPick(i){const x=RP.items[i],inp=RP.inp;if(!x||!inp)return;inp.value=x.nome;const sel=inp.closest(".resrow").querySelector(".rclasse");
+  if(x.classe){sel.value=x.classe;sel.dataset.auto="1";sel.title=classeTip(x.classe)}resPopClose();const q=inp.closest(".resrow").querySelector(".rqtd");q&&q.focus()}
+function resHi(d){const p=$("#resPop");if(!p||p.hidden)return;RP.i=Math.max(0,Math.min(RP.items.length-1,RP.i+d));p.querySelectorAll(".ropt").forEach((o,k)=>o.classList.toggle("on",k===RP.i));const on=p.querySelector(".ropt.on");on&&on.scrollIntoView({block:"nearest"})}
+$("#fRes").addEventListener("click",e=>{const b=e.target.closest(".rlist");if(!b)return;const inp=b.parentElement.querySelector(".rtipo");
+  if(RP.inp===inp&&!$("#resPop").hidden){resPopClose();return}inp.focus();resPopOpen(inp,true)});
+$("#fRes").addEventListener("input",e=>{if(e.target.classList.contains("rtipo"))resPopOpen(e.target,false)});
+$("#fRes").addEventListener("keydown",e=>{if(!e.target.classList.contains("rtipo"))return;const open=$("#resPop")&&!$("#resPop").hidden&&RP.inp===e.target;
+  if(e.key==="ArrowDown"){e.preventDefault();if(!open)resPopOpen(e.target,true);else resHi(1)}
+  else if(e.key==="ArrowUp"&&open){e.preventDefault();resHi(-1)}
+  else if(e.key==="Enter"&&open&&RP.i>=0){e.preventDefault();resPick(RP.i)}
+  else if(e.key==="Escape"&&open){e.preventDefault();e.stopPropagation();resPopClose()}});
+$("#fRes").addEventListener("focusout",e=>{if(e.target.classList.contains("rtipo"))setTimeout(()=>{if(RP.inp===e.target&&document.activeElement!==e.target)resPopClose()},120)});
+document.addEventListener("scroll",e=>{if(RP.inp&&!(e.target&&e.target.id==="resPop"))resPopClose()},true);
 $("#resInfo").addEventListener("click",()=>{const b=$("#resLeg");b.hidden=!b.hidden;if(!b.innerHTML)b.innerHTML=classeLegenda()});
 $("#addRes").addEventListener("click",()=>{const r=resRow({});$("#fRes").appendChild(r);r.querySelector(".rtipo").focus()});
 $("#fRes").addEventListener("click",e=>{const b=e.target.closest(".rm");if(!b)return;const row=b.closest(".resrow");
@@ -1795,9 +1838,7 @@ $("#form").addEventListener("submit",async e=>{
   const novos=cadastroPendente(f);
   let ok=false,msg="Rota salva",snaps=[];
   if(sm){const s0=S.series.get(cur.sid);const novo=serieBody(f,rec,s0?s0.excluidas:[]);msg="Repetição atualizada";const cd=cur.kind==="series"?null:cur.date;
-    if(s0&&mesmaRegra(s0,novo)){ok=await mudarSerie(cur.sid,cd,novo,snaps);if(ok&&snaps.length&&snaps[0].prev===null)msg="Repetição atualizada daqui para frente (o que já passou ficou como estava)"}
-    else{snaps=[snapDoc("series",cur.sid)];ok=await put("series",cur.sid,novo);
-      if(ok&&s0){const hj=iso(new Date());ok=await levarParaExcecoes(cur.sid,cd&&cd<hj?cd:hj,diffSerie(s0,novo),snaps)}}}
+    ok=await mudarSerie(cur.sid,cd,novo,snaps);if(ok&&snaps.some(x=>x.kind==="series"&&x.id!==cur.sid))msg="Repetição atualizada daqui para frente (o que já passou ficou como estava)"}
   else if(recOn&&(cur.kind==="new"||cur.kind==="rota")){
     const sid=newId(S.serCol);snaps=[snapDoc("series",sid)];if(cur.kind==="rota")snaps.push(snapDoc("rotas",cur.id));
     ok=await put("series",sid,serieBody(f,rec,[]));
@@ -1886,6 +1927,7 @@ function goTo(ds,id){S.anchor=parseIso(ds);S.view="dia";S._scrolled=false;subscr
 const blobUrl=id=>"https://lh3.googleusercontent.com/d/"+encodeURIComponent(id)+"=w400";
 const driveView=id=>"https://drive.google.com/file/d/"+encodeURIComponent(id)+"/view";
 const drivePrev=id=>"https://drive.google.com/file/d/"+encodeURIComponent(id)+"/preview";
+const driveRaw=id=>"https://drive.usercontent.google.com/download?id="+encodeURIComponent(id)+"&export=download";
 const isImg=a=>/^image\//.test(a.tipo),isPdf=a=>a.tipo==="application/pdf",isVid=a=>/^video\//.test(a.tipo);
 function renderAnexos(){
   const box=$("#fAnx");if(!box||!E)return;const list=E.anexos||[];
@@ -1934,7 +1976,12 @@ function openViewer(list,i){V={list,i};showView();$("#viewer").classList.add("op
 function closeViewer(){$("#viewer").classList.remove("open");$("#viewer").setAttribute("aria-hidden","true");$("#vBody").innerHTML=""}
 function showView(){const a=V.list[V.i];if(!a)return closeViewer();
   $("#vName").textContent=a.nome;$("#vPos").textContent=V.list.length>1?(V.i+1)+" de "+V.list.length:"";$("#vOpen").href=driveView(a.id);
-  $("#vBody").innerHTML=isImg(a)?'<img src="'+esc("https://lh3.googleusercontent.com/d/"+encodeURIComponent(a.id)+"=w2000")+'" alt="'+esc(a.nome)+'">':'<iframe src="'+esc(drivePrev(a.id))+'" title="'+esc(a.nome)+'" allow="autoplay"></iframe>';
+  const ifr='<iframe src="'+esc(drivePrev(a.id))+'" title="'+esc(a.nome)+'" allow="autoplay"></iframe>';
+  /* vídeo: toca direto do arquivo (a prévia do Drive demora para "processar" vídeos novos) */
+  $("#vBody").innerHTML=isImg(a)?'<img src="'+esc("https://lh3.googleusercontent.com/d/"+encodeURIComponent(a.id)+"=w2000")+'" alt="'+esc(a.nome)+'">':
+    isVid(a)?'<video controls playsinline preload="metadata" src="'+esc(driveRaw(a.id))+'"></video>':ifr;
+  const vv=$("#vBody video");if(vv)vv.addEventListener("error",()=>{if(V.list[V.i]!==a)return;
+    $("#vBody").innerHTML='<div class="vfail"><p>Este vídeo não abriu aqui. Use <b>Abrir original</b> no alto ou baixe o arquivo.</p><a class="btn" href="'+esc(driveRaw(a.id))+'" download>'+ic("download")+' Baixar vídeo</a></div>'},{once:true});
   $("#vPrev").hidden=$("#vNext").hidden=V.list.length<2}
 $("#vClose").addEventListener("click",closeViewer);
 $("#vPrev").addEventListener("click",()=>{V.i=(V.i-1+V.list.length)%V.list.length;showView()});
@@ -2350,19 +2397,20 @@ function fhRoutes(){const tk=picked("#fhTruck"),mot=$("#fhMot").value;
   return FH.rotas.filter(r=>active(r)&&r.caminhao===tk&&(!mot||!r.motorista||norm(r.motorista)===norm(mot)))}
 function fhBuild(reset){
   const rs=fhRoutes();const dias=[...new Set(rs.map(r=>r.data))].sort();
-  if(reset){$("#fhDias").value=dias.length;const mo=fhMotObj();$("#fhPag").value=mo&&mo[1].pagamento||""}
+  if(reset){$("#fhDias").value=dias.length;const mo=fhMotObj();$("#fhPag").value=mo&&mo[1].pagamento||(mo?"CPF: \nNome do Banco: \nNome Completo: "+mo[1].nome+"\nDados para o pix: ":"")}
   $("#fhDiasHint").textContent=dias.length+" dia(s) com rota nesta semana";
   const nd=Math.max(0,parseInt($("#fhDias").value,10)||0),val=parseFloat($("#fhValor").value)||0,ex=fhExtras();
   const tot=nd*val+ex.reduce((a,x)=>a+x.valor,0);$("#fhTot").innerHTML="Total: <b>"+brl(tot)+"</b>";
   const tk=picked("#fhTruck");const d0=dias[0]||FH.week,d1=dias[dias.length-1]||iso(addDays(parseIso(FH.week),4));
-  $("#fhAssunto").value="Pagamento Motorista Diarista semana dia "+ddmm(parseIso(d0))+" a "+ddmmyy(d1);
-  let t="Bom dia! Segue e-mail para pagamento do Motorista - "+tk+"\n\nDados para pagamento:\n\n";
-  ex.forEach(x=>{t+="**"+(x.valor<0?"Descontar ":"Depositar ")+brl(Math.abs(x.valor))+(x.desc?", "+x.desc:"")+"**\n\n"});
+  const mot=$("#fhMot").value.trim(),pn=mot.split(/\s+/)[0]||"";
+  $("#fhAssunto").value="Pagamento Motorista Diarista"+(pn?" - "+pn:"")+" semana dia "+ddmm(parseIso(d0))+" a "+ddmmyy(d1);
+  let t="Bom dia! Segue e-mail para pagamento do Motorista - "+tk+(pn?", "+pn:"")+"\n\nDados para pagamento:\n\n";
+  const reais=v=>{v=Math.abs(v);return(Number.isInteger(v)?String(v):v.toFixed(2).replace(".",","))+" reais"};
+  ex.forEach(x=>{t+="**"+(x.valor<0?"Descontar ":"Depositar ")+reais(x.valor)+(x.desc?", "+x.desc:"")+"**\n\n"});
   t+="**Valor a creditar "+nd+" diária"+(nd===1?"":"s")+" a "+brl(val)+" = "+brl(nd*val)+"**\n\n**TOTAL = "+brl(tot)+"**\n\n";
   if($("#fhPag").value.trim())t+=$("#fhPag").value.trim()+"\n\n";
   dias.forEach(ds=>{t+="Visitas nos clientes em "+ddmmyy(ds)+":\n\n";
-    rs.filter(r=>r.data===ds).forEach(r=>{let l=(r.cliente||r.servico)+(r.cliente&&r.servico?" – "+r.servico:"");
-      if(r.destino&&!norm(l).includes(norm(r.destino)))l+=", descarte na "+r.destino;t+=l+"\n"});t+="\n"});
+    rs.filter(r=>r.data===ds).sort((a,b)=>(a.ini||"").localeCompare(b.ini||"")).forEach(r=>{t+=(r.cliente||r.servico)+(r.cliente&&r.servico?" – "+r.servico:"")+"\n"});t+="\n"});
   if(!dias.length)t+="(nenhuma rota deste caminhão/motorista na semana)\n";
   $("#fhTxt").value=t.trim();fhLinks();$("#fhInfo").textContent="";
 }
@@ -2441,31 +2489,30 @@ async function levarParaExcecoes(sid,desde,diff,sn,novoSid){
   return ok}
 /* A partir de que dia a mudança vale. Os dias que já passaram não podem mudar (histórico, fechamento do motorista):
    se a repetição já tem dias no passado, ela é encerrada ontem e uma cópia com a mudança começa na próxima data. */
-function pontoDeCorte(s,cardDate){
+function pontoDeCorte(s,novo,cardDate){
   const hoje=iso(new Date());const base=cardDate&&cardDate<hoje?cardDate:hoje;
-  if(base<=s.inicio)return{base,P:null};
-  const livre=Object.assign({},s,{excluidas:[]});let antes=0;
-  for(let d=parseIso(s.inicio),i=0;i<4000&&iso(d)<base;i++,d=addDays(d,1))if(occurs(livre,iso(d)))antes++;
-  if(!antes)return{base,P:null};
-  let P=null;for(let d=parseIso(base),i=0;i<800;i++,d=addDays(d,1))if(occurs(livre,iso(d))){P=iso(d);break}
-  if(P&&s.freq==="mensal"&&s.mensalModo==="dia"&&parseIso(s.inicio).getDate()!==parseIso(P).getDate())P=null;
+  const velha=Object.assign({},s,{excluidas:[]});let antes=0;
+  if(base>s.inicio)for(let d=parseIso(s.inicio),i=0;i<4000&&iso(d)<base;i++,d=addDays(d,1))if(occurs(velha,iso(d)))antes++;
+  if(!antes)return{base,P:null,antes:0};
+  const nv=Object.assign({},novo,{excluidas:[]});const de=novo.inicio>base?novo.inicio:base;let P=null;
+  for(let d=parseIso(de),i=0;i<800;i++,d=addDays(d,1))if(occurs(nv,iso(d))){P=iso(d);break}
+  if(P&&novo.freq==="mensal"&&novo.mensalModo==="dia"&&parseIso(novo.inicio).getDate()!==parseIso(P).getDate())P=null;
   return{base,P,antes}}
+/* muda a repetição sem mexer nos dias que já passaram:
+   - ainda não teve nenhum dia: muda no lugar
+   - já teve dias: a antiga termina ontem e uma cópia com a mudança começa no próximo dia que ela cai */
 async function mudarSerie(sid,cardDate,novo,sn){
-  const s=S.series.get(sid);if(!s)return false;const diff=diffSerie(s,novo);const c=pontoDeCorte(s,cardDate);
-  if(!c.P){sn.push(snapDoc("series",sid));let ok=await put("series",sid,novo);if(ok)ok=await levarParaExcecoes(sid,c.base,diff,sn);return ok}
+  const s=S.series.get(sid);if(!s)return false;const diff=diffSerie(s,novo);const c=pontoDeCorte(s,novo,cardDate);
+  if(!c.antes){sn.push(snapDoc("series",sid));let ok=await put("series",sid,novo);if(ok)ok=await levarParaExcecoes(sid,c.base,diff,sn);return ok}
+  const fim=iso(addDays(parseIso(c.base),-1));
+  if(!c.P){sn.push(snapDoc("series",sid));return put("series",sid,Object.assign({},s,{fimTipo:"data",ate:fim,excluidas:s.excluidas.filter(x=>x<=fim)}))}
   const nid=newId(S.serCol);sn.push({kind:"series",id:nid,prev:null},snapDoc("series",sid));
-  const nova=Object.assign({},novo,{inicio:c.P,excluidas:s.excluidas.filter(x=>x>=c.P)});
-  if(s.fimTipo==="qtd")nova.qtd=Math.max(1,s.qtd-c.antes);
+  const nova=Object.assign({},novo,{inicio:c.P,excluidas:(novo.excluidas||[]).filter(x=>x>=c.P)});
+  if(novo.fimTipo==="qtd")nova.qtd=Math.max(1,(novo.qtd||s.qtd)-c.antes);
   let ok=await put("series",nid,nova);
-  if(ok)ok=await put("series",sid,Object.assign({},s,{fimTipo:"data",ate:iso(addDays(parseIso(c.P),-1)),excluidas:s.excluidas.filter(x=>x<c.P)}));
-  if(ok)ok=await levarParaExcecoes(sid,c.P,diff,sn,nid);
+  if(ok)ok=await put("series",sid,Object.assign({},s,{fimTipo:"data",ate:fim,excluidas:s.excluidas.filter(x=>x<=fim)}));
+  if(ok)ok=await levarParaExcecoes(sid,c.base,diff,sn,nid);
   return ok}
-const mesmaRegra=(a,b)=>{const eq=k=>String(a[k]==null?"":a[k])===String(b[k]==null?"":b[k]);
-  if(!["inicio","freq","fimTipo"].every(eq))return false;
-  if(a.freq!=="uteis"&&(a.intervalo||1)!==(b.intervalo||1))return false;
-  if(a.freq==="mensal"&&!eq("mensalModo"))return false;
-  if(a.freq==="semanal"&&String((a.dias||[]).slice().sort())!==String((b.dias||[]).slice().sort()))return false;
-  if(a.fimTipo==="data"&&!eq("ate"))return false;if(a.fimTipo==="qtd"&&!eq("qtd"))return false;return true};
 /* aplica a mudança na repetição inteira (e também neste dia, se ele já tinha sido alterado à mão) */
 async function applyToSeries(r,changes,id,msg){
   const s=S.series.get(r.serie);const ch={};["ini","fim","caminhao"].forEach(k=>{if(changes[k]!=null)ch[k]=changes[k]});
@@ -2539,11 +2586,11 @@ async function cadDel(col,id){
   const map=col==="residuos"?S.residuos:S.motoristas;const c=col==="residuos"?S.resCol:S.motCol;
   map.delete(id);fillLists();if(CAD.open)renderCad();try{await c.doc(id).delete();return true}catch(e){return writeErr(e)}
 }
-async function saveLocal(oldId,nome,endereco,obs){
+async function saveLocal(oldId,nome,endereco,obs,tipo){
   const k=locKey(nome);if(!k){toast("Informe o nome do local");return false}
   const ex=S.locais.get(k);if(ex&&ex._id!==oldId){toast("Já existe um local com esse nome");return false}
   const old=oldId?[...S.locais].find(([,x])=>x._id===oldId):null;
-  const body={nome,endereco,obs};
+  const body={nome,endereco,obs,tipo:tipo||(old&&old[1].tipo)||""};
   const sameKey=old&&old[0]===k;const id=sameKey?oldId:(ex?ex._id:k);
   if(old)S.locais.delete(old[0]);S.locais.set(k,Object.assign({_id:id},body));renderCad();
   try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
@@ -2558,6 +2605,12 @@ async function loadOverr(){const ids=[...S.series.keys()];if(!ids.length){CAD.ov
 const actBtns=(id,extra)=>(extra||"")+'<button type="button" class="btn sm" data-act="edit" data-id="'+esc(id)+'">'+ic("edit")+' Editar</button> '+
   (CAD.confirm===id?'<button type="button" class="btn sm danger" data-act="del" data-id="'+esc(id)+'">Confirmar exclusão</button> <button type="button" class="btn sm ghost" data-act="nodel">Não</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(id)+'" title="Excluir">'+ic("trash")+'</button>');
 const editBtns='<button type="button" class="btn sm primary" data-act="save">Salvar</button> <button type="button" class="btn sm ghost" data-act="cancel">Cancelar</button>';
+const LOC_TIPOS=[["cliente","Cliente"],["destino","Destino"],["ambos","Cliente e destino"]];
+function locTipo(x){if(x.tipo)return x.tipo;const c=usoN("clientes",x.nome)||0,d=usoN("destinos",x.nome)||0;return c&&d?"ambos":d?"destino":"cliente"}
+function locTipoHtml(t){return'<span class="pill ltipo '+t+'">'+(LOC_TIPOS.find(x=>x[0]===t)||["",""])[1]+'</span>'}
+function locUso(nome){if(!S.uso)return'<span class="uso">…</span>';const c=usoN("clientes",nome)||0,d=usoN("destinos",nome)||0,l=usoN("locais",nome)||0;
+  const p=[];if(c)p.push("<b>"+c+"</b> como cliente");if(d)p.push("<b>"+d+"</b> como destino");if(l&&!c&&!d)p.push("<b>"+l+"</b> no trajeto");
+  return'<span class="uso">'+(p.join(" · ")||"nenhuma")+'</span>'}
 function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm));return Object.values(S.uso[g]||{}).filter(x=>!k.has(norm(x.nome))&&x.nome!=="Galpão Trevo").sort((a,b)=>b.n-a.n)}
 function renderCad(){
   if(!CAD.open)return;
@@ -2567,24 +2620,28 @@ function renderCad(){
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
   if(CAD.tab==="locais"){
     h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
-    h+=bar("Procurar local ou endereço","Novo local");
-    const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
-    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local"></td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
-    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
-    const sc=semCadastro("locais",list.map(x=>x.nome));
-    h+=fixHtml("local",sc,list.map(x=>x.nome),"Locais usados nas rotas e ainda sem cadastro");
-    h+='<p class="cnote">Os endereços salvos aqui aparecem sozinhos quando você digita o nome do local no trajeto. Um endereço novo só é guardado quando você confirma.</p>';
+    h+=bar("Procurar cliente, destino ou endereço","Novo cliente ou destino");
+    const lf=CAD.lf||"";h+='<div class="seg lfilt" role="group" aria-label="Mostrar">'+[["","Todos"],["cliente","Clientes"],["destino","Destinos"]].map(([v,t])=>'<button type="button" data-act="lf" data-v="'+v+'" aria-pressed="'+(lf===v)+'">'+t+'</button>').join("")+'</div>';
+    const all=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
+    const list=all.filter(x=>{const t=locTipo(x);return!lf||t===lf||t==="ambos"});
+    const tsel=v=>'<select id="eTipo">'+LOC_TIPOS.map(([k,t])=>'<option value="'+k+'"'+(k===v?" selected":"")+'>'+t+'</option>').join("")+'</select>';
+    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:(ed.nome||""))+'" placeholder="Nome do cliente ou destino"></td><td>'+tsel(x?locTipo(x):(ed.tipo||"cliente"))+'</td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?locUso(x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td data-l="Tipo">'+locTipoHtml(locTipo(x))+'</td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+locUso(x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
+    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Nome</th><th>Tipo</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum '+(lf==="destino"?"destino":lf==="cliente"?"cliente":"cliente ou destino")+' salvo ainda.</p>')+'</div>';
+    const known=all.map(x=>x.nome);const kk=new Set(known.map(norm).concat(["galpao trevo"]));const sc=new Map();
+    ["clientes","destinos","locais"].forEach(g=>Object.values(S.uso&&S.uso[g]||{}).forEach(x=>{const k=norm(x.nome);if(kk.has(k))return;const o=sc.get(k)||{nome:x.nome,n:0,g:new Set()};o.n=Math.max(o.n,x.n);o.g.add(g);sc.set(k,o)}));
+    h+=fixHtml("local",[...sc.values()].sort((a,b)=>b.n-a.n),known,"Clientes e destinos usados nas rotas e ainda sem cadastro");
+    h+='<p class="cnote">Corrigir o nome aqui corrige também o <b>cliente</b>, o <b>destino</b> e o <b>trajeto</b> de todas as rotas e repetições que usam esse nome. Os endereços salvos aparecem sozinhos quando você digita o nome no trajeto.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
     const csel=v=>'<select id="eCla" title="'+esc(classeTip(v))+'">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'"'+(c[0]===v?" selected":"")+'>'+(c[0]?c[1]:"—")+'</option>').join("")+'</select>';
-    const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td>'+csel(x?x.classe:"")+'</td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: perigoso, tambores de 200 L"></td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
-    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
+    const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td>'+csel(x?x.classe:"")+'</td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td data-l="Usado em">'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
+    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
     const sc=semCadastro("residuos",list.map(([,x])=>x.nome));
     h+=fixHtml("residuo",sc,list.map(([,x])=>x.nome),"Resíduos usados nas rotas e ainda sem cadastro");
-    h+='<p class="cnote">Corrigir o nome ou a classe aqui corrige também todas as rotas que usam esse resíduo. Excluir só tira das sugestões: as rotas continuam iguais.</p><details class="cnote"><summary>ⓘ O que é cada classe?</summary>'+classeLegenda()+'</details>';
+    h+='<p class="cnote">Aqui fica só o nome e a classe. A quantidade (caçamba, bombonas, tambores…) é preenchida em cada rota, porque muda de uma coleta para outra. Corrigir o nome ou a classe aqui corrige também todas as rotas que usam esse resíduo. Excluir só tira das sugestões: as rotas continuam iguais.</p><details class="cnote"><summary>ⓘ O que é cada classe?</summary>'+classeLegenda()+'</details>';
   }else if(CAD.tab==="motoristas"){
     h+=bar("Procurar motorista","Novo motorista");
     const list=[...S.motoristas].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
@@ -2616,7 +2673,8 @@ function renderCad(){
     if(!I)h+='<div class="seccard"><h4>Verificando…</h4><p>Consultando o Google.</p></div>';
     else if(I.erro)h+='<div class="seccard"><h4>Não foi possível verificar</h4><p>'+esc(I.erro)+'</p></div>';
     else h+='<div class="seccard"><h4>'+ic("save")+' Backup automático</h4><p class="big">'+(I.ultimoBackup?esc(I.ultimoBackup):"ainda não feito")+'</p><p>'+I.backups+' cópia(s) guardada(s) na pasta “Agenda de Rotas – backups” do Google Drive. Uma por dia, as últimas '+I.guardados+'.</p></div>'+
-      '<div class="seccard"><h4>'+ic("database")+' Seus dados</h4><p class="big">'+I.rotas+' rotas</p><p>Guardadas na planilha “Agenda de Rotas – dados” do Google Drive, com histórico de versões.</p></div>';
+      '<div class="seccard"><h4>'+ic("database")+' Seus dados</h4><p class="big">'+I.rotas+' rotas</p><p>Guardadas na planilha “Agenda de Rotas – dados” do Google Drive, com histórico de versões.</p>'+
+      (I.rotas>=4000?'<p class="secwarn">A agenda está perto do limite em que fica mais lenta (cerca de 5.000 rotas). Peça para arquivar as rotas com mais de 1 ano.</p>':'<p>A agenda continua rápida até cerca de 5.000 rotas guardadas (as repetições não contam). Perto disso, as rotas com mais de 1 ano vão para um arquivo.</p>')+'</div>';
     h+='<div class="seccard"><h4>'+ic("lock")+' Acesso</h4><p class="secok">Só entra quem tem usuário e senha.</p><p>A senha é conferida no Google, não fica escrita no site. Cada aparelho fica conectado por até 30 dias.</p></div>'+
       '<div class="seccard"><h4>'+ic("clock")+' O site expira?</h4><p class="secok">Não.</p><p>GitHub Pages e Google Apps Script são gratuitos e sem prazo. O que precisa de cuidado é a conta Google da logística: deixe a verificação em duas etapas ligada.</p></div></div>';
     h+='<div class="secbtns"><button type="button" class="btn primary" data-act="backup">'+ic("save")+' Fazer backup agora</button><button type="button" class="btn" data-act="full">'+ic("download")+' Baixar agenda completa (Excel)</button><button type="button" class="btn" data-act="logout">Sair deste aparelho</button></div>';
@@ -2632,14 +2690,23 @@ function fixHtml(g,sc,nomes,titulo){if(!sc.length)return"";
     sc.slice(0,40).map(x=>'<div class="fixrow"><b>'+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><select aria-label="Nome certo">'+opts+'</select><button type="button" class="btn sm primary" data-act="fix" data-g="'+g+'" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ Cadastrar</button></div>').join("")}
 /* corrige o nome (e o que mudou) em todas as rotas e repetições */
 async function propagar(tipo,de,para,ex){
-  try{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);if(r&&r.alteradas)toast("Corrigido também em "+r.alteradas+" rota(s)");API.refresh();loadUso();return true}
+  try{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);let n=r&&r.alteradas||0;
+    if(tipo==="local"&&de!==para)n+=await clienteAntigo(de,para);
+    if(n)toast("Corrigido também em "+n+" rota(s)");API.refresh();loadUso();return true}
   catch(e){if(e&&e.code==="invalid_request")toast("Atualize o Code.gs no Google para corrigir as rotas automaticamente");else writeErr(e);return false}}
+/* o Code.gs antigo (antes da 6.9) não troca o nome do cliente: a tela faz isso por ele */
+async function clienteAntigo(de,para){let v=0;try{const p=await API.call("ping",[]);v=p&&p.versao||0}catch(e){}if(v>=6)return 0;
+  let n=0;const k=norm(de);
+  try{const g=await S.col.get();for(const d of g.docs){if(!d.exists)continue;const r=clean(d.data());if(norm(r.cliente)===k&&r.cliente!==para){S.rotas.set(d.id,r);if(await put("rotas",d.id,Object.assign({},r,{cliente:para})))n++}}}catch(e){}
+  for(const[id,s]of [...S.series])if(norm(s.cliente)===k&&s.cliente!==para){if(await put("series",id,Object.assign({},s,{cliente:para})))n++}
+  return n}
 function filterCad(){const k=norm(CAD.q);document.querySelectorAll("#cBody tr[data-k]").forEach(tr=>{tr.hidden=!!k&&!tr.dataset.k.includes(k)})}
 $("#cBody").addEventListener("keydown",e=>{if(!e.target.closest("[data-edit]"))return;if(e.key==="Enter"){e.preventDefault();$("#cBody [data-act=save]").click()}else if(e.key==="Escape"){e.stopPropagation();CAD.edit=null;renderCad()}});
 $("#cBody").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;const tab=CAD.tab;
   if(a==="patio"){openPatio();return}
-  if(a==="new"){CAD.edit={id:""};CAD.confirm=null;renderCad();return}
+  if(a==="new"){CAD.edit={id:"",tipo:CAD.lf||"cliente"};CAD.confirm=null;renderCad();return}
+  if(a==="lf"){CAD.lf=b.dataset.v;CAD.edit=null;renderCad();return}
   if(a==="edit"){CAD.edit={id};CAD.confirm=null;renderCad();return}
   if(a==="cancel"){CAD.edit=null;renderCad();return}
   if(a==="ask"){CAD.confirm=id;renderCad();return}
@@ -2650,16 +2717,16 @@ $("#cBody").addEventListener("click",async e=>{
     if(g==="local"){const l=S.locais.get(locKey(para));if(l&&l.endereco)ex={enderecoDe:"",enderecoPara:l.endereco}}
     if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
     await propagar(g,b.dataset.de,para,ex);return}
-  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
+  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome,tipo:(usoN("destinos",b.dataset.nome)&&!usoN("clientes",b.dataset.nome))?"destino":"cliente"};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
     const nome=($("#eNome").value||"").trim();if(!nome){toast("Informe o nome");$("#eNome").focus();return}
     const eid=CAD.edit&&CAD.edit.id;let ok;
     if(tab==="locais"){const old=eid?[...S.locais.values()].find(x=>x._id===eid):null;const end=($("#eEnd").value||"").trim();
-      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim());
+      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim(),$("#eTipo")?$("#eTipo").value:"");
       if(ok&&old&&(old.nome!==nome||old.endereco!==end))await propagar("local",old.nome,nome,old.endereco!==end?{enderecoDe:old.endereco,enderecoPara:end}:{})}
     else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}const old=eid&&S.residuos.get(eid)?Object.assign({},S.residuos.get(eid)):null;const cla=$("#eCla").value;
-      ok=await cadSet("residuos",eid||null,Object.assign({},old||{},{nome,obs:($("#eObs").value||"").trim(),classe:cla}));
+      ok=await cadSet("residuos",eid||null,Object.assign({},old||{},{nome,classe:cla}));
       if(ok&&old&&(old.nome!==nome||(old.classe||"")!==cla))await propagar("residuo",old.nome,nome,(old.classe||"")!==cla?{classe:cla}:{})}
     else{const dup=[...S.motoristas].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse motorista já existe");return}const old=eid&&S.motoristas.get(eid)?Object.assign({},S.motoristas.get(eid)):null;
       ok=await cadSet("motoristas",eid||null,Object.assign({},old||{},{nome,caminhao:$("#eCam").value,telefone:($("#eTel").value||"").trim()}));
@@ -2805,7 +2872,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.7";
+const VERSAO_TELA="6.9";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -2824,7 +2891,7 @@ async function startData(){
   S.col=db.collection("rotas");S.serCol=db.collection("series");S.locCol=db.collection("locais");S.cfgDoc=db.doc("config/geral");
   S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");
   subscribeWeek();subscribeSeries();
-  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
+  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.motCol.onSnapshot(snap=>{S.motoristas.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.motoristas.set(d.id,{nome:String(x.nome),caminhao:String(x.caminhao||""),telefone:String(x.telefone||""),pagamento:String(x.pagamento||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.cfgDoc.onSnapshot(d=>{S.cfg=d.exists?Object.assign({},d.data()||{}):{};S.patio=String(S.cfg.patio||"");render();if(CAD.open)renderCad();if(!S.cfgOk){S.cfgOk=true;seedV5()}},()=>{});
