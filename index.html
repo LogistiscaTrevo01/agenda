@@ -173,7 +173,7 @@ button{cursor:pointer}
 .ev.short .m{display:inline;order:-1}
 .ev .flag{color:var(--danger);font-weight:700}
 .ev .rz{position:absolute;left:0;right:0;bottom:0;height:7px;cursor:ns-resize}
-.ev.dragging{opacity:.85;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:grabbing;z-index:9}
+.ev.dragging{opacity:.9;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:grabbing;z-index:60!important}
 .empty-hint{position:absolute;inset:auto 0 0 0;text-align:center;color:var(--muted);font-size:13px;padding:6px}
 
 /* lista */
@@ -1057,7 +1057,7 @@ function query(col,filters){
     where(f,op,v){return query(col,filters.concat([[f,op,v]]))},
     orderBy(){return q},limit(){return q},
     async get(){return snapOf(await call("apiQuery",[col,filters]))},
-    onSnapshot(next,err){return listen(async()=>{try{next(snapOf(await call("apiQuery",[col,filters])))}catch(e){err&&err(e)}})},
+    onSnapshot(next,err){return listen(async()=>{const t0=performance.now();try{const sn=snapOf(await call("apiQuery",[col,filters]));sn.t0=t0;next(sn)}catch(e){err&&err(e)}})},
     doc(id){return docRef(col,id||newId())},
     async add(d){const r=docRef(col,newId());await r.set(d);return r},
     async setMany(docs){const v=await callW("apiSetMany",[col,JSON.parse(JSON.stringify(docs))]);rev=v}};
@@ -1325,34 +1325,45 @@ function subscribeWeek(){
   clearTimeout(loadTimer);
   loadTimer=setTimeout(()=>banner("A conexão está lenta: as rotas ainda estão carregando…","info"),20000);
   S.unsub=S.col.where("data",">=",from).where("data","<=",to).onSnapshot(snap=>{
-    for(const[id,r]of S.rotas){if(r.data>=from&&r.data<=to)S.rotas.delete(id)}
-    snap.docs.forEach(d=>{if(d.exists){const x=d.data();S.rotas.set(d.id,clean(x));S.ver.set("rotas:"+d.id,x.atualizado||"")}});
+    const t0=snap.t0||0;
+    for(const[id,r]of S.rotas){if(r.data>=from&&r.data<=to&&!protegido("rotas:"+id,t0))S.rotas.delete(id)}
+    snap.docs.forEach(d=>{if(d.exists&&!protegido("rotas:"+d.id,t0)){const x=d.data();S.rotas.set(d.id,clean(x));S.ver.set("rotas:"+d.id,x.atualizado||"")}});
     if(!snap.metadata.fromCache){clearTimeout(loadTimer);if(!S.readOnly&&!S.conflito)banner("")}
     render();
   },err=>{clearTimeout(loadTimer);banner(err&&err.message||"Não foi possível falar com a planilha do Google. Confira a internet e recarregue a página.","warn")});
 }
 function subscribeSeries(){
-  S.serCol.onSnapshot(snap=>{S.series.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data();S.series.set(d.id,cleanSerie(x));S.ver.set("series:"+d.id,x.atualizado||"")}});render()},
+  S.serCol.onSnapshot(snap=>{const t0=snap.t0||0;for(const id of [...S.series.keys()])if(!protegido("series:"+id,t0))S.series.delete(id);
+    snap.docs.forEach(d=>{if(d.exists&&!protegido("series:"+d.id,t0)){const x=d.data();S.series.set(d.id,cleanSerie(x));S.ver.set("series:"+d.id,x.atualizado||"")}});render()},
     err=>banner("Não foi possível ler as rotas que se repetem: "+(err&&err.message||err&&err.code||"erro"),"warn"));
 }
 function newId(col){return col?col.doc().id:("l"+Date.now()+Math.floor(Math.random()*1e4))}
+/* cada item grava um de cada vez, na ordem; enquanto grava (e logo depois), uma leitura antiga do Google não desfaz a mudança na tela */
+const WQ=new Map(),PEND=new Map(),WDONE=new Map();
+function protegido(vk,t0){return(PEND.get(vk)||0)>0||(WDONE.get(vk)||0)>t0}
+function naFila(vk,fn){PEND.set(vk,(PEND.get(vk)||0)+1);
+  const p=(WQ.get(vk)||Promise.resolve()).then(fn).finally(()=>{PEND.set(vk,PEND.get(vk)-1);if(!PEND.get(vk))PEND.delete(vk);WDONE.set(vk,performance.now())});
+  WQ.set(vk,p.catch(()=>{}));return p}
 async function put(kind,id,body){
   const map=kind==="rotas"?S.rotas:S.series;const col=kind==="rotas"?S.col:S.serCol;
   map.set(id,kind==="rotas"?clean(body):cleanSerie(body));render();
   if(!col)return true;
-  const extra={atualizado:new Date().toISOString()};if(kind==="rotas")extra.clienteKey=locKey(body.cliente);
-  const vk=kind+":"+id;const esperado=S.ver.has(vk)?S.ver.get(vk):undefined;
-  try{await col.doc(id).set(Object.assign({},body,extra),esperado);S.ver.set(vk,extra.atualizado);if(S.conflito){S.conflito=false;banner("")}return true}catch(e){return writeErr(e)}
+  const vk=kind+":"+id;
+  return naFila(vk,async()=>{
+    const extra={atualizado:new Date().toISOString()};if(kind==="rotas")extra.clienteKey=locKey(body.cliente);
+    const esperado=S.ver.has(vk)?S.ver.get(vk):undefined;
+    try{await col.doc(id).set(Object.assign({},body,extra),esperado);S.ver.set(vk,extra.atualizado);if(S.conflito){S.conflito=false;banner("")}return true}
+    catch(e){WDONE.delete(vk);return writeErr(e)}});
 }
 async function del(kind,id){
   const map=kind==="rotas"?S.rotas:S.series;const col=kind==="rotas"?S.col:S.serCol;
   map.delete(id);render();
   if(!col)return true;
-  try{await col.doc(id).delete();return true}catch(e){return writeErr(e)}
+  return naFila(kind+":"+id,async()=>{try{await col.doc(id).delete();return true}catch(e){return writeErr(e)}});
 }
 function writeErr(e){
   const c=e&&e.code;
-  if(c==="conflict"){toast("Outra pessoa alterou esta rota agora há pouco. A agenda foi atualizada: confira e salve de novo.");S.conflito=true;banner("⚠ Sua alteração não foi salva porque outra pessoa mexeu na mesma rota ao mesmo tempo. Confira a rota e faça a mudança de novo.","warn");S.subWeek=null;subscribeWeek();API.refresh();return false}
+  if(c==="conflict"){try{window.API&&API.refresh&&API.refresh()}catch(x){}toast("Outra pessoa alterou esta rota agora há pouco. A agenda foi atualizada: confira e salve de novo.");S.conflito=true;banner("⚠ Sua alteração não foi salva porque outra pessoa mexeu na mesma rota ao mesmo tempo. Confira a rota e faça a mudança de novo.","warn");S.subWeek=null;subscribeWeek();API.refresh();return false}
   if(c==="invalid_argument"){S.readOnly=true;banner("Não foi possível salvar: confira o PIN da equipe e tente de novo.","warn")}
   else if(c==="quota_exceeded")banner("O armazenamento da agenda está cheio. Exclua rotas antigas para lançar novas.","warn");
   else toast("Não foi possível salvar. Tente de novo.");
@@ -1373,8 +1384,9 @@ function serieBody(f,rec,excl){return cleanSerie(Object.assign({},f,rec,{inicio:
 async function excludeDate(sid,ds){
   const s=S.series.get(sid);if(!s||s.excluidas.includes(ds))return true;
   S.series.set(sid,Object.assign({},s,{excluidas:s.excluidas.concat(ds)}));render();
+  return naFila("series:"+sid,async()=>{
   for(let t=0;t<3;t++){
-    let cur=s,ver;
+    let cur=S.series.get(sid)||s,ver;if(!t)cur=Object.assign({},cur,{excluidas:cur.excluidas.filter(x=>x!==ds)});
     if(t&&S.serCol){try{const g=await S.serCol.doc(sid).get();if(!g.exists)return true;cur=cleanSerie(g.data());ver=g.data().atualizado||""}catch(e){continue}}
     if(cur.excluidas.includes(ds))return true;
     const body=Object.assign({},cur,{excluidas:cur.excluidas.concat(ds)});
@@ -1383,7 +1395,7 @@ async function excludeDate(sid,ds){
     try{await S.serCol.doc(sid).set(Object.assign({},body,{atualizado:at}),t?ver:(S.ver.has("series:"+sid)?S.ver.get("series:"+sid):undefined));S.series.set(sid,body);S.ver.set("series:"+sid,at);return true}
     catch(e){if(!(e&&e.code==="conflict"))return writeErr(e)}
   }
-  return writeErr({code:"conflict"});
+  return writeErr({code:"conflict"})});
 }
 /* para de repetir a partir de um dia (o que já passou fica) e tira os dias alterados à mão dali pra frente */
 async function endSeriesFrom(sid,ds){
@@ -1408,7 +1420,8 @@ async function saveOccurrence(item,f,existingId){
 
 /* ---------- render ---------- */
 function render(){
-  rebuild();
+  if(S.dragging){S.needRender=true;return}
+  S.needRender=false;rebuild();
   document.querySelectorAll(".bar .seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.view===S.view)));
   $("#btnNew").disabled=S.readOnly;
   const wd=weekDays();
@@ -1502,7 +1515,7 @@ function evHtml(it,hs,pin){
   const ser=r.serie&&S.series.get(r.serie);
   const tip=[title,sub,r.ini+" – "+r.fim,r.destino&&("Destino: "+r.destino),stopsOf(r).map((p,i)=>(i+1)+". "+p.tipo+": "+[p.local,p.endereco].filter(Boolean).join(" — ")).join("\n"),r.residuo&&("Resíduos: "+r.residuo),r.motorista&&("Motorista: "+r.motorista),r.mtr&&("MTR: "+r.mtr),r.obs,
     "Status: "+es+(r.auto?" (automático pelo horário)":" (definido manualmente)"),ser&&("↻ "+recSummary(ser)),conf&&"⚠ Conflito de horário"].filter(Boolean).join("\n");
-  return '<div class="'+cls.join(" ")+'" data-id="'+esc(r.id)+'" tabindex="0" role="button" title="'+esc(tip)+'" style="top:'+top+'px;height:'+ht+'px;'+(it.cw?'left:calc('+it.cx+'% + 1px);right:auto;width:calc('+it.cw+'% - 3px)':'left:'+(2+off)+'px;right:auto;width:calc('+(it.area||100)+'% - '+(4+off)+'px)')+';z-index:'+(2+it.col)+'">'+
+  return '<div class="'+cls.join(" ")+'" data-id="'+esc(r.id)+'" tabindex="0" role="button" title="'+esc(tip)+'" style="top:'+top+'px;height:'+ht+'px;'+(it.cw?'left:calc('+it.cx+'% + 1px);right:auto;width:calc('+it.cw+'% - 3px)':it.cols>1?'left:calc('+(it.col*(it.area||100)/it.cols)+'% + 1px);right:auto;width:calc('+((it.area||100)/it.cols)+'% - 3px)':'left:'+(2+off)+'px;right:auto;width:calc('+(it.area||100)+'% - '+(4+off)+'px)')+';z-index:'+(2+it.col)+'">'+
     (conf?'<span class="flag">⚠ </span>':'')+(r.serie?'<span class="rec" aria-label="Repete">↻ </span>':'')+'<span class="t">'+esc(title)+'</span>'+
     (sub?'<span class="s">'+esc(sub)+'</span>':'')+
     '<span class="m">'+esc(meta)+'</span>'+
@@ -2605,7 +2618,7 @@ const snap=m=>Math.round(m/15)*15;
 cal.addEventListener("pointermove",e=>{
   if(!drag||drag.type==="new")return;
   if(drag.touch&&!drag.armed){if(Math.abs(e.clientX-drag.x0)+Math.abs(e.clientY-drag.y0)>8){clearTimeout(drag.timer);drag=null}return}
-  if(!drag.started){if(Math.abs(e.clientX-drag.x0)+Math.abs(e.clientY-drag.y0)<5)return;if(S.readOnly)return;drag.started=true;drag.ev.classList.add("dragging")}
+  if(!drag.started){if(Math.abs(e.clientX-drag.x0)+Math.abs(e.clientY-drag.y0)<5)return;if(S.readOnly)return;drag.started=true;S.dragging=true;drag.ev.classList.add("dragging")}
   const dur=drag.fim-drag.ini;
   if(drag.type==="resize"){
     const rect=drag.lane.getBoundingClientRect();let end=snap(S.hs+(e.clientY-rect.top)/HOUR*60);end=Math.max(drag.ini+15,Math.min(24*60,end));
@@ -2623,7 +2636,7 @@ cal.addEventListener("pointermove",e=>{
   const m=drag.ev.querySelector(".m");if(m)m.textContent=toHM(st)+"–"+toHM(st+dur);
 });
 cal.addEventListener("pointerup",async e=>{
-  const d=drag;drag=null;if(!d)return;
+  const d=drag;drag=null;if(S.dragging){S.dragging=false;if(S.needRender&&!(d&&d.started))render()}if(!d)return;
   if(d.type==="new"){
     const lane=e.target.closest(".lane");if(!lane||lane!==d.lane||Math.abs(e.clientY-d.y0)>6||e.target.closest(".ev"))return;
     if(!guard())return;
@@ -2642,7 +2655,7 @@ cal.addEventListener("pointerup",async e=>{
   else{sn=[snapDoc("rotas",d.id)];ok=await put("rotas",d.id,r)}
   if(ok){const c=conflictsOf(d.id,r).length;offerUndo(c?"⚠ Rota movida, mas há conflito de horário":(d.r.serie?"Só este dia foi alterado: ":"Rota atualizada: ")+r.caminhao+" "+ddmm(parseIso(r.data))+" "+r.ini+"–"+r.fim,sn)}
 });
-cal.addEventListener("pointercancel",()=>{if(drag){clearTimeout(drag.timer);const was=drag.started;drag=null;if(was)render();else document.querySelectorAll(".ev.armed").forEach(x=>x.classList.remove("armed"))}});
+cal.addEventListener("pointercancel",()=>{S.dragging=false;if(drag){clearTimeout(drag.timer);const was=drag.started;drag=null;if(was||S.needRender)render();else document.querySelectorAll(".ev.armed").forEach(x=>x.classList.remove("armed"))}});
 document.addEventListener("touchmove",e=>{if(drag&&drag.armed&&drag.touch)e.preventDefault()},{passive:false});
 cal.addEventListener("contextmenu",e=>{const ev=e.target.closest(".ev");if(!ev)return;e.preventDefault();if(drag&&drag.touch)return;drag=null;ctxOpen(ev.dataset.id,e.clientX,e.clientY,false)});
 
@@ -2675,7 +2688,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.2";
+const VERSAO_TELA="6.3";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
