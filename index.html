@@ -768,6 +768,20 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     </form>
   </div>
 </div>
+<div class="scrim" id="scrimScope" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="scTitle" style="width:min(460px,100%)">
+    <header><h2 id="scTitle">Esta rota se repete</h2><button class="icon-btn" type="button" data-scope="" aria-label="Fechar">✕</button></header>
+    <div class="mbody" style="display:block;padding:4px 18px 18px">
+      <p id="scText" style="margin:8px 0 14px"></p>
+      <div style="display:grid;gap:8px">
+        <button type="button" class="btn" data-scope="one" id="scOne">Só neste dia</button>
+        <button type="button" class="btn primary" data-scope="all" id="scAll">Em todos os dias desta repetição</button>
+        <button type="button" class="btn ghost" data-scope="">Cancelar</button>
+      </div>
+      <p class="hint" id="scHint" style="margin:10px 0 0"></p>
+    </div>
+  </div>
+</div>
 <div class="scrim" id="scrimSearch" aria-hidden="true">
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="sTitle">
     <header><h2 id="sTitle">Buscar rotas</h2><button class="icon-btn" type="button" data-close="scrimSearch" aria-label="Fechar">✕</button></header>
@@ -2381,8 +2395,30 @@ function ctxOpen(id,x,y,touch){
   m.querySelector("button").focus({preventScroll:true});
 }
 /* altera a rota (ou só este dia, se for de uma repetição) */
+/* rota de repetição: pergunta se a mudança vale só para este dia ou para todos */
+let scopeRes=null;
+function askScope(r,changes){
+  const s=S.series.get(r.serie);if(!s)return Promise.resolve("one");
+  const partes=[];if(changes.ini&&(changes.ini!==r.ini||changes.fim!==r.fim))partes.push("horário para "+changes.ini+"–"+changes.fim);
+  if(changes.caminhao&&changes.caminhao!==r.caminhao)partes.push("caminhão para o "+changes.caminhao);
+  $("#scText").innerHTML="Mudar o <b>"+esc(partes.join(" e ")||"horário")+"</b> de <b>"+esc(r.cliente||r.servico||"rota")+"</b>:";
+  $("#scHint").textContent="↻ "+recSummary(s)+". Os dias que já foram alterados à mão continuam como estão.";
+  openModal("scrimScope");setTimeout(()=>$("#scAll").focus(),30);
+  return new Promise(res=>{scopeRes=res})}
+document.getElementById("scrimScope").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b&&e.target.id!=="scrimScope")return;
+  closeModal("scrimScope");const f=scopeRes;scopeRes=null;f&&f(b?b.dataset.scope:"")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&scopeRes){closeModal("scrimScope");const f=scopeRes;scopeRes=null;f("")}});
+/* aplica a mudança na repetição inteira (e também neste dia, se ele já tinha sido alterado à mão) */
+async function applyToSeries(r,changes,id,msg){
+  const s=S.series.get(r.serie);const ch={};["ini","fim","caminhao"].forEach(k=>{if(changes[k]!=null)ch[k]=changes[k]});
+  const sn=[snapDoc("series",r.serie)];let ok=await put("series",r.serie,Object.assign({},s,ch));
+  if(ok&&!r.virtual){sn.push(snapDoc("rotas",id));ok=await put("rotas",id,Object.assign(clean(r),ch))}
+  if(ok)offerUndo(msg+" · em todos os dias da repetição",sn);return ok}
 async function ctxSave(id,changes,msg){
   const r=S.items.get(id);if(!r||!guard())return;const body=Object.assign(clean(r),changes);let ok,sn;
+  if(r.serie&&S.series.has(r.serie)&&("ini" in changes||"caminhao" in changes)){
+    const sc=await askScope(r,Object.assign({ini:r.ini,fim:r.fim},changes));if(!sc){render();return}
+    if(sc==="all"){await applyToSeries(r,changes,id,msg);return}}
   if(r.virtual){const rid=newId(S.col);sn=[snapDoc("rotas",rid),snapDoc("series",r.serie)];ok=await saveOccurrence(r,body,rid)}
   else{sn=[snapDoc("rotas",id)];ok=await put("rotas",id,body)}
   if(ok)offerUndo(msg,sn);
@@ -2669,6 +2705,9 @@ cal.addEventListener("pointerup",async e=>{
   else{const tl=d.target||d.lane;const ni=d.newIni==null?d.ini:d.newIni;const dur=d.fim-d.ini;r.ini=toHM(ni);r.fim=toHM(ni+dur);r.data=tl.dataset.day;r.caminhao=tl.dataset.truck}
   if(r.ini===d.r.ini&&r.fim===d.r.fim&&r.data===d.r.data&&r.caminhao===d.r.caminhao)return render();
   let ok,sn;
+  if(d.r.serie&&S.series.has(d.r.serie)&&r.data===d.r.data){
+    const sc=await askScope(d.r,{ini:r.ini,fim:r.fim,caminhao:r.caminhao});if(!sc){render();return}
+    if(sc==="all"){await applyToSeries(d.r,{ini:r.ini,fim:r.fim,caminhao:r.caminhao},d.id,(r.caminhao!==d.r.caminhao?"Passada para o "+r.caminhao+" ":"")+r.ini+"–"+r.fim);return}}
   if(d.r.virtual){const rid=newId(S.col);sn=[snapDoc("rotas",rid),snapDoc("series",d.r.serie)];ok=await saveOccurrence(d.r,r,rid)}
   else{sn=[snapDoc("rotas",d.id)];ok=await put("rotas",d.id,r)}
   if(ok){const c=conflictsOf(d.id,r).length;offerUndo(c?"⚠ Rota movida, mas há conflito de horário":(d.r.serie?"Só este dia foi alterado: ":"Rota atualizada: ")+r.caminhao+" "+ddmm(parseIso(r.data))+" "+r.ini+"–"+r.fim,sn)}
@@ -2706,7 +2745,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.4";
+const VERSAO_TELA="6.5";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
