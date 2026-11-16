@@ -1327,43 +1327,61 @@ function subscribeWeek(){
   S.unsub=S.col.where("data",">=",from).where("data","<=",to).onSnapshot(snap=>{
     const t0=snap.t0||0;
     for(const[id,r]of S.rotas){if(r.data>=from&&r.data<=to&&!protegido("rotas:"+id,t0))S.rotas.delete(id)}
-    snap.docs.forEach(d=>{if(d.exists&&!protegido("rotas:"+d.id,t0)){const x=d.data();S.rotas.set(d.id,clean(x));S.ver.set("rotas:"+d.id,x.atualizado||"")}});
+    snap.docs.forEach(d=>{if(d.exists&&!protegido("rotas:"+d.id,t0,d.data())){const x=d.data();S.rotas.set(d.id,clean(x));S.ver.set("rotas:"+d.id,x.atualizado||"")}});
     if(!snap.metadata.fromCache){clearTimeout(loadTimer);if(!S.readOnly&&!S.conflito)banner("")}
     render();
   },err=>{clearTimeout(loadTimer);banner(err&&err.message||"Não foi possível falar com a planilha do Google. Confira a internet e recarregue a página.","warn")});
 }
 function subscribeSeries(){
   S.serCol.onSnapshot(snap=>{const t0=snap.t0||0;for(const id of [...S.series.keys()])if(!protegido("series:"+id,t0))S.series.delete(id);
-    snap.docs.forEach(d=>{if(d.exists&&!protegido("series:"+d.id,t0)){const x=d.data();S.series.set(d.id,cleanSerie(x));S.ver.set("series:"+d.id,x.atualizado||"")}});render()},
+    snap.docs.forEach(d=>{if(d.exists&&!protegido("series:"+d.id,t0,d.data())){const x=d.data();S.series.set(d.id,cleanSerie(x));S.ver.set("series:"+d.id,x.atualizado||"")}});render()},
     err=>banner("Não foi possível ler as rotas que se repetem: "+(err&&err.message||err&&err.code||"erro"),"warn"));
 }
 function newId(col){return col?col.doc().id:("l"+Date.now()+Math.floor(Math.random()*1e4))}
 /* cada item grava um de cada vez, na ordem; enquanto grava (e logo depois), uma leitura antiga do Google não desfaz a mudança na tela */
-const WQ=new Map(),PEND=new Map(),WDONE=new Map();
-function protegido(vk,t0){return(PEND.get(vk)||0)>0||(WDONE.get(vk)||0)>t0}
+const WQ=new Map(),PEND=new Map(),WDONE=new Map(),MINHAS=new Map(),SEQ=new Map();
+function minha(vk,v){if(!v)return;if(!MINHAS.has(vk))MINHAS.set(vk,new Set());MINHAS.get(vk).add(v)}
+function protegido(vk,t0,x){if((PEND.get(vk)||0)>0||(WDONE.get(vk)||0)>t0)return true;
+  const v=x&&x.atualizado;return!!(v&&MINHAS.has(vk)&&MINHAS.get(vk).has(v)&&S.ver.get(vk)!==v)}
 function naFila(vk,fn){PEND.set(vk,(PEND.get(vk)||0)+1);
-  const p=(WQ.get(vk)||Promise.resolve()).then(fn).finally(()=>{PEND.set(vk,PEND.get(vk)-1);if(!PEND.get(vk))PEND.delete(vk);WDONE.set(vk,performance.now())});
+  const p=(WQ.get(vk)||Promise.resolve()).then(fn).then(r=>{if(r!==false)WDONE.set(vk,performance.now());return r},e=>false)
+    .finally(()=>{PEND.set(vk,PEND.get(vk)-1);if(!PEND.get(vk))PEND.delete(vk)});
+  p.then(r=>{if(r===false)setTimeout(()=>{try{window.API&&API.refresh&&API.refresh()}catch(x){}},50)});
   WQ.set(vk,p.catch(()=>{}));return p}
 async function put(kind,id,body){
   const map=kind==="rotas"?S.rotas:S.series;const col=kind==="rotas"?S.col:S.serCol;
   map.set(id,kind==="rotas"?clean(body):cleanSerie(body));render();
   if(!col)return true;
-  const vk=kind+":"+id;
+  const vk=kind+":"+id;const meu=(SEQ.get(vk)||0)+1;SEQ.set(vk,meu);
   return naFila(vk,async()=>{
+    if(SEQ.get(vk)!==meu)return true; // já tem uma mudança mais nova deste mesmo item na fila: só ela precisa ir para o Google
     const extra={atualizado:new Date().toISOString()};if(kind==="rotas")extra.clienteKey=locKey(body.cliente);
     const esperado=S.ver.has(vk)?S.ver.get(vk):undefined;
-    try{await col.doc(id).set(Object.assign({},body,extra),esperado);S.ver.set(vk,extra.atualizado);if(S.conflito){S.conflito=false;banner("")}return true}
-    catch(e){WDONE.delete(vk);return writeErr(e)}});
+    const ok=()=>{S.ver.set(vk,extra.atualizado);minha(vk,extra.atualizado);if(S.conflito){S.conflito=false;banner("")}return true};
+    try{await col.doc(id).set(Object.assign({},body,extra),esperado);return ok()}
+    catch(e){
+      /* "conflito" logo depois de uma gravação nossa: quase sempre é o Google que ainda não terminou de gravar a anterior.
+         Espera um pouco e confere: se a versão que está lá foi gravada por esta tela, grava por cima sem incomodar ninguém. */
+      if(e&&e.code==="conflict"&&MINHAS.has(vk)){
+        for(let t=0;t<3;t++){
+          await new Promise(r=>setTimeout(r,700*(t+1)));
+          let atual;try{const g=await col.doc(id).get();atual=g.exists?(g.data().atualizado||""):null}catch(x){continue}
+          if(atual!==null&&atual!==esperado&&!MINHAS.get(vk).has(atual))break; // foi outra pessoa de verdade
+          try{await col.doc(id).set(Object.assign({},body,extra),t===0&&atual!==null?atual:undefined);return ok()}catch(x){if(!(x&&x.code==="conflict")){WDONE.delete(vk);return writeErr(x)}}
+        }
+      }
+      WDONE.delete(vk);return writeErr(e)}});
 }
 async function del(kind,id){
   const map=kind==="rotas"?S.rotas:S.series;const col=kind==="rotas"?S.col:S.serCol;
   map.delete(id);render();
   if(!col)return true;
-  return naFila(kind+":"+id,async()=>{try{await col.doc(id).delete();return true}catch(e){return writeErr(e)}});
+  const vk=kind+":"+id;SEQ.set(vk,(SEQ.get(vk)||0)+1);
+  return naFila(vk,async()=>{try{await col.doc(id).delete();return true}catch(e){return writeErr(e)}});
 }
 function writeErr(e){
   const c=e&&e.code;
-  if(c==="conflict"){try{window.API&&API.refresh&&API.refresh()}catch(x){}toast("Outra pessoa alterou esta rota agora há pouco. A agenda foi atualizada: confira e salve de novo.");S.conflito=true;banner("⚠ Sua alteração não foi salva porque outra pessoa mexeu na mesma rota ao mesmo tempo. Confira a rota e faça a mudança de novo.","warn");S.subWeek=null;subscribeWeek();API.refresh();return false}
+  if(c==="conflict"){try{window.API&&API.refresh&&API.refresh()}catch(x){}toast("Esta rota foi alterada em outro aparelho agora há pouco. A agenda foi atualizada: confira e salve de novo.");S.conflito=true;banner("⚠ Sua alteração não foi salva porque a mesma rota foi alterada em outro aparelho ao mesmo tempo. Confira a rota e faça a mudança de novo.","warn");S.subWeek=null;subscribeWeek();API.refresh();return false}
   if(c==="invalid_argument"){S.readOnly=true;banner("Não foi possível salvar: confira o PIN da equipe e tente de novo.","warn")}
   else if(c==="quota_exceeded")banner("O armazenamento da agenda está cheio. Exclua rotas antigas para lançar novas.","warn");
   else toast("Não foi possível salvar. Tente de novo.");
@@ -1392,7 +1410,7 @@ async function excludeDate(sid,ds){
     const body=Object.assign({},cur,{excluidas:cur.excluidas.concat(ds)});
     if(!S.serCol){S.series.set(sid,body);return true}
     const at=new Date().toISOString();
-    try{await S.serCol.doc(sid).set(Object.assign({},body,{atualizado:at}),t?ver:(S.ver.has("series:"+sid)?S.ver.get("series:"+sid):undefined));S.series.set(sid,body);S.ver.set("series:"+sid,at);return true}
+    try{await S.serCol.doc(sid).set(Object.assign({},body,{atualizado:at}),t?ver:(S.ver.has("series:"+sid)?S.ver.get("series:"+sid):undefined));S.series.set(sid,body);S.ver.set("series:"+sid,at);minha("series:"+sid,at);return true}
     catch(e){if(!(e&&e.code==="conflict"))return writeErr(e)}
   }
   return writeErr({code:"conflict"})});
@@ -2688,7 +2706,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.3";
+const VERSAO_TELA="6.4";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
