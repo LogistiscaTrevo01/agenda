@@ -272,6 +272,7 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .lane{container-type:inline-size}
 .ev.has-pin:not(.short){padding-right:6px}
 .ev.has-pin:not(.short) .t{display:block;padding-right:104px}
+.ev.has-pin:not(.short) .flag,.ev.has-pin:not(.short) .rec{float:left;margin-right:4px}
 .ev.short .gpin.wide span{display:none}
 .ev.short .gpin.wide{width:20px;padding:0;justify-content:center}
 @container (max-width:240px){.ev .gpin.wide{width:20px;padding:0;justify-content:center}.ev .gpin.wide span{display:none}.ev.has-pin:not(.short) .t{padding-right:20px}}
@@ -383,6 +384,22 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
   .brand small{display:none}
 }
 
+
+/* ===== ajustes da auditoria (6.7) ===== */
+@media (max-width:640px){
+  #fDur{grid-column:1/-1;margin-top:-4px;min-height:0}
+  #fDur:empty{display:none}
+  .wagrid .fld{grid-column:1/-1}
+  .chkrow{flex-direction:column;gap:10px;align-items:flex-start}
+  .chkrow label{width:100%}
+  .chkrow input[type=checkbox]{flex:none;width:20px;height:20px}
+  .ctable td[data-l]:not(:empty)::before{content:attr(data-l)": ";font:600 11px var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .quick button,.cst{min-height:34px}
+}
+@media (pointer:coarse){
+  .lhmap{position:relative}
+  .lhmap::after{content:"";position:absolute;inset:-9px}
+}
 /* ===== v5 ===== */
 .top .who{display:inline-flex;align-items:center;gap:8px;font-size:13px;opacity:.9}
 .top .who b{font-weight:600}
@@ -662,7 +679,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <div class="scopebox"><span>↻ Esta rota se repete.</span>
           <div class="seg" id="fScope" role="group" aria-label="O que editar">
             <button type="button" data-v="one" aria-pressed="true">Só esta ocorrência</button>
-            <button type="button" data-v="all" aria-pressed="false">Toda a série</button>
+            <button type="button" data-v="all" aria-pressed="false" title="Vale de hoje em diante. Os dias que já passaram ficam como estavam.">Toda a série (de hoje em diante)</button>
           </div>
         </div>
       </div>
@@ -775,7 +792,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
       <p id="scText" style="margin:8px 0 14px"></p>
       <div style="display:grid;gap:8px">
         <button type="button" class="btn" data-scope="one" id="scOne">Só neste dia</button>
-        <button type="button" class="btn primary" data-scope="all" id="scAll">Em todos os dias desta repetição</button>
+        <button type="button" class="btn primary" data-scope="all" id="scAll">Em todos os próximos dias desta repetição</button>
         <button type="button" class="btn ghost" data-scope="">Cancelar</button>
       </div>
       <p class="hint" id="scHint" style="margin:10px 0 0"></p>
@@ -1396,8 +1413,8 @@ async function del(kind,id){
 function writeErr(e){
   const c=e&&e.code;
   if(c==="conflict"){try{window.API&&API.refresh&&API.refresh()}catch(x){}toast("Esta rota foi alterada em outro aparelho agora há pouco. A agenda foi atualizada: confira e salve de novo.");S.conflito=true;banner("⚠ Sua alteração não foi salva porque a mesma rota foi alterada em outro aparelho ao mesmo tempo. Confira a rota e faça a mudança de novo.","warn");S.subWeek=null;subscribeWeek();API.refresh();return false}
-  if(c==="invalid_argument"){S.readOnly=true;banner("Não foi possível salvar: confira o PIN da equipe e tente de novo.","warn")}
-  else if(c==="quota_exceeded")banner("O armazenamento da agenda está cheio. Exclua rotas antigas para lançar novas.","warn");
+  if(c==="invalid_request"||c==="too_large")toast(/grande/i.test(e.message||"")?"Não foi possível salvar: esta rota tem texto demais (observações ou trajeto). Encurte e tente de novo.":"Não foi possível salvar esta alteração. Recarregue a página e tente de novo.");
+  else if(c==="unavailable")toast("Sem conexão com o Google: a alteração não foi salva. Confira a internet e tente de novo.");
   else toast("Não foi possível salvar. Tente de novo.");
   S.subWeek=null;subscribeWeek();render();return false;
 }
@@ -1777,8 +1794,10 @@ $("#form").addEventListener("submit",async e=>{
   E.saved=true;const cur=E;const prevAnchor=S.anchor;closeForm();
   const novos=cadastroPendente(f);
   let ok=false,msg="Rota salva",snaps=[];
-  if(sm){snaps=[snapDoc("series",cur.sid)];const s0=S.series.get(cur.sid);const novo=serieBody(f,rec,s0?s0.excluidas:[]);ok=await put("series",cur.sid,novo);msg="Série atualizada"
-    if(ok&&s0){const desde=cur.kind==="series"?iso(new Date()):(cur.date||iso(new Date()));ok=await levarParaExcecoes(cur.sid,desde,diffSerie(s0,novo),snaps)}}
+  if(sm){const s0=S.series.get(cur.sid);const novo=serieBody(f,rec,s0?s0.excluidas:[]);msg="Repetição atualizada";const cd=cur.kind==="series"?null:cur.date;
+    if(s0&&mesmaRegra(s0,novo)){ok=await mudarSerie(cur.sid,cd,novo,snaps);if(ok&&snaps.length&&snaps[0].prev===null)msg="Repetição atualizada daqui para frente (o que já passou ficou como estava)"}
+    else{snaps=[snapDoc("series",cur.sid)];ok=await put("series",cur.sid,novo);
+      if(ok&&s0){const hj=iso(new Date());ok=await levarParaExcecoes(cur.sid,cd&&cd<hj?cd:hj,diffSerie(s0,novo),snaps)}}}
   else if(recOn&&(cur.kind==="new"||cur.kind==="rota")){
     const sid=newId(S.serCol);snaps=[snapDoc("series",sid)];if(cur.kind==="rota")snaps.push(snapDoc("rotas",cur.id));
     ok=await put("series",sid,serieBody(f,rec,[]));
@@ -2403,7 +2422,7 @@ function askScope(r,changes){
   const partes=[];if(changes.ini&&(changes.ini!==r.ini||changes.fim!==r.fim))partes.push("horário para "+changes.ini+"–"+changes.fim);
   if(changes.caminhao&&changes.caminhao!==r.caminhao)partes.push("caminhão para o "+changes.caminhao);
   $("#scText").innerHTML="Mudar o <b>"+esc(partes.join(" e ")||"horário")+"</b> de <b>"+esc(r.cliente||r.servico||"rota")+"</b>:";
-  $("#scHint").textContent="↻ "+recSummary(s)+". Em \"todos\", a mudança vale também para os dias já alterados à mão, deste dia em diante.";
+  $("#scHint").textContent="↻ "+recSummary(s)+". Em \"todos\", vale de hoje em diante, inclusive nos dias já alterados à mão. Os dias que já passaram não mudam.";
   openModal("scrimScope");setTimeout(()=>$("#scAll").focus(),30);
   return new Promise(res=>{scopeRes=res})}
 document.getElementById("scrimScope").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b&&e.target.id!=="scrimScope")return;
@@ -2412,20 +2431,46 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&scopeRes){closeModa
 /* campos que mudaram na repetição vão também para os dias alterados à mão (do dia escolhido em diante) */
 const CAMPOS_SERIE=["ini","fim","caminhao","cliente","servico","residuos","residuo","destino","motorista","obs","paradas","mtr","endColeta","endDestino"];
 function diffSerie(antes,depois){const d={};CAMPOS_SERIE.forEach(k=>{if(JSON.stringify(antes[k]===undefined?"":antes[k])!==JSON.stringify(depois[k]===undefined?"":depois[k]))d[k]=depois[k]});return d}
-async function levarParaExcecoes(sid,desde,diff,sn){
-  if(!Object.keys(diff).length)return true;const alvo=new Map();
+async function levarParaExcecoes(sid,desde,diff,sn,novoSid){
+  novoSid=novoSid||sid;if(novoSid===sid&&!Object.keys(diff).length)return true;const alvo=new Map();
   if(S.col){try{const g=await S.col.where("serie","==",sid).get();g.docs.forEach(d=>{if(d.exists)alvo.set(d.id,clean(d.data()))})}catch(e){}}
   for(const[id,r]of S.rotas)if(r.serie===sid)alvo.set(id,r);
   let ok=true;
   for(const[id,r]of alvo){if((r.serieData||r.data)<desde)continue;if(!S.rotas.has(id))S.rotas.set(id,r);sn.push(snapDoc("rotas",id));
-    if(!await put("rotas",id,Object.assign(clean(r),diff,{serie:sid,serieData:r.serieData||r.data})))ok=false}
+    if(!await put("rotas",id,Object.assign(clean(r),diff,{serie:novoSid,serieData:r.serieData||r.data})))ok=false}
   return ok}
+/* A partir de que dia a mudança vale. Os dias que já passaram não podem mudar (histórico, fechamento do motorista):
+   se a repetição já tem dias no passado, ela é encerrada ontem e uma cópia com a mudança começa na próxima data. */
+function pontoDeCorte(s,cardDate){
+  const hoje=iso(new Date());const base=cardDate&&cardDate<hoje?cardDate:hoje;
+  if(base<=s.inicio)return{base,P:null};
+  const livre=Object.assign({},s,{excluidas:[]});let antes=0;
+  for(let d=parseIso(s.inicio),i=0;i<4000&&iso(d)<base;i++,d=addDays(d,1))if(occurs(livre,iso(d)))antes++;
+  if(!antes)return{base,P:null};
+  let P=null;for(let d=parseIso(base),i=0;i<800;i++,d=addDays(d,1))if(occurs(livre,iso(d))){P=iso(d);break}
+  if(P&&s.freq==="mensal"&&s.mensalModo==="dia"&&parseIso(s.inicio).getDate()!==parseIso(P).getDate())P=null;
+  return{base,P,antes}}
+async function mudarSerie(sid,cardDate,novo,sn){
+  const s=S.series.get(sid);if(!s)return false;const diff=diffSerie(s,novo);const c=pontoDeCorte(s,cardDate);
+  if(!c.P){sn.push(snapDoc("series",sid));let ok=await put("series",sid,novo);if(ok)ok=await levarParaExcecoes(sid,c.base,diff,sn);return ok}
+  const nid=newId(S.serCol);sn.push({kind:"series",id:nid,prev:null},snapDoc("series",sid));
+  const nova=Object.assign({},novo,{inicio:c.P,excluidas:s.excluidas.filter(x=>x>=c.P)});
+  if(s.fimTipo==="qtd")nova.qtd=Math.max(1,s.qtd-c.antes);
+  let ok=await put("series",nid,nova);
+  if(ok)ok=await put("series",sid,Object.assign({},s,{fimTipo:"data",ate:iso(addDays(parseIso(c.P),-1)),excluidas:s.excluidas.filter(x=>x<c.P)}));
+  if(ok)ok=await levarParaExcecoes(sid,c.P,diff,sn,nid);
+  return ok}
+const mesmaRegra=(a,b)=>{const eq=k=>String(a[k]==null?"":a[k])===String(b[k]==null?"":b[k]);
+  if(!["inicio","freq","fimTipo"].every(eq))return false;
+  if(a.freq!=="uteis"&&(a.intervalo||1)!==(b.intervalo||1))return false;
+  if(a.freq==="mensal"&&!eq("mensalModo"))return false;
+  if(a.freq==="semanal"&&String((a.dias||[]).slice().sort())!==String((b.dias||[]).slice().sort()))return false;
+  if(a.fimTipo==="data"&&!eq("ate"))return false;if(a.fimTipo==="qtd"&&!eq("qtd"))return false;return true};
 /* aplica a mudança na repetição inteira (e também neste dia, se ele já tinha sido alterado à mão) */
 async function applyToSeries(r,changes,id,msg){
   const s=S.series.get(r.serie);const ch={};["ini","fim","caminhao"].forEach(k=>{if(changes[k]!=null)ch[k]=changes[k]});
-  const sn=[snapDoc("series",r.serie)];let ok=await put("series",r.serie,Object.assign({},s,ch));
-  if(ok)ok=await levarParaExcecoes(r.serie,r.serieData||r.data,ch,sn);
-  if(ok)offerUndo(msg+" · em todos os dias da repetição",sn);return ok}
+  const sn=[];const ok=await mudarSerie(r.serie,r.serieData||r.data,Object.assign({},s,ch),sn);
+  if(ok)offerUndo(msg+" · em todos os próximos dias da repetição",sn);return ok}
 async function ctxSave(id,changes,msg){
   const r=S.items.get(id);if(!r||!guard())return;const body=Object.assign(clean(r),changes);let ok,sn;
   if(r.serie&&S.series.has(r.serie)&&("ini" in changes||"caminhao" in changes)){
@@ -2517,7 +2562,7 @@ function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm)
 function renderCad(){
   if(!CAD.open)return;
   document.querySelectorAll("#cTabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===CAD.tab)));
-  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=S.series.size;
+  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
   const box=$("#cBody");let h="";const ed=CAD.edit;
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
   if(CAD.tab==="locais"){
@@ -2525,7 +2570,7 @@ function renderCad(){
     h+=bar("Procurar local ou endereço","Novo local");
     const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
     const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local"></td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
     const sc=semCadastro("locais",list.map(x=>x.nome));
     h+=fixHtml("local",sc,list.map(x=>x.nome),"Locais usados nas rotas e ainda sem cadastro");
@@ -2535,7 +2580,7 @@ function renderCad(){
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
     const csel=v=>'<select id="eCla" title="'+esc(classeTip(v))+'">'+CLASSES.map(c=>'<option value="'+c[0]+'" title="'+esc(classeTip(c[0]))+'"'+(c[0]===v?" selected":"")+'>'+(c[0]?c[1]:"—")+'</option>').join("")+'</select>';
     const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Ex.: Borra oleosa"></td><td>'+csel(x?x.classe:"")+'</td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: perigoso, tambores de 200 L"></td><td>'+(x?usoHtml("residuos",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td>'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs+" "+x.classe))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.classe?'<span class="pill" style="border-left-color:'+(x.classe==="Classe I"?"var(--danger)":"var(--ok)")+'">'+esc(x.classe)+'</span>':'<span class="uso">—</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("residuos",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Tipo de resíduo</th><th>Classe</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum tipo de resíduo salvo.</p>')+'</div>';
     const sc=semCadastro("residuos",list.map(([,x])=>x.nome));
     h+=fixHtml("residuo",sc,list.map(([,x])=>x.nome),"Resíduos usados nas rotas e ainda sem cadastro");
@@ -2545,23 +2590,26 @@ function renderCad(){
     const list=[...S.motoristas].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
     const tsel=v=>'<select id="eCam"><option value="">—</option>'+TRUCKS.map(t=>'<option'+(t.k===v?" selected":"")+'>'+t.k+'</option>').join("")+'</select>';
     const row=(id,x)=>{if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome"></td><td>'+tsel(x?x.caminhao:"")+'</td><td><input id="eTel" value="'+esc(x?x.telefone:"")+'" placeholder="(31) 99999-9999" inputmode="tel"></td><td>'+(x?usoHtml("motoristas",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.caminhao+" "+x.telefone))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.caminhao?'<span class="pill '+truckCls(x.caminhao)+'">'+esc(x.caminhao)+'</span>':'')+'</td><td class="addr">'+esc(x.telefone)+'</td><td>'+usoHtml("motoristas",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.caminhao+" "+x.telefone))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.caminhao?'<span class="pill '+truckCls(x.caminhao)+'">'+esc(x.caminhao)+'</span>':'')+'</td><td class="addr">'+esc(x.telefone)+'</td><td data-l="Usado em">'+usoHtml("motoristas",x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Motorista</th><th>Caminhão</th><th>WhatsApp</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row("",null):"")+list.map(([id,x])=>row(id,x)).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum motorista salvo.</p>')+'</div>';
     h+=fixHtml("motorista",semCadastro("motoristas",list.map(([,x])=>x.nome)),list.map(([,x])=>x.nome),"Nomes usados nas rotas e que não estão no cadastro");
     h+='<p class="cnote">Corrigir o nome aqui corrige também todas as rotas desse motorista. Com o WhatsApp do motorista salvo, a mensagem das rotas ganha o botão “Enviar para…” direto para ele.</p>';
   }else if(CAD.tab==="series"){
     const list=[...S.series].sort((a,b)=>(a[1].caminhao+a[1].ini).localeCompare(b[1].caminhao+b[1].ini));const td=iso(new Date());
     h+='<p class="cnote" style="margin-top:12px">Rotas que se repetem sozinhas na agenda. Para criar uma nova, abra “＋ Nova rota” e escolha em “↻ Repetir”.</p>';
-    if(!list.length)h+='<p class="cempty">Nenhuma rota que se repete.</p>';
-    else{h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Caminhão</th><th>Rota</th><th>Como repete</th><th>Próxima</th><th>Dias pulados</th><th></th></tr></thead><tbody>';
-      list.forEach(([sid,s])=>{const nx=nextDates(s,td,1)[0];const end=seriesEnd(s);
+    const acabou=s=>{const e=seriesEnd(s);return!!e&&e<td};const ativas=list.filter(x=>!acabou(x[1])),velhas=list.filter(x=>acabou(x[1]));
+    const cab='<div class="cscroll"><table class="ctable"><thead><tr><th>Caminhão</th><th>Rota</th><th>Como repete</th><th>Próxima</th><th>Dias pulados</th><th></th></tr></thead><tbody>';
+    if(!ativas.length)h+='<p class="cempty">Nenhuma rota que se repete.</p>';
+    [ativas,velhas].forEach((grupo,gi)=>{if(!grupo.length)return;
+      h+=(gi?'<details class="cnote"><summary>Repetições encerradas ('+grupo.length+') — ficam guardadas como histórico</summary>':'')+cab;
+      grupo.forEach(([sid,s])=>{const nx=nextDates(s,td,1)[0];const end=seriesEnd(s);
         const pul=s.excluidas.filter(ds=>!(CAD.overr&&CAD.overr.has(sid+"|"+ds))).sort();
-        h+='<tr><td><span class="pill '+truckCls(s.caminhao)+'">'+esc(s.caminhao)+'</span></td><td><b>'+esc(s.cliente||s.servico)+'</b>'+(s.cliente&&s.servico?'<br><span class="addr">'+esc(s.servico)+'</span>':'')+'</td><td class="addr">'+esc(recSummary(s))+'</td><td class="uso">'+(nx?'<b>'+ddmm(parseIso(nx))+'</b>':(end&&end<td?'encerrada':'—'))+'</td><td>'+
+        h+='<tr><td><span class="pill '+truckCls(s.caminhao)+'">'+esc(s.caminhao)+'</span></td><td><b>'+esc(s.cliente||s.servico)+'</b>'+(s.cliente&&s.servico?'<br><span class="addr">'+esc(s.servico)+'</span>':'')+'</td><td class="addr">'+esc(recSummary(s))+'</td><td class="uso" data-l="Próxima">'+(nx?'<b>'+ddmm(parseIso(nx))+'</b>':(end&&end<td?'encerrada':'—'))+'</td><td data-l="Dias pulados">'+
           (CAD.overr===null?'<span class="uso">…</span>':pul.length?pul.map(ds=>'<span class="chipx">'+ddmm(parseIso(ds))+'<button type="button" data-act="restore" data-id="'+esc(sid)+'" data-ds="'+ds+'" title="Voltar a repetir neste dia">restaurar</button></span>').join(""):'<span class="uso">nenhum</span>')+'</td><td class="act">'+
           '<button type="button" class="btn sm" data-act="sedit" data-id="'+esc(sid)+'">'+ic("edit")+' Editar</button> '+
           (CAD.confirm==="end:"+sid?'<button type="button" class="btn sm danger" data-act="send" data-id="'+esc(sid)+'">Confirmar: encerrar hoje</button> ':'<button type="button" class="btn sm" data-act="askend" data-id="'+esc(sid)+'" title="Para de repetir a partir de hoje (o que já passou fica)">'+ic("stop")+' Encerrar</button> ')+
           (CAD.confirm===sid?'<button type="button" class="btn sm danger" data-act="sdel" data-id="'+esc(sid)+'">Confirmar exclusão</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(sid)+'" title="Excluir a série inteira">'+ic("trash")+'</button>')+'</td></tr>'});
-      h+='</tbody></table></div>'}
+      h+='</tbody></table></div>'+(gi?'</details>':'')});
   }else{
     const I=CAD.info;
     h+='<div class="secgrid">';
@@ -2757,7 +2805,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.6";
+const VERSAO_TELA="6.7";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
