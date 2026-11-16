@@ -1777,7 +1777,8 @@ $("#form").addEventListener("submit",async e=>{
   E.saved=true;const cur=E;const prevAnchor=S.anchor;closeForm();
   const novos=cadastroPendente(f);
   let ok=false,msg="Rota salva",snaps=[];
-  if(sm){snaps=[snapDoc("series",cur.sid)];const s0=S.series.get(cur.sid);ok=await put("series",cur.sid,serieBody(f,rec,s0?s0.excluidas:[]));msg="Série atualizada"}
+  if(sm){snaps=[snapDoc("series",cur.sid)];const s0=S.series.get(cur.sid);const novo=serieBody(f,rec,s0?s0.excluidas:[]);ok=await put("series",cur.sid,novo);msg="Série atualizada"
+    if(ok&&s0){const desde=cur.kind==="series"?iso(new Date()):(cur.date||iso(new Date()));ok=await levarParaExcecoes(cur.sid,desde,diffSerie(s0,novo),snaps)}}
   else if(recOn&&(cur.kind==="new"||cur.kind==="rota")){
     const sid=newId(S.serCol);snaps=[snapDoc("series",sid)];if(cur.kind==="rota")snaps.push(snapDoc("rotas",cur.id));
     ok=await put("series",sid,serieBody(f,rec,[]));
@@ -2402,17 +2403,28 @@ function askScope(r,changes){
   const partes=[];if(changes.ini&&(changes.ini!==r.ini||changes.fim!==r.fim))partes.push("horário para "+changes.ini+"–"+changes.fim);
   if(changes.caminhao&&changes.caminhao!==r.caminhao)partes.push("caminhão para o "+changes.caminhao);
   $("#scText").innerHTML="Mudar o <b>"+esc(partes.join(" e ")||"horário")+"</b> de <b>"+esc(r.cliente||r.servico||"rota")+"</b>:";
-  $("#scHint").textContent="↻ "+recSummary(s)+". Os dias que já foram alterados à mão continuam como estão.";
+  $("#scHint").textContent="↻ "+recSummary(s)+". Em \"todos\", a mudança vale também para os dias já alterados à mão, deste dia em diante.";
   openModal("scrimScope");setTimeout(()=>$("#scAll").focus(),30);
   return new Promise(res=>{scopeRes=res})}
 document.getElementById("scrimScope").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b&&e.target.id!=="scrimScope")return;
   closeModal("scrimScope");const f=scopeRes;scopeRes=null;f&&f(b?b.dataset.scope:"")});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&scopeRes){closeModal("scrimScope");const f=scopeRes;scopeRes=null;f("")}});
+/* campos que mudaram na repetição vão também para os dias alterados à mão (do dia escolhido em diante) */
+const CAMPOS_SERIE=["ini","fim","caminhao","cliente","servico","residuos","residuo","destino","motorista","obs","paradas","mtr","endColeta","endDestino"];
+function diffSerie(antes,depois){const d={};CAMPOS_SERIE.forEach(k=>{if(JSON.stringify(antes[k]===undefined?"":antes[k])!==JSON.stringify(depois[k]===undefined?"":depois[k]))d[k]=depois[k]});return d}
+async function levarParaExcecoes(sid,desde,diff,sn){
+  if(!Object.keys(diff).length)return true;const alvo=new Map();
+  if(S.col){try{const g=await S.col.where("serie","==",sid).get();g.docs.forEach(d=>{if(d.exists)alvo.set(d.id,clean(d.data()))})}catch(e){}}
+  for(const[id,r]of S.rotas)if(r.serie===sid)alvo.set(id,r);
+  let ok=true;
+  for(const[id,r]of alvo){if((r.serieData||r.data)<desde)continue;if(!S.rotas.has(id))S.rotas.set(id,r);sn.push(snapDoc("rotas",id));
+    if(!await put("rotas",id,Object.assign(clean(r),diff,{serie:sid,serieData:r.serieData||r.data})))ok=false}
+  return ok}
 /* aplica a mudança na repetição inteira (e também neste dia, se ele já tinha sido alterado à mão) */
 async function applyToSeries(r,changes,id,msg){
   const s=S.series.get(r.serie);const ch={};["ini","fim","caminhao"].forEach(k=>{if(changes[k]!=null)ch[k]=changes[k]});
   const sn=[snapDoc("series",r.serie)];let ok=await put("series",r.serie,Object.assign({},s,ch));
-  if(ok&&!r.virtual){sn.push(snapDoc("rotas",id));ok=await put("rotas",id,Object.assign(clean(r),ch))}
+  if(ok)ok=await levarParaExcecoes(r.serie,r.serieData||r.data,ch,sn);
   if(ok)offerUndo(msg+" · em todos os dias da repetição",sn);return ok}
 async function ctxSave(id,changes,msg){
   const r=S.items.get(id);if(!r||!guard())return;const body=Object.assign(clean(r),changes);let ok,sn;
@@ -2745,7 +2757,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.5";
+const VERSAO_TELA="6.6";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
