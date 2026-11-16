@@ -748,7 +748,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
       <div class="warnbox" id="fWarn"></div>
       <div class="actions">
         <button type="button" class="btn danger" id="mDel">Excluir</button>
-        <button type="button" class="btn" id="mEnd">Encerrar série a partir deste dia</button>
+        <button type="button" class="btn" id="mEnd">Excluir a repetição deste dia em diante</button>
         <button type="button" class="btn" id="mDup">Duplicar</button>
         <button type="button" class="btn" id="mWa" title="Mandar esta rota para o motorista"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg> WhatsApp</button>
         <div class="spacer"></div>
@@ -1272,6 +1272,7 @@ function occurs(s,ds){
   if(s.excluidas.includes(ds))return false;
   return matches(s,ds);
 }
+const ovSet=(...maps)=>{const o=new Set();maps.forEach(m=>m&&m.forEach(r=>{if(r&&r.serie&&!r.virtual)o.add(r.serie+"|"+r.serieData)}));return o};
 function virt(s,sid,ds){const o=clean(Object.assign({},s,{data:ds}));o.serie=sid;o.serieData=ds;o.virtual=true;return o}
 function recSummary(s){
   if(!s||!s.freq)return"";
@@ -1295,7 +1296,8 @@ function recSummary(s){
 function rebuild(){
   const it=new Map();for(const[id,r]of S.rotas)it.set(id,r);
   const m=monday(S.anchor);
-  for(let i=-1;i<=7;i++){const ds=iso(addDays(m,i));for(const[sid,s]of S.series)if(occurs(s,ds))it.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
+  const ov=ovSet(S.rotas);
+  for(let i=-1;i<=7;i++){const ds=iso(addDays(m,i));for(const[sid,s]of S.series)if(occurs(s,ds)&&!ov.has(sid+"|"+ds))it.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
   S.items=it;
 }
 function weekDays(){const m=monday(S.anchor);return Array.from({length:7},(_,i)=>addDays(m,i))}
@@ -1370,7 +1372,31 @@ function rotaBody(f){const b=clean(f);return b}
 function serieBody(f,rec,excl){return cleanSerie(Object.assign({},f,rec,{inicio:f.data,excluidas:excl||[]}))}
 async function excludeDate(sid,ds){
   const s=S.series.get(sid);if(!s||s.excluidas.includes(ds))return true;
-  return put("series",sid,Object.assign({},s,{excluidas:s.excluidas.concat(ds)}));
+  S.series.set(sid,Object.assign({},s,{excluidas:s.excluidas.concat(ds)}));render();
+  for(let t=0;t<3;t++){
+    let cur=s,ver;
+    if(t&&S.serCol){try{const g=await S.serCol.doc(sid).get();if(!g.exists)return true;cur=cleanSerie(g.data());ver=g.data().atualizado||""}catch(e){continue}}
+    if(cur.excluidas.includes(ds))return true;
+    const body=Object.assign({},cur,{excluidas:cur.excluidas.concat(ds)});
+    if(!S.serCol){S.series.set(sid,body);return true}
+    const at=new Date().toISOString();
+    try{await S.serCol.doc(sid).set(Object.assign({},body,{atualizado:at}),t?ver:(S.ver.has("series:"+sid)?S.ver.get("series:"+sid):undefined));S.series.set(sid,body);S.ver.set("series:"+sid,at);return true}
+    catch(e){if(!(e&&e.code==="conflict"))return writeErr(e)}
+  }
+  return writeErr({code:"conflict"});
+}
+/* para de repetir a partir de um dia (o que já passou fica) e tira os dias alterados à mão dali pra frente */
+async function endSeriesFrom(sid,ds){
+  const s=S.series.get(sid);if(!s)return null;const sn=[snapDoc("series",sid)];let ov=[];
+  if(S.col){try{const g=await S.col.where("serie","==",sid).get();ov=g.docs.filter(d=>d.exists&&String(d.data().serieData||d.data().data)>=ds).map(d=>[d.id,clean(d.data())])}catch(e){}}
+  for(const[id,r]of S.rotas)if(r.serie===sid&&(r.serieData||r.data)>=ds&&!ov.some(x=>x[0]===id))ov.push([id,r]);
+  ov.forEach(([id,r])=>{S.rotas.set(id,r);sn.push(snapDoc("rotas",id))});
+  let ok;
+  if(ds<=s.inicio)ok=await del("series",sid);
+  else ok=await put("series",sid,Object.assign({},s,{fimTipo:"data",ate:iso(addDays(parseIso(ds),-1))}));
+  if(!ok)return null;
+  for(const[id]of ov)await del("rotas",id);
+  return{sn,msg:ds<=s.inicio?"Repetição excluída":"Não repete mais a partir de "+ddmm(parseIso(ds))+(ov.length?" ("+ov.length+" dia(s) alterado(s) também saíram)":"")};
 }
 /* grava uma ocorrência como rota própria (exceção da série) */
 async function saveOccurrence(item,f,existingId){
@@ -1764,9 +1790,7 @@ $("#mDel").addEventListener("click",async()=>{
 });
 $("#mEnd").addEventListener("click",async()=>{
   if(!guard())return;const cur=E;const s=S.series.get(cur.sid);if(!s)return;closeForm();
-  const sn=[snapDoc("series",cur.sid)];
-  if(cur.date<=s.inicio){if(await del("series",cur.sid))offerUndo("Série excluída",sn);return}
-  if(await put("series",cur.sid,Object.assign({},s,{fimTipo:"data",ate:iso(addDays(parseIso(cur.date),-1))})))offerUndo("A série termina antes de "+ddmmyy(cur.date),sn);
+  const res=await endSeriesFrom(cur.sid,cur.date);if(res)offerUndo(res.msg,res.sn);
 });
 $("#mWa").addEventListener("click",()=>{if(!E)return;const f=formData();if(!f.data)return;
   const it=E.kind==="new"?null:Object.assign({id:E.id},f);openWA(f.data,f.caminhao,it)});
@@ -1930,8 +1954,8 @@ async function runSearch(){
   const t=new Date();const td=iso(t);
   if(mm){renderMtr(q,[...rows],(pend&&pend.itens||[]).map(x=>[x.id,clean(x.data)]),res.total,pend&&pend.total);return}
   const a=q.de||iso(addDays(t,-60));let b=q.ate||iso(addDays(t,90));if(dayDiff(parseIso(a),parseIso(b))>400)b=iso(addDays(parseIso(a),400));
-  let nv=0;
-  for(const[sid,s]of S.series)for(let d=parseIso(a);iso(d)<=b&&nv<400;d=addDays(d,1)){const ds=iso(d);if(occurs(s,ds)){const v=virt(s,sid,ds);if(matchQ(v,q)){rows.set("s~"+sid+"~"+ds,v);nv++}}}
+  let nv=0;const ov=ovSet(S.rotas,rows);
+  for(const[sid,s]of S.series)for(let d=parseIso(a);iso(d)<=b&&nv<400;d=addDays(d,1)){const ds=iso(d);if(occurs(s,ds)&&!ov.has(sid+"|"+ds)){const v=virt(s,sid,ds);if(matchQ(v,q)){rows.set("s~"+sid+"~"+ds,v);nv++}}}
   const all=[...rows];
   const fut=all.filter(([,r])=>r.data>=td).sort((x,y)=>(x[1].data+x[1].ini).localeCompare(y[1].data+y[1].ini));
   const past=all.filter(([,r])=>r.data<td).sort((x,y)=>(y[1].data+y[1].ini).localeCompare(x[1].data+x[1].ini));
@@ -2117,7 +2141,8 @@ async function exportXlsx(de,ate,truck){
   const rows=new Map();
   try{const sn=await S.col.where("data",">=",de).where("data","<=",ate).get();sn.docs.forEach(d=>{if(d.exists)rows.set(d.id,clean(d.data()))})}
   catch(e){toast("Não foi possível ler as rotas. Tente de novo.");return false}
-  for(let d=parseIso(de);iso(d)<=ate;d=addDays(d,1)){const ds=iso(d);for(const[sid,s]of S.series)if(occurs(s,ds))rows.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
+  const ov=ovSet(rows);
+  for(let d=parseIso(de);iso(d)<=ate;d=addDays(d,1)){const ds=iso(d);for(const[sid,s]of S.series)if(occurs(s,ds)&&!ov.has(sid+"|"+ds))rows.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
   const list=[...rows.values()].filter(r=>!truck||r.caminhao===truck).sort((a,b)=>(a.data+a.ini+a.caminhao).localeCompare(b.data+b.ini+b.caminhao));
   if(!list.length){toast("Nenhuma rota nesse período");return false}
   const sub="Período: "+ddmmyy(de)+" a "+ddmmyy(ate)+" · "+(truck||"Baú e Poliguindaste")+" · gerado em "+stamp();
@@ -2169,7 +2194,7 @@ async function dayItems(ds){
   if(inLoaded(ds))return routesOn(ds);
   const map=new Map();
   try{const sn=await S.col.where("data","==",ds).get();sn.docs.forEach(d=>{if(d.exists)map.set(d.id,clean(d.data()))})}catch(e){}
-  for(const[sid,s]of S.series)if(occurs(s,ds))map.set("s~"+sid+"~"+ds,virt(s,sid,ds));
+  const ov=ovSet(map);for(const[sid,s]of S.series)if(occurs(s,ds)&&!ov.has(sid+"|"+ds))map.set("s~"+sid+"~"+ds,virt(s,sid,ds));
   return[...map].map(([id,r])=>Object.assign({id},r)).sort((a,b)=>toMin(a.ini)-toMin(b.ini));
 }
 function waRoute(r,n,opt){
@@ -2234,7 +2259,8 @@ const FH={rotas:[],week:""};
 async function routesBetween(de,ate){
   const rows=new Map();
   const sn=await S.col.where("data",">=",de).where("data","<=",ate).get();sn.docs.forEach(d=>{if(d.exists)rows.set(d.id,clean(d.data()))});
-  for(let d=parseIso(de);iso(d)<=ate;d=addDays(d,1)){const ds=iso(d);for(const[sid,s]of S.series)if(occurs(s,ds))rows.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
+  const ov=ovSet(rows);
+  for(let d=parseIso(de);iso(d)<=ate;d=addDays(d,1)){const ds=iso(d);for(const[sid,s]of S.series)if(occurs(s,ds)&&!ov.has(sid+"|"+ds))rows.set("s~"+sid+"~"+ds,virt(s,sid,ds))}
   return[...rows.values()].sort((a,b)=>(a.data+a.ini).localeCompare(b.data+b.ini));
 }
 function fhExRow(x){const d=document.createElement("div");d.className="resrow";
@@ -2316,6 +2342,7 @@ function ctxOpen(id,x,y,touch){
     '<button type="button" data-act="wa">'+ic("wa")+' Mandar no WhatsApp</button>'+
     (temTraj?'<button type="button" data-act="map">'+PIN_S+' Trajeto no Google Maps</button>':'')+
     '<hr><button type="button" class="danger" data-act="del">'+ic("trash")+' '+(r.serie?"Excluir só este dia":"Excluir")+'</button>'+
+    (r.serie&&S.series.has(r.serie)?'<button type="button" class="danger" data-act="delser" title="Este e os próximos dias saem da agenda. Os dias que já passaram ficam.">'+ic("stop")+' Excluir a repetição (deste dia em diante)</button>':'')+
     (touch?'<button type="button" class="ctxcancel" data-act="close">Fechar</button>':'');
   const sc=document.createElement("div");sc.className="ctxscrim"+(touch?" dim":"");sc.addEventListener("pointerdown",e=>{e.preventDefault();ctxClose()});
   document.body.appendChild(sc);document.body.appendChild(m);
@@ -2335,6 +2362,7 @@ document.addEventListener("click",async e=>{
   if(a==="time"){const ni=$("#ctxIni").value,nf=$("#ctxFim").value;if(!ni||!nf||toMin(nf)<=toMin(ni)){toast("O fim precisa ser depois do início");return}
     ctxClose();if(ni===r.ini&&nf===r.fim)return;return ctxSave(id,{ini:ni,fim:nf},"Horário: "+ni+"–"+nf)}
   if(a==="del"&&!CTX.confirm){CTX.confirm=true;b.textContent="Confirmar: "+(r.serie?"excluir só este dia":"excluir rota");b.classList.add("armed");return}
+  if(a==="delser"&&!b.dataset.ok){b.dataset.ok="1";b.innerHTML=ic("stop")+" Confirmar: não repetir mais a partir de "+ddmm(parseIso(r.serieData||r.data));b.classList.add("armed");return}
   ctxClose();
   if(a==="close")return;
   if(a==="open")return openForm(id);
@@ -2346,6 +2374,7 @@ document.addEventListener("click",async e=>{
   if(a==="truck"){const c=r.caminhao==="Baú"?"Poliguindaste":"Baú";return ctxSave(id,{caminhao:c},"Passada para o "+c)}
   if(a==="tomorrow"){if(!guard())return;const body=clean(r);delete body.serie;delete body.serieData;body.data=iso(addDays(parseIso(r.data),1));body.status="Agendado";body.auto=true;body.anexos=[];
     const nid=newId(S.col);const sn=[snapDoc("rotas",nid)];if(await put("rotas",nid,body))offerUndo("Copiada para "+ddmm(parseIso(body.data)),sn);return}
+  if(a==="delser"){if(!guard())return;const res=await endSeriesFrom(r.serie,r.serieData||r.data);if(res)offerUndo(res.msg,res.sn);return}
   if(a==="del"){if(!guard())return;let ok,sn;
     if(r.virtual){sn=[snapDoc("series",r.serie)];ok=await excludeDate(r.serie,r.serieData);if(ok)offerUndo("Removida só deste dia",sn)}
     else{sn=[snapDoc("rotas",id)];ok=await del("rotas",id);if(ok)offerUndo(r.serie?"Removida só deste dia":"Rota excluída",sn)}}
@@ -2646,7 +2675,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.1";
+const VERSAO_TELA="6.2";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
