@@ -2753,13 +2753,25 @@ function mdHtml(t){const lin=String(t||"").split(/\r?\n/);let h="",ul=false,tb=[
     const hd=l.match(/^\s*#{1,6}\s+(.*)$/);if(hd){h+='<div class="ihd">'+inl(hd[1])+'</div>';return}if(l.trim())h+="<p>"+inl(l)+"</p>"});
   fechaUl();fechaTb();return h}
 S.iaHist=[];
-function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Júlia está pensando… <span id="iaSeg">0</span> s</div>':"");box.scrollTop=box.scrollHeight;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+(m.retry&&m===S.iaHist[S.iaHist.length-1]?'<p><button type="button" class="btn sm" data-iaretry>↻ Tentar de novo</button></p>':'')+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Júlia está pensando… <span id="iaSeg">0</span> s</div>':"");box.scrollTop=box.scrollHeight;
   clearInterval(S.iaTimer);if(pensando){const t0=Date.now();S.iaTimer=setInterval(()=>{const e=$("#iaSeg");if(e)e.textContent=Math.round((Date.now()-t0)/1000);else clearInterval(S.iaTimer)},1000)}}
 async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return;if(!guard())return;S.iaBusy=true;$("#iaGo").disabled=true;
   const hist=S.iaHist.filter(m=>!m.erro).slice(-8).map(m=>({role:m.role,texto:m.texto}));S.iaHist.push({role:"user",texto:txt});$("#iaTxt").value="";iaRender(true);
-  const t0=Date.now();try{const r=await API.call("apiIA",[{pergunta:txt,contexto:ctxIA(),historico:hist}]);S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
-  catch(e){const m=e&&e.message||"";S.iaHist.push({role:"model",erro:true,texto:/INVALIDO: apiIA/.test(m)?"O Google ainda está com o Code.gs antigo. Publique o Code.gs 9 (Implantar → Gerenciar implantações → ✏️ → Nova versão).":m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora."})}
+  S.iaUlt=txt;const t0=Date.now();const args=[{pergunta:txt,contexto:ctxIA(),historico:hist}];
+  try{let r;
+    // a conexão do celular às vezes cai em pedidos longos: tenta mais uma vez sozinha
+    try{r=await API.call("apiIA",args)}catch(e1){if(e1&&e1.code==="unavailable"&&!/INVALIDO/.test(e1.message||"")){const t=$("#iaMsgs .iathink");if(t)t.insertAdjacentHTML("beforeend"," · a conexão caiu, tentando de novo…");await sleep(2000);r=await API.call("apiIA",args)}else throw e1}
+    S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
+  catch(e){const m=e&&e.message||"";let msg;
+    if(/INVALIDO: apiIA/.test(m))msg="O Google ainda está com o Code.gs antigo. Publique o Code.gs novo (Implantar → Gerenciar implantações → ✏️ → Nova versão).";
+    else if(/LOTADO/.test(m))msg="O serviço gratuito de IA do Google está **lotado agora** (acontece em horários de pico). Nada errado com a agenda: tente de novo em 1 ou 2 minutos.";
+    else if(e&&e.code==="unavailable")msg="A conexão caiu antes da resposta chegar. Confira a internet e tente de novo.";
+    else msg=m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora.";
+    S.iaHist.push({role:"model",erro:true,retry:true,texto:msg})}
   finally{S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
+$("#iaMsgs").addEventListener("click",e=>{if(!e.target.closest("[data-iaretry]")||S.iaBusy)return;
+  const L=S.iaHist;if(L.length&&L[L.length-1].erro)L.pop();if(L.length&&L[L.length-1].role==="user")L.pop();iaEnviar(S.iaUlt)});
 function juliaAberta(){return $("#juliaPanel").classList.contains("open")}
 function juliaFecha(){const p=$("#juliaPanel");p.classList.remove("open");document.body.classList.remove("jopen");p.setAttribute("aria-hidden","true");$("#btnJulia").setAttribute("aria-expanded","false")}
 function abrirIA(pergunta){const p=$("#juliaPanel");if(!juliaAberta()){p.classList.add("open");document.body.classList.add("jopen");p.setAttribute("aria-hidden","false");$("#btnJulia").setAttribute("aria-expanded","true");iaRender(!!S.iaBusy)}
@@ -3301,7 +3313,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="8.3";
+const VERSAO_TELA="8.4";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
