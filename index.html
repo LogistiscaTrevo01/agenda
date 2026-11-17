@@ -263,6 +263,16 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .btn.sm{padding:4px 10px;font-size:13px}
 .fromprev{font-size:13px;color:var(--muted);margin-bottom:6px;display:none}
 .fromprev.show{display:block}
+.clipbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:45;display:none;align-items:center;flex-wrap:wrap;gap:8px;max-width:calc(100vw - 24px);background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:14px}
+.clipbar.show{display:flex}.clipbar b{font-weight:700}.clipbar small{color:var(--muted);flex-basis:100%}
+.clipbar input[type=date]{width:auto;padding:6px 8px}
+body.colando .lane{cursor:copy}
+body.colando .toast,body.colando .undobar{bottom:120px}
+.fixrow .usolink{color:var(--accent);font-weight:600;margin:0;background:none;opacity:1}
+@media (max-width:640px){.clipbar{bottom:8px;font-size:13px}}
+.dver{list-style:none;margin:8px 0 2px;padding:0;flex-basis:100%;display:flex;flex-direction:column;gap:4px}
+.dver button{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:100%;text-align:left;background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid rgba(127,127,127,.3);border-radius:8px;padding:6px 10px;font:inherit;color:inherit;cursor:pointer}
+.dver button:hover{border-color:var(--accent)}.dver .dq{font-weight:700;min-width:110px}.dver small{flex-basis:100%;color:var(--muted)}
 .fsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:6px 0 2px}.fsug:empty{display:none}
 .fsug button{border:1px dashed var(--accent);background:transparent;color:var(--accent);font:inherit;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer}
 .fsug button:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
@@ -983,7 +993,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <details><summary><b>3</b> Usar a agenda no dia a dia</summary><ol>
           <li>Escolha a visão: <b>Semana</b>, <b>Dia</b> ou <b>Lista</b>. Use <b>Hoje</b>, ‹ › ou a data para navegar.</li>
           <li><b>Mudar horário:</b> no computador, arraste o card; para esticar, puxe a borda de baixo. No celular, <b>segure o dedo</b> no card até ele ficar tracejado e arraste; para esticar, segure a <b>barrinha de baixo</b>.</li>
-          <li><b>Menu da rota:</b> botão direito (computador) ou segurar o dedo e soltar (celular). Nele você muda status, horário e caminhão, duplica, copia para o dia seguinte, manda no WhatsApp, abre o trajeto ou exclui.</li>
+          <li><b>Menu da rota:</b> botão direito (computador) ou segurar o dedo e soltar (celular). Nele você muda status, horário e caminhão, duplica, copia para o dia seguinte, <b>copia para colar em outro dia</b> (aparece uma barra embaixo: escolha o dia e clique em Colar, ou clique num horário vazio da agenda), manda no WhatsApp, abre o trajeto ou exclui.</li>
           <li><b>Status:</b> fica automático pelo horário (Agendado → Em rota → Concluído). Você pode marcar manualmente. <b>Cancelado</b> fica em vermelho e continua salvo; para tirar de vez, use Excluir.</li>
           <li>O <b>alfinete vermelho</b> abre no Google Maps o deslocamento entre uma rota e a próxima. O alfinete no nome do caminhão abre a rota do dia inteira.</li>
           <li>Um aviso vermelho de <b>conflito</b> aparece quando duas rotas do mesmo caminhão caem no mesmo horário.</li>
@@ -1048,6 +1058,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
 </div>
 <datalist id="dlLoc"></datalist><datalist id="dlCli"></datalist><datalist id="dlDest"></datalist><datalist id="dlRes"></datalist><datalist id="dlMot"></datalist>
 <div class="toast" id="toast" role="status"></div>
+<div class="clipbar" id="clipBar" role="region" aria-label="Rota copiada"></div>
 <div class="undobar" id="undobar" role="status" aria-live="polite"><span id="undoMsg"></span><button type="button" id="undoBtn">Desfazer</button><button type="button" id="undoClose" aria-label="Fechar">✕</button></div>
 
 <script>
@@ -2521,6 +2532,20 @@ $("#fhCopy").addEventListener("click",async()=>{
   fhSavePag()});
 $("#fhMail").addEventListener("click",()=>fhSavePag());
 
+/* ---------- copiar uma rota e colar em outro dia ---------- */
+function clipBody(r){const b=clean(r);["serie","serieData","id","virtual","excluidas","freq","inicio"].forEach(k=>delete b[k]);b.status="Agendado";b.auto=true;b.anexos=[];b.mtr="";delete b.atualizado;return b}
+function clipSet(r){S.clip=clipBody(r);try{localStorage.setItem("agendaClip",JSON.stringify(S.clip))}catch(e){}clipShow();toast("Rota copiada. Escolha o dia na barra de baixo ou clique num horário vazio da agenda.")}
+function clipClear(){S.clip=null;try{localStorage.removeItem("agendaClip")}catch(e){}clipShow()}
+function clipShow(){const b=$("#clipBar");if(!b)return;const c=S.clip;document.body.classList.toggle("colando",!!c);if(!c){b.classList.remove("show");b.innerHTML="";return}
+  const d=$("#clipDia")&&$("#clipDia").value||iso(addDays(new Date(),7));
+  b.innerHTML=ic("copy")+'<span>Copiada: <b>'+esc(c.cliente||c.servico||"Rota")+'</b> · '+esc(c.caminhao)+' '+esc(c.ini)+'–'+esc(c.fim)+'</span>'+
+    '<label>Colar em <input type="date" id="clipDia" value="'+esc(d)+'"></label><button type="button" class="btn sm primary" id="clipGo">Colar</button><button type="button" class="btn sm ghost" id="clipX" title="Parar de colar">✕</button>'+
+    '<small>Ou clique num horário vazio da agenda: a cópia abre naquele dia e caminhão, com o mesmo horário. Confira e salve.</small>';b.classList.add("show")}
+function clipPaste(ds,truck){if(!S.clip||!guard())return;const p=Object.assign(JSON.parse(JSON.stringify(S.clip)),{data:ds});if(truck)p.caminhao=truck;
+  openForm(null,p);$("#mTitle").textContent="Nova rota (colada)";toast("Confira e clique em Salvar. A cópia continua guardada para colar em outros dias.")}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#clipX,#clipGo");if(!t)return;if(t.id==="clipX")clipClear();else{const d=$("#clipDia").value;if(!d){toast("Escolha o dia");return}clipPaste(d)}});
+try{const c=JSON.parse(localStorage.getItem("agendaClip")||"null");if(c&&c.ini)S.clip=c}catch(e){}
+setTimeout(clipShow,0);
 /* ---------- menu da rota: botão direito (computador) ou segurar o dedo (celular) ---------- */
 const CTX={id:null,confirm:false};
 function ctxClose(){const m=$("#ctxMenu");if(m){m.remove()}document.querySelector(".ctxscrim")&&document.querySelector(".ctxscrim").remove();CTX.id=null;CTX.confirm=false}
@@ -2534,6 +2559,7 @@ function ctxOpen(id,x,y,touch){
     '<div class="ctxsub">Horário</div><div class="ctxtime"><label>Início <input type="time" step="300" id="ctxIni" value="'+esc(r.ini)+'"></label><label>Fim <input type="time" step="300" id="ctxFim" value="'+esc(r.fim)+'"></label><button type="button" class="cst" data-act="time">Aplicar</button></div>'+
     '<div class="ctxsub">Status</div><div class="ctxst">'+st+'<button type="button" class="cst'+(r.auto?" on":"")+'" data-act="auto">'+ic("clock")+' Automático</button></div>'+
     '<hr><button type="button" data-act="dup">'+ic("copy")+' Duplicar…</button>'+
+    '<button type="button" data-act="clip">'+ic("copy")+' Copiar (para colar em outro dia)</button>'+
     '<button type="button" data-act="tomorrow">'+ic("calplus")+' Copiar para o dia seguinte</button>'+
     '<button type="button" data-act="truck">'+ic("truck")+' Passar para o '+outro+'</button>'+
     '<button type="button" data-act="wa">'+ic("wa")+' Mandar no WhatsApp</button>'+
@@ -2627,6 +2653,7 @@ document.addEventListener("click",async e=>{
   if(a==="st")return ctxSave(id,{status:b.dataset.v,auto:false},"Status: "+b.dataset.v);
   if(a==="auto")return ctxSave(id,{status:"Agendado",auto:true},"Status automático pelo horário");
   if(a==="truck"){const c=r.caminhao==="Baú"?"Poliguindaste":"Baú";return ctxSave(id,{caminhao:c},"Passada para o "+c)}
+  if(a==="clip"){ctxClose();clipSet(r);return}
   if(a==="tomorrow"){if(!guard())return;const body=clean(r);delete body.serie;delete body.serieData;body.data=iso(addDays(parseIso(r.data),1));body.status="Agendado";body.auto=true;body.anexos=[];
     const nid=newId(S.col);const sn=[snapDoc("rotas",nid)];if(await put("rotas",nid,body))offerUndo("Copiada para "+ddmm(parseIso(body.data)),sn);return}
   if(a==="delser"){if(!guard())return;const res=await endSeriesFrom(r.serie,r.serieData||r.data);if(res)offerUndo(res.msg,res.sn);return}
@@ -2658,7 +2685,7 @@ const _closeM=closeModal;
 function dicaAjuda(){try{if(localStorage.getItem("agenda.dicaAjuda"))return;localStorage.setItem("agenda.dicaAjuda","1")}catch(e){return}setTimeout(()=>toast("Novo por aqui? Clique em Ajuda para ver o vídeo e o passo a passo."),1500)}
 
 /* ---------- Cadastros: locais, resíduos, motoristas, repetições e segurança ---------- */
-const CAD={open:false,tab:"clientes",q:"",edit:null,confirm:null,info:null,overr:null};
+const CAD={dopen:new Set(),todas:null,open:false,tab:"clientes",q:"",edit:null,confirm:null,info:null,overr:null};
 function usoN(g,nome){if(!S.uso)return null;const x=(S.uso[g]||{})[norm(nome)];return x?x.n:0}
 function usoHtml(g,nome){const n=usoN(g,nome);if(n===null)return'<span class="uso">…</span>';if(!n)return'<span class="uso">nenhuma</span>';
   return'<button type="button" class="usolink" data-act="ver" data-g="'+g+'" data-nome="'+esc(nome)+'" title="Ver quais rotas">'+'<b>'+n+'</b> rota'+(n>1?"s":"")+' ›</button>'}
@@ -2685,7 +2712,19 @@ async function saveLocal(oldId,nome,endereco,obs,tipo){
   if(old)S.locais.delete(old[0]);S.locais.set(k,Object.assign({_id:id},body));renderCad();
   try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
 }
-function openCad(tab){CAD.open=true;CAD.tab=tab||CAD.tab;CAD.edit=null;CAD.confirm=null;openModal("scrimCad");renderCad();loadUso();if(CAD.tab==="seg")loadInfo();if(CAD.tab==="series")loadOverr()}
+/* rotas e repetições que usam um destino (lista aberta na própria aba Endereços) */
+async function carregarTodas(){if(CAD.todas||CAD.carregando)return;CAD.carregando=true;
+  try{const g=await S.col.get();CAD.todas=g.docs.filter(d=>d.exists).map(d=>({id:d.id,r:clean(d.data())}))}catch(e){CAD.todas=[];toast("Não foi possível carregar as rotas agora")}
+  finally{CAD.carregando=false}if(CAD.open)renderCad()}
+function dverHtml(nome){const k=norm(nome);const usa=r=>partesDestino(r.destino).some(n=>norm(n)===k);
+  if(!CAD.todas){setTimeout(carregarTodas,0);return'<div class="dver"><span class="uso">Carregando as rotas…</span></div>'}
+  const rot=CAD.todas.filter(x=>usa(x.r)).sort((a,b)=>(a.r.data+a.r.ini).localeCompare(b.r.data+b.r.ini));
+  const ser=[...S.series].filter(([,s])=>usa(s));const hoje=iso(new Date());
+  const li=(attrs,quando,r,extra)=>'<li><button type="button" '+attrs+'><span class="dq">'+quando+'</span><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span> <b>'+esc(r.ini+"–"+r.fim)+'</b> · '+esc(r.cliente||r.servico||"Rota")+'<small>Destino: '+esc(r.destino)+(extra||"")+'</small></button></li>';
+  const h=ser.map(([id,s])=>li('data-act="dserie" data-id="'+esc(id)+'"','↻ '+esc(recSummary(s)),s,(seriesEnd(s)&&seriesEnd(s)<hoje?" · já terminou":" · repetição"))).join("")+
+    rot.map(x=>li('data-act="drota" data-id="'+esc(x.id)+'" data-ds="'+esc(x.r.data)+'"',DAYN[parseIso(x.r.data).getDay()].slice(0,3)+' '+ddmmyy(x.r.data),x.r,(x.r.serie?" · dia alterado de uma repetição":"")+(x.r.data<hoje?" · já passou":""))).join("");
+  return'<ul class="dver">'+(h||'<li><span class="uso">Nenhuma rota encontrada (pode ter sido corrigida agora).</span></li>')+'</ul>'}
+function openCad(tab){CAD.todas=null;CAD.open=true;CAD.tab=tab||CAD.tab;CAD.edit=null;CAD.confirm=null;openModal("scrimCad");renderCad();loadUso();if(CAD.tab==="seg")loadInfo();if(CAD.tab==="series")loadOverr()}
 $("#btnCad").addEventListener("click",()=>openCad());
 $("#cTabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;CAD.tab=b.dataset.tab;CAD.edit=null;CAD.confirm=null;CAD.q="";renderCad();if(CAD.tab==="seg")loadInfo();if(CAD.tab==="series")loadOverr()});
 async function loadInfo(){try{CAD.info=await API.call("apiInfo",[])}catch(e){CAD.info={erro:e&&e.code==="invalid_request"?MSG_OLD:(e&&e.message||"Não foi possível ler")}}if(CAD.open&&CAD.tab==="seg")renderCad()}
@@ -2738,7 +2777,7 @@ function renderCad(){
     const kl=new Set(todos.map(norm));const dsem=new Map();
     if(S.uso)Object.values(S.uso.destinos||{}).forEach(x=>partesDestino(x.nome).forEach(n=>{const k=norm(n);if(!k||kl.has(k))return;const o=dsem.get(k)||{nome:n,n:0};o.n+=x.n;dsem.set(k,o)}));
     const dopts='<option value="">Trocar por…</option>'+[...S.locais.values()].filter(l=>l.tipo==="destino"||l.nome==="Galpão Trevo").map(l=>l.nome).sort((a,b)=>a.localeCompare(b,"pt")).map(n=>'<option>'+esc(n)+'</option>').join("");
-    if(dsem.size)h+='<h4 class="csec">Destinos usados nas rotas e ainda sem endereço</h4><p class="cnote" style="margin-top:0">Se for um destino que já está cadastrado com outro nome (ex.: Macaúbas = Vital), escolha o nome certo e clique em <b>Corrigir nas rotas</b>. Se for um lugar novo, clique em <b>Cadastrar endereço</b>.</p>'+[...dsem.values()].sort((a,b)=>b.n-a.n).slice(0,30).map(x=>'<div class="fixrow"><b>'+ic("flag")+' '+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><select aria-label="Destino certo">'+dopts+'</select><button type="button" class="btn sm primary" data-act="fixdst" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-dst="1" data-nome="'+esc(x.nome)+'">＋ Cadastrar endereço</button></div>').join("");
+    if(dsem.size)h+='<h4 class="csec">Destinos usados nas rotas e ainda sem endereço</h4><p class="cnote" style="margin-top:0">Se for um destino que já está cadastrado com outro nome (ex.: Macaúbas = Vital), escolha o nome certo e clique em <b>Corrigir nas rotas</b>. Se for um lugar novo, clique em <b>Cadastrar endereço</b>.</p>'+[...dsem.values()].sort((a,b)=>b.n-a.n).slice(0,30).map(x=>'<div class="fixrow"><b>'+ic("flag")+' '+esc(x.nome)+'</b><button type="button" class="usolink" data-act="dver" data-nome="'+esc(x.nome)+'" aria-expanded="'+(CAD.dopen.has(norm(x.nome))?"true":"false")+'" title="Ver quais rotas"><b>'+x.n+'</b> rota'+(x.n>1?"s":"")+' '+(CAD.dopen.has(norm(x.nome))?"▴":"▾")+'</button><select aria-label="Destino certo">'+dopts+'</select><button type="button" class="btn sm primary" data-act="fixdst" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-dst="1" data-nome="'+esc(x.nome)+'">＋ Cadastrar endereço</button>'+(CAD.dopen.has(norm(x.nome))?dverHtml(x.nome):'')+'</div>').join("");
     h+='<p class="cnote">Aqui ficam <b>todos os lugares com endereço</b>: onde o caminhão coleta e para onde leva o resíduo. Marque <b>É destino</b> nos destinadores (Vital, J&amp;E, Inovar…): eles aparecem na lista de <b>Destino</b> da rota e, ao escolher um, a parada de <b>Descarte</b> entra sozinha no trajeto com o endereço certo. Corrigir o nome ou o endereço aqui corrige todas as rotas.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
@@ -2848,9 +2887,12 @@ $("#cBody").addEventListener("click",async e=>{
     if(g==="local"){const l=S.locais.get(locKey(para));if(l&&l.endereco)ex={enderecoDe:"",enderecoPara:l.endereco}}
     if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
     await propagar(g,b.dataset.de,para,ex);return}
+  if(a==="dver"){const k=norm(b.dataset.nome);if(CAD.dopen.has(k))CAD.dopen.delete(k);else CAD.dopen.add(k);renderCad();return}
+  if(a==="drota"){closeModal("scrimCad");openFound(b.dataset.ds,id);return}
+  if(a==="dserie"){closeModal("scrimCad");openSeries(id);return}
   if(a==="fdst"){CAD.soDst=!!b.dataset.v;renderCad();return}
   if(a==="fixdst"){const sel=b.closest(".fixrow").querySelector("select");const para=sel.value;if(!para){sel.focus();toast("Escolha o destino certo na lista");return}if(!guard())return;
-    b.disabled=true;b.textContent="Corrigindo…";const n=await trocarDestino(b.dataset.de,para);toast(n?"Corrigido em "+n+" rota(s)/repetição(ões)":"Nada para corrigir");API.refresh();await loadUso();renderCad();return}
+    b.disabled=true;b.textContent="Corrigindo…";const n=await trocarDestino(b.dataset.de,para);CAD.todas=null;toast(n?"Corrigido em "+n+" rota(s)/repetição(ões)":"Nada para corrigir");API.refresh();await loadUso();renderCad();return}
   if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome,dst:!!b.dataset.dst};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
@@ -2962,6 +3004,7 @@ cal.addEventListener("pointerup",async e=>{
     const lane=e.target.closest(".lane");if(!lane||lane!==d.lane||Math.abs(e.clientY-d.y0)>6||e.target.closest(".ev"))return;
     if(!guard())return;
     const rect=lane.getBoundingClientRect();const st=Math.floor((S.hs+(e.clientY-rect.top)/HOUR*60)/30)*30;
+    if(S.clip){clipPaste(lane.dataset.day,lane.dataset.truck);return}
     openForm(null,{data:lane.dataset.day,caminhao:lane.dataset.truck,ini:toHM(st),fim:toHM(Math.min(st+60,23*60+45))});return;
   }
   clearTimeout(d.timer);d.ev&&d.ev.classList.remove("armed");
@@ -3012,7 +3055,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.3";
+const VERSAO_TELA="7.4";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
