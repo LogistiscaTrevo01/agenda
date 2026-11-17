@@ -440,6 +440,8 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .docrow{display:grid;grid-template-columns:170px 1fr;gap:12px;align-items:start}
 .sublbl{display:block;font:600 11px var(--f-display);text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:4px}
 .fld .mtrbox input{width:100%}
+.mtrlist{display:flex;flex-direction:column;gap:6px}.mtrrow{display:flex;gap:6px;align-items:center}.mtrrow input{flex:1;min-width:0}
+.mtrrm{width:36px;height:36px;flex:none}.mtradd{margin-top:6px}
 .anxlist{display:flex;gap:8px;flex-wrap:wrap}
 .anxlist:empty{display:none}
 .anx{position:relative;width:84px;height:84px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:26px}
@@ -830,7 +832,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
       <div class="fld docs" id="fDocs">
         <label><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> MTR e anexos</label>
         <div class="docrow">
-          <div class="mtrbox"><span class="sublbl">Nº MTR</span><input id="fMtr" autocomplete="off" placeholder="Ex.: 240012345" aria-label="Número do MTR"></div>
+          <div class="mtrbox"><span class="sublbl">Nº MTR</span><div class="mtrlist" id="fMtrList"></div><input type="hidden" id="fMtr"><button type="button" class="btn sm ghost mtradd" id="fMtrAdd">＋ Outro MTR</button></div>
           <div class="anxwrap">
             <span class="sublbl">Fotos e arquivos</span>
             <div class="anxlist" id="fAnx"></div>
@@ -1756,7 +1758,7 @@ function fillFields(r){
   if(E){E.anexos=(r.anexos||[]).slice();E.newUploads=E.newUploads||[]}setTimeout(renderAnexos,0);
   $("#fData").value=r.data||"";$("#fIni").value=r.ini||"";$("#fFim").value=r.fim||"";
   $("#fCli").value=r.cliente||"";$("#fSrv").value=r.servico||"";$("#fDest").value=r.destino||"";setRes(cleanRes(r));
-  $("#fMot").value=r.motorista||"";$("#fMtr").value=r.mtr||"";$("#fObs").value=r.obs||"";
+  $("#fMot").value=r.motorista||"";$("#fMtr").value=r.mtr||"";mtrRender();$("#fObs").value=r.obs||"";
   const st=stopsOf(r);setStops(st.length?st:(r.id||r.inicio?[]:[{tipo:"Coleta",local:"",endereco:""},{tipo:"Descarte",local:"",endereco:""}]));
   $("#fDest").dataset.prev=r.destino||"";sugCli();
   pick("#fTruck",r.caminhao||"Baú");$("#fAuto").checked=r.auto!==false&&r.status!=="Cancelado";pick("#fStatus",r.status||"Agendado");
@@ -1924,6 +1926,18 @@ function validate(f,rec,needRec){
   if(rec.freq&&rec.fimTipo==="data"&&(!rec.ate||rec.ate<f.data))return"A data de término precisa ser depois do início.";
   return"";
 }
+/* vários MTRs: cada um num campo; ficam guardados juntos, separados por vírgula */
+const mtrAll=q=>[...document.querySelectorAll(q)];
+const mtrSplit=v=>String(v||"").split(/\s*[,;\n]\s*/).map(x=>x.trim()).filter(Boolean);
+function mtrRowHtml(v,i,n){return'<div class="mtrrow"><input class="mtrin" value="'+esc(v)+'" autocomplete="off" placeholder="'+(i?'Outro nº de MTR':'Ex.: 240012345')+'" aria-label="Número do MTR '+(i+1)+'">'+(n>1?'<button type="button" class="icon-btn mtrrm" title="Tirar este MTR" aria-label="Tirar o MTR '+(i+1)+'">✕</button>':'')+'</div>'}
+function mtrRender(foco){const L=mtrSplit($("#fMtr").value);if(!L.length||foco==="novo")L.push("");$("#fMtrList").innerHTML=L.map((v,i)=>mtrRowHtml(v,i,L.length)).join("");
+  if(foco){const ins=mtrAll("#fMtrList .mtrin");const el=foco==="novo"?ins[ins.length-1]:ins[Math.min(foco,ins.length-1)];el&&el.focus()}}
+function mtrSync(){$("#fMtr").value=mtrAll("#fMtrList .mtrin").map(x=>x.value.trim()).filter(Boolean).join(", ")}
+$("#fMtrList").addEventListener("input",e=>{if(e.target.classList.contains("mtrin"))mtrSync()});
+$("#fMtrList").addEventListener("change",e=>{if(e.target.classList.contains("mtrin")&&/[,;]/.test(e.target.value)){mtrSync();mtrRender()}});
+$("#fMtrList").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("mtrin")){e.preventDefault();mtrSync();if(e.target.value.trim())mtrRender("novo")}});
+$("#fMtrList").addEventListener("click",e=>{const b=e.target.closest(".mtrrm");if(!b)return;const i=mtrAll("#fMtrList .mtrrow").indexOf(b.closest(".mtrrow"));b.closest(".mtrrow").remove();mtrSync();mtrRender(Math.max(0,i-1));updateFormState()});
+$("#fMtrAdd").addEventListener("click",()=>{mtrSync();mtrRender("novo")});
 $("#form").addEventListener("input",updateFormState);
 function stopRow(p){
   const d=document.createElement("div");d.className="stop";
@@ -2283,7 +2297,7 @@ function renderMtr(q,withM,pend,tot,ptot){
   else h+='<p class="sempty">Nenhum MTR encontrado com esses filtros.</p>';
   if(pend.length){pend.sort((a,b)=>(b[1].data+b[1].ini).localeCompare(a[1].data+a[1].ini));
     h+='<h4>'+ic("alert")+' Concluídas sem MTR ('+(ptot||pend.length)+') — digite o número e salve aqui mesmo</h4><div class="cscroll" style="max-height:30vh"><table class="ctable"><tbody>'+
-    pend.slice(0,150).map(([id,r])=>{const d=parseIso(r.data);return'<tr class="pendrow"><td class="uso">'+ddmm(d)+'/'+d.getFullYear()+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></td><td><b>'+esc(r.cliente||r.servico)+'</b>'+(r.cliente&&r.servico?' · <span class="addr">'+esc(r.servico)+'</span>':'')+'</td><td class="act"><input placeholder="Nº do MTR" data-mtrin="'+esc(id)+'"> <button type="button" class="btn sm primary" data-mtrsave="'+esc(id)+'">Salvar</button> <button type="button" class="btn sm" data-go="'+esc(r.data)+'" data-id="'+esc(id)+'">Abrir</button></td></tr>'}).join("")+'</tbody></table></div>'}
+    pend.slice(0,150).map(([id,r])=>{const d=parseIso(r.data);return'<tr class="pendrow"><td class="uso">'+ddmm(d)+'/'+d.getFullYear()+'</td><td><span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></td><td><b>'+esc(r.cliente||r.servico)+'</b>'+(r.cliente&&r.servico?' · <span class="addr">'+esc(r.servico)+'</span>':'')+'</td><td class="act"><input placeholder="Nº do MTR (vários: separe por vírgula)" data-mtrin="'+esc(id)+'"> <button type="button" class="btn sm primary" data-mtrsave="'+esc(id)+'">Salvar</button> <button type="button" class="btn sm" data-go="'+esc(r.data)+'" data-id="'+esc(id)+'">Abrir</button></td></tr>'}).join("")+'</tbody></table></div>'}
   $("#sOut").innerHTML=h;
 }
 async function exportMtr(L){
@@ -3313,7 +3327,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="8.4";
+const VERSAO_TELA="8.5";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
