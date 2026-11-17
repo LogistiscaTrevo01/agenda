@@ -408,6 +408,12 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .btn.tema{background:transparent;border-color:rgba(255,255,255,.28);color:var(--top-ink,#fff)}
 .btn.tema:hover{background:rgba(255,255,255,.12)}
 @media (max-width:640px){.btn.tema .lbl{display:none}.btn.tema{padding:0 9px}}
+.usolink{background:none;border:0;padding:2px 4px;margin:-2px -4px;border-radius:6px;font:inherit;font-size:13px;color:var(--accent-ink,var(--brand,#241F59));cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.usolink:hover{background:var(--hover,rgba(36,31,89,.08))}
+[data-theme="dark"] .usolink{color:#c9c4ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .usolink{color:#c9c4ff}}
+.sexato{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--hover,rgba(36,31,89,.06));border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.sres.srep{cursor:pointer}
 /* ===== v5 ===== */
 .top .who{display:inline-flex;align-items:center;gap:8px;font-size:13px;opacity:.9}
 .top .who b{font-weight:600}
@@ -2027,8 +2033,19 @@ function sQuery(){
   else if(per==="semana"){const wd=weekDays();de=iso(wd[0]);ate=iso(wd[6])}
   else if(per==="mes"){const a=S.anchor;de=iso(new Date(a.getFullYear(),a.getMonth(),1));ate=iso(new Date(a.getFullYear(),a.getMonth()+1,0))}
   else if(per==="custom"){de=$("#sDe").value;ate=$("#sAte").value}
-  return{texto:$("#sTxt").value.trim(),campo:$("#sCampo").value,caminhao:picked("#sTruck"),tipo:$("#sTipo").value,status:$("#sStatus").value,mtr:$("#sMtr").value,anexos:$("#sAnx").value,de,ate};
+  const q={texto:$("#sTxt").value.trim(),campo:$("#sCampo").value,caminhao:picked("#sTruck"),tipo:$("#sTipo").value,status:$("#sStatus").value,mtr:$("#sMtr").value,anexos:$("#sAnx").value,de,ate};
+  if(S.sExato){if(q.texto===S.sExato.texto&&q.campo===S.sExato.campo)q.exato=S.sExato;else S.sExato=null}
+  return q;
 }
+/* "Usado em N rotas" nos Cadastros: abre a busca só com as rotas desse nome exato */
+const EXATO={clientes:["cliente","cliente"],destinos:["local","destino"],locais:["local","trajeto"],residuos:["residuo","resíduo"],motoristas:["motorista","motorista"]};
+function exatoOk(r,x){const k=norm(x.nome);
+  if(x.g==="clientes")return norm(r.cliente)===k;if(x.g==="destinos")return norm(r.destino)===k;
+  if(x.g==="locais")return(r.paradas||[]).some(p=>norm(p.local)===k);if(x.g==="motoristas")return norm(r.motorista)===k;
+  if(x.g==="residuos")return(r.residuos&&r.residuos.length)?r.residuos.some(y=>norm(y.tipo)===k):norm(r.residuo)===k;return true}
+function verRotas(g,nome){if(!EXATO[g])return;const tab=CAD.tab;closeModal("scrimCad");sReset(false);pick("#sMode","rotas");
+  $("#sTxt").value=nome;$("#sCampo").value=EXATO[g][0];S.sExato={g,nome,texto:nome,campo:EXATO[g][0],tab};
+  openModal("scrimSearch");runSearch()}
 const sEmpty=q=>!q.texto&&!q.caminhao&&!q.tipo&&!q.status&&!q.mtr&&!q.anexos&&!q.de&&!q.ate;
 function campoTxt(r,campo){
   const st=stopsOf(r);
@@ -2071,10 +2088,12 @@ async function runSearch(){
   catch(e){if(seq!==sSeq)return;out.innerHTML='<p class="sempty">'+esc(e&&e.code==="invalid_request"?MSG_OLD:(e&&e.message||"Não foi possível buscar agora. Tente de novo."))+'</p>';return}
   if(seq!==sSeq)return;
   const rows=new Map();(res.itens||[]).forEach(x=>rows.set(x.id,clean(x.data)));
+  if(q.exato)for(const[id,r]of [...rows])if(!exatoOk(r,q.exato))rows.delete(id);
   const t=new Date();const td=iso(t);
   if(mm){renderMtr(q,[...rows],(pend&&pend.itens||[]).map(x=>[x.id,clean(x.data)]),res.total,pend&&pend.total);return}
   const a=q.de||iso(addDays(t,-60));let b=q.ate||iso(addDays(t,90));if(dayDiff(parseIso(a),parseIso(b))>400)b=iso(addDays(parseIso(a),400));
   let nv=0;const ov=ovSet(S.rotas,rows);
+  if(q.exato){renderExato(q,rows,res,td);return}
   for(const[sid,s]of S.series)for(let d=parseIso(a);iso(d)<=b&&nv<400;d=addDays(d,1)){const ds=iso(d);if(occurs(s,ds)&&!ov.has(sid+"|"+ds)){const v=virt(s,sid,ds);if(matchQ(v,q)){rows.set("s~"+sid+"~"+ds,v);nv++}}}
   const all=[...rows];
   const fut=all.filter(([,r])=>r.data>=td).sort((x,y)=>(x[1].data+x[1].ini).localeCompare(y[1].data+y[1].ini));
@@ -2087,6 +2106,21 @@ async function runSearch(){
   h+='<h4>Anteriores ('+past.length+')</h4>'+(past.length?past.slice(0,lim).map(([id,r])=>resRowS(id,r,q)).join("")+(past.length>lim?'<p class="sempty">… e mais '+(past.length-lim)+'. Exporte para ver todas.</p>':''):'<p class="sempty">Nenhuma rota anterior.</p>');
   out.innerHTML=h;
 }
+function renderExato(q,rows,res,td){const x=q.exato;
+  const all=[...rows];const fut=all.filter(([,r])=>r.data>=td).sort((a,b)=>(a[1].data+a[1].ini).localeCompare(b[1].data+b[1].ini));
+  const past=all.filter(([,r])=>r.data<td).sort((a,b)=>(b[1].data+b[1].ini).localeCompare(a[1].data+a[1].ini));
+  const hojeS=iso(new Date());
+  const reps=[...S.series].filter(([,s])=>exatoOk(s,x)).map(([sid,s])=>{const e=seriesEnd(s);return[sid,s,e&&e<hojeS,nextDates(s,hojeS,1)[0]]}).filter(r=>(!q.caminhao||r[1].caminhao===q.caminhao));
+  S.sLast={q,list:fut.concat(past).map(([,r])=>r)};
+  const ativas=reps.filter(r=>!r[2]),velhas=reps.filter(r=>r[2]);
+  let h='<div class="sexato">'+ic("search")+'<span>Só o que tem <b>'+EXATO[x.g][1]+'</b> igual a “<b>'+esc(x.nome)+'</b>”</span><span class="spacer"></span><button type="button" class="btn sm" data-sx="volta">← Voltar aos Cadastros</button><button type="button" class="btn sm ghost" data-sx="limpa">Limpar</button></div>';
+  h+='<div class="shead"><b>'+all.length+' rota(s)'+(reps.length?' e '+reps.length+' repetição(ões)':'')+'</b><span class="hint">Baú '+all.filter(([,r])=>r.caminhao==="Baú").length+' · Poli '+all.filter(([,r])=>r.caminhao==="Poliguindaste").length+'</span>'+(res.total>(res.itens||[]).length?'<span class="hint">a busca trouxe as '+(res.itens||[]).length+' mais recentes</span>':'')+'<span class="spacer"></span>'+(all.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Excel</button>':'')+'</div>';
+  const repRow=([sid,s,acabou,nx])=>'<div class="sres srep'+(acabou?' cancel':'')+'" data-ser="'+esc(sid)+'"><span class="num">'+ic("repeat")+'</span><span class="num">'+esc(s.ini)+'–'+esc(s.fim)+'</span><span class="pill '+truckCls(s.caminhao)+'">'+(s.caminhao==="Baú"?"Baú":"Poli")+'</span><span class="sw"><b>'+esc(s.cliente||s.servico)+'</b>'+(s.cliente&&s.servico?' – '+esc(s.servico):'')+'</span><span class="tags"><span class="tg">'+esc(recSummary(s))+'</span><span class="tg">'+(acabou?'encerrada':nx?'próxima: '+ddmm(parseIso(nx)):'sem próximas')+'</span></span></div>';
+  if(ativas.length)h+='<h4>Repetições ('+ativas.length+')</h4>'+ativas.map(repRow).join("");
+  h+='<h4>Próximas ('+fut.length+')</h4>'+(fut.length?fut.slice(0,150).map(([id,r])=>resRowS(id,r,q)).join(""):'<p class="sempty">Nenhuma rota avulsa daqui para frente'+(ativas.length?' (as datas das repetições aparecem na agenda).':'.')+'</p>');
+  h+='<h4>Anteriores ('+past.length+')</h4>'+(past.length?past.slice(0,150).map(([id,r])=>resRowS(id,r,q)).join(""):'<p class="sempty">Nenhuma rota anterior.</p>');
+  if(velhas.length)h+='<h4>Repetições encerradas ('+velhas.length+')</h4>'+velhas.map(repRow).join("");
+  $("#sOut").innerHTML=h}
 /* lista de MTRs: um MTR por linha, com repetidos marcados e as concluídas que ainda estão sem MTR */
 function renderMtr(q,withM,pend,tot,ptot){
   const linhas=[];const na=withM.filter(([,r])=>isNA(r.mtr)).length;withM.forEach(([id,r])=>splitMtr(r.mtr).forEach(n=>linhas.push({n,id,r})));
@@ -2115,7 +2149,7 @@ async function exportMtr(L){
     L.pend.map(([,r])=>[xDate(r.data),r.caminhao,r.cliente,r.servico,r.destino,r.motorista]),"FFD92D20").eachRow((row,i)=>{if(i>4)row.getCell(1).numFmt="dd/mm/yyyy"});
   try{await saveWb(wb,"Lista de MTRs "+iso(new Date())+".xlsx");toast("Lista de MTRs baixada")}catch(e){toast("Não foi possível baixar a planilha")}
 }
-function sReset(keepText){if(!keepText){$("#sTxt").value="";$("#sCampo").value=""}pick("#sTruck","");["#sTipo","#sStatus","#sMtr","#sAnx","#sPer"].forEach(x=>$(x).value="");$("#sDe").hidden=$("#sAte").hidden=true}
+function sReset(keepText){S.sExato=null;if(!keepText){$("#sTxt").value="";$("#sCampo").value=""}pick("#sTruck","");["#sTipo","#sStatus","#sMtr","#sAnx","#sPer"].forEach(x=>$(x).value="");$("#sDe").hidden=$("#sAte").hidden=true}
 $("#btnSearch").addEventListener("click",()=>{openModal("scrimSearch");if(!S.sLast)runSearch();setTimeout(()=>$("#sTxt").focus(),30)});
 $("#sForm").addEventListener("submit",e=>{e.preventDefault();runSearch()});
 let sT=null;const sLater=()=>{clearTimeout(sT);sT=setTimeout(runSearch,250)};
@@ -2130,6 +2164,8 @@ $("#sQuick").addEventListener("click",e=>{const b=e.target.closest("[data-q]");i
   else if(k==="anexos")$("#sAnx").value="com";else if(k==="cancel")$("#sStatus").value="Cancelado";
   runSearch()});
 $("#sOut").addEventListener("click",async e=>{
+  const sx=e.target.closest("[data-sx]");if(sx){const x=S.sExato;S.sExato=null;if(sx.dataset.sx==="volta"&&x){closeModal("scrimSearch");openCad(x.tab)}else{sReset(false);runSearch();$("#sTxt").focus()}return}
+  const sr=e.target.closest("[data-ser]");if(sr){closeModal("scrimSearch");openSeries(sr.dataset.ser);return}
   if(e.target.closest("#sExp")){const L=S.sLast;if(!L)return;if(L.mtr)exportMtr(L);else exportList(L.list,"Resultado da busca",descQ(L.q));return}
   const cp=e.target.closest("[data-copy]");if(cp){e.stopPropagation();try{await copyText(cp.dataset.copy);toast("Nº do MTR copiado")}catch(x){}return}
   if(e.target.closest("a,input"))return;
@@ -2584,7 +2620,8 @@ function dicaAjuda(){try{if(localStorage.getItem("agenda.dicaAjuda"))return;loca
 /* ---------- Cadastros: locais, resíduos, motoristas, repetições e segurança ---------- */
 const CAD={open:false,tab:"clientes",q:"",edit:null,confirm:null,info:null,overr:null};
 function usoN(g,nome){if(!S.uso)return null;const x=(S.uso[g]||{})[norm(nome)];return x?x.n:0}
-function usoHtml(g,nome){const n=usoN(g,nome);return n===null?'<span class="uso">…</span>':'<span class="uso">'+(n?'<b>'+n+'</b> rota'+(n>1?"s":""):"nenhuma")+'</span>'}
+function usoHtml(g,nome){const n=usoN(g,nome);if(n===null)return'<span class="uso">…</span>';if(!n)return'<span class="uso">nenhuma</span>';
+  return'<button type="button" class="usolink" data-act="ver" data-g="'+g+'" data-nome="'+esc(nome)+'" title="Ver quais rotas">'+'<b>'+n+'</b> rota'+(n>1?"s":"")+' ›</button>'}
 function uid(map,nome){let k=locKey(nome)||("x"+Date.now().toString(36));if(!map.has(k))return k;let i=2;while(map.has(k+"-"+i))i++;return k+"-"+i}
 async function loadUso(){try{S.uso=await API.call("apiUso",[]);fillLists();if(CAD.open)renderCad()}catch(e){}}
 const CADMAP=col=>({residuos:[S.residuos,S.resCol],motoristas:[S.motoristas,S.motCol],clientes:[S.clientes,S.cliCol],destinos:[S.destinos,S.dstCol]})[col];
@@ -2737,6 +2774,7 @@ $("#cBody").addEventListener("keydown",e=>{if(!e.target.closest("[data-edit]"))r
 $("#cBody").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;const tab=CAD.tab;
   if(a==="patio"){openPatio();return}
+  if(a==="ver"){verRotas(b.dataset.g,b.dataset.nome);return}
   if(a==="new"){CAD.edit={id:""};CAD.confirm=null;renderCad();return}
   if(a==="addall"){const K=LISTA[b.dataset.g];const known=new Set([...K.map().values()].map(x=>norm(x.nome)));const nomes=new Map();
     semCadastro(K.g,[...known]).forEach(x=>(K.g==="destinos"?partesDestino(x.nome):[x.nome]).forEach(n=>{if(!known.has(norm(n))&&!nomes.has(norm(n)))nomes.set(norm(n),n)}));
@@ -2910,7 +2948,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.0";
+const VERSAO_TELA="7.1";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
