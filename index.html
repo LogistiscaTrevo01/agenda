@@ -263,6 +263,14 @@ tr.cancel td:first-child{box-shadow:inset 4px 0 0 var(--cancel)}
 .btn.sm{padding:4px 10px;font-size:13px}
 .fromprev{font-size:13px;color:var(--muted);margin-bottom:6px;display:none}
 .fromprev.show{display:block}
+.fsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:6px 0 2px}.fsug:empty{display:none}
+.fsug button{border:1px dashed var(--accent);background:transparent;color:var(--accent);font:inherit;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer}
+.fsug button:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.stop.sauto{animation:sflash 1.4s ease-out}@keyframes sflash{0%{background:color-mix(in srgb,var(--accent) 22%,transparent)}100%{background:transparent}}
+.dpill{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.dpill .ic{width:11px;height:11px}
+.dchk{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:6px;font-weight:600;cursor:pointer}.dchk input{width:auto}
+.cfilt{display:flex;gap:6px;margin:0 0 10px}.cfilt .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .fromprev a{color:var(--accent);font-weight:600;text-decoration:none}
 .gapchip{position:absolute;left:50%;z-index:3;display:inline-flex;align-items:center;gap:3px;max-width:calc(100% - 6px);overflow:hidden;font:600 11.5px/1 var(--f-cond);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 8px 3px 5px;text-decoration:none;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:var(--shadow)}
 .gapchip:hover{border-color:#EA4335;color:#b3261e}
@@ -725,6 +733,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <label><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Trajeto <span class="hint" style="text-transform:none;letter-spacing:0;font-weight:500">— opcional, na ordem em que o caminhão passa</span></label>
         <div class="fromprev" id="fromPrev"></div>
         <div class="stops" id="fStops"></div>
+        <div class="fsug" id="fSug" aria-live="polite"></div>
         <div class="stopbtns">
           <button type="button" class="btn sm" id="addStop">＋ Parada</button>
           <button type="button" class="btn sm" id="addPatioStart">＋ Sair do Galpão Trevo</button>
@@ -895,7 +904,6 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <header><h2 id="cTitle">Cadastros</h2><button class="icon-btn" type="button" data-close="scrimCad" aria-label="Fechar">✕</button></header>
     <div class="tabs" role="tablist" id="cTabs">
       <button type="button" role="tab" data-tab="clientes" aria-selected="true"><span data-ic="building"></span> Clientes<span class="n" id="nCli"></span></button>
-      <button type="button" role="tab" data-tab="destinos" aria-selected="false"><span data-ic="flag"></span> Destinos<span class="n" id="nDst"></span></button>
       <button type="button" role="tab" data-tab="locais" aria-selected="false"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Endereços<span class="n" id="nLoc"></span></button>
       <button type="button" role="tab" data-tab="residuos" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Resíduos<span class="n" id="nRes"></span></button>
       <button type="button" role="tab" data-tab="motoristas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Motoristas<span class="n" id="nMot"></span></button>
@@ -966,6 +974,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <li>Clique em <b>＋ Nova rota</b> (botão amarelo). No computador, também dá para clicar num horário vazio da agenda.</li>
           <li>Escolha o caminhão: <b>Baú (verde)</b> ou <b>Poliguindaste (azul)</b>. Preencha data, início, fim, cliente e serviço.</li>
           <li><b>Trajeto:</b> monte as paradas na ordem em que o caminhão passa (Saída, Coleta, Descarte, Retorno…). Os botões <b>Sair do Galpão Trevo</b> e <b>Voltar ao Galpão Trevo</b> já colocam o endereço do galpão.</li>
+          <li><b>Destino e cliente:</b> ao escolher o <b>Destino</b>, a parada de <b>Descarte</b> entra sozinha no trajeto com o endereço. Ao escolher o <b>Cliente</b>, aparece a sugestão <b>＋ Coleta em…</b> com o endereço dele — clique só se o caminhão for lá. Os destinos são os endereços marcados como <b>É destino</b> em Cadastros → Endereços.</li>
           <li>Digitou o nome de um local já salvo? O endereço aparece sozinho. Para mudar a ordem, <b>segure a alça ⠿</b> e arraste (ou use as setas).</li>
           <li><b>Resíduos:</b> coloque o tipo, a <b>classe</b> e a quantidade, um por linha. Passe o mouse na classe ou toque em <b>ⓘ Classes</b> para ver a explicação de cada uma.</li>
           <li><b>MTR e anexos:</b> digite o nº do MTR e anexe fotos ou PDFs (MTR assinado, foto da caçamba…).</li>
@@ -1616,7 +1625,7 @@ function renderList(wd){
   $("#list").innerHTML=(any?h:'<p style="color:var(--muted);padding:20px 0">Nenhuma rota nesta semana. Use “＋ Nova rota” para lançar.</p>')+sh;
 }
 function fillLists(){
-  const sets={cli:new Set(),dest:new Set(DEST_DEF),res:new Set(S.residuos.size?[]:RES_DEF),mot:new Set()};
+  const sets={cli:new Set(),dest:new Set(["Galpão Trevo"]),res:new Set(S.residuos.size?[]:RES_DEF),mot:new Set()};
   const add=r=>{if(r.cliente)sets.cli.add(r.cliente);if(r.destino)sets.dest.add(r.destino);
     if(!S.residuos.size)(r.residuos||[]).forEach(x=>sets.res.add(x.tipo));if(!S.motoristas.size&&r.motorista)sets.mot.add(r.motorista)};
   for(const r of S.rotas.values())add(r);for(const r of S.series.values())add(r);
@@ -1624,7 +1633,7 @@ function fillLists(){
   for(const x of S.motoristas.values())if(x.nome)sets.mot.add(x.nome);
   if(S.uso)Object.values(S.uso.clientes||{}).forEach(x=>sets.cli.add(x.nome));
   const put=(id,s)=>{$(id).innerHTML=[...s].sort((a,b)=>a.localeCompare(b,"pt")).map(v=>'<option value="'+esc(v)+'">').join("")};
-  for(const x of S.clientes.values())sets.cli.add(x.nome);for(const x of S.destinos.values())sets.dest.add(x.nome);
+  for(const x of S.clientes.values())sets.cli.add(x.nome);for(const l of S.locais.values())if(l.tipo==="destino"&&l.nome)sets.dest.add(l.nome);
   const locs=new Set();for(const l of S.locais.values())if(l.nome)locs.add(l.nome);if(S.uso)Object.values(S.uso.locais||{}).forEach(x=>locs.add(x.nome));
   for(const r of S.rotas.values())(r.paradas||[]).forEach(p=>p.local&&locs.add(p.local));
   put("#dlLoc",locs);put("#dlCli",sets.cli);put("#dlDest",sets.dest);put("#dlRes",sets.res);put("#dlMot",sets.mot);
@@ -1641,6 +1650,7 @@ function fillFields(r){
   $("#fCli").value=r.cliente||"";$("#fSrv").value=r.servico||"";$("#fDest").value=r.destino||"";setRes(cleanRes(r));
   $("#fMot").value=r.motorista||"";$("#fMtr").value=r.mtr||"";$("#fObs").value=r.obs||"";
   const st=stopsOf(r);setStops(st.length?st:(r.id||r.inicio?[]:[{tipo:"Coleta",local:"",endereco:""},{tipo:"Descarte",local:"",endereco:""}]));
+  $("#fDest").dataset.prev=r.destino||"";sugCli();
   pick("#fTruck",r.caminhao||"Baú");$("#fAuto").checked=r.auto!==false&&r.status!=="Cancelado";pick("#fStatus",r.status||"Agendado");
 }
 function fillRec(s,dateForDefault){
@@ -1819,11 +1829,40 @@ function stopRow(p){
 function setStops(list){const c=$("#fStops");c.innerHTML="";list.forEach(p=>c.appendChild(stopRow(p)))}
 function getStops(){return[...document.querySelectorAll("#fStops .stop")].map(r=>({tipo:r.querySelector(".stipo").value,local:r.querySelector(".slocal").value.trim(),endereco:r.querySelector(".send").value.trim()})).filter(p=>p.local||p.endereco)}
 function addStop(p,atStart){const c=$("#fStops");const row=stopRow(p);if(atStart)c.prepend(row);else c.appendChild(row);updateFormState();if(!p.local&&!p.endereco)row.querySelector(".slocal").focus()}
+/* Destino escolhido → parada de Descarte com o endereço certo; Cliente → sugestão de Coleta */
+function stopRows(){return[...document.querySelectorAll("#fStops .stop")]}
+function rowSet(row,tipo,local,end){row.querySelector(".stipo").value=tipo;row.querySelector(".slocal").value=local;const a=row.querySelector(".send");a.value=end||"";a.dataset.auto=end?"1":"";
+  row.classList.remove("sauto");void row.offsetWidth;row.classList.add("sauto")}
+function rowVazia(row,tipo){return row.querySelector(".stipo").value===tipo&&!row.querySelector(".slocal").value.trim()&&!row.querySelector(".send").value.trim()}
+function inserirParada(tipo,local,end){const c=$("#fStops");const rows=stopRows();
+  const vaz=rows.find(r=>rowVazia(r,tipo));if(vaz){rowSet(vaz,tipo,local,end);return vaz}
+  const row=stopRow({tipo,local,endereco:end});row.querySelector(".send").dataset.auto=end?"1":"";
+  let antes=null;
+  if(tipo==="Coleta")antes=rows.find(r=>["Descarte","Retorno"].includes(r.querySelector(".stipo").value))||null;
+  else{const ult=rows[rows.length-1];if(ult&&ult.querySelector(".stipo").value==="Retorno")antes=ult}
+  c.insertBefore(row,antes);row.classList.add("sauto");return row}
+function localDe(nome){const k=locKey(nome);return k?S.locais.get(k):null}
+function aplicarDestino(){const inp=$("#fDest");const novo=partesDestino(inp.value);const velho=partesDestino(inp.dataset.prev||"");inp.dataset.prev=inp.value;
+  const nn=novo.map(norm),vv=velho.map(norm);const tem=n=>stopRows().some(r=>norm(r.querySelector(".slocal").value)===n);
+  const faltam=novo.filter(n=>!tem(norm(n))&&localDe(n));let mudou=0;
+  stopRows().forEach(r=>{if(r.querySelector(".stipo").value!=="Descarte")return;const n=norm(r.querySelector(".slocal").value);if(!n||!vv.includes(n)||nn.includes(n))return;
+    const x=faltam.shift();if(x){const l=localDe(x);rowSet(r,"Descarte",l.nome,l.endereco);mudou++}else if(r.dataset.autodst){r.remove();mudou++}});
+  faltam.forEach(x=>{const l=localDe(x);const row=inserirParada("Descarte",l.nome,l.endereco);row.dataset.autodst="1";mudou++});
+  if(mudou){updateFormState();sugCli()}}
+function sugCli(){const box=$("#fSug");if(!box)return;const cli=$("#fCli").value.trim();
+  const partes=partesDestino(cli).map(norm).filter(x=>x.length>=3);const ja=new Set(stopRows().map(r=>norm(r.querySelector(".slocal").value)));
+  const out=[];if(partes.length)for(const l of S.locais.values()){if(l.tipo==="destino"||l.nome==="Galpão Trevo"||!l.nome)continue;const ln=norm(l.nome);if(ja.has(ln))continue;
+    if(partes.some(p=>ln===p||ln.includes(p)||(ln.length>=4&&p.includes(ln))))out.push(l)}
+  out.sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
+  box.innerHTML=out.length?'<span>Sugestão:</span>'+out.slice(0,6).map(l=>'<button type="button" data-sug="'+esc(l.nome)+'" title="'+esc(l.endereco||"sem endereço")+'">＋ Coleta em '+esc(l.nome)+'</button>').join(""):""}
+$("#fSug").addEventListener("click",e=>{const b=e.target.closest("[data-sug]");if(!b)return;const l=localDe(b.dataset.sug);if(!l)return;inserirParada("Coleta",l.nome,l.endereco);updateFormState();sugCli()});
+$("#fDest").addEventListener("change",aplicarDestino);
+$("#fCli").addEventListener("input",sugCli);$("#fCli").addEventListener("change",sugCli);
 $("#addStop").addEventListener("click",()=>addStop({tipo:"Parada",local:"",endereco:""}));
 $("#addPatioStart").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço do Galpão em Cadastros → Locais");return}addStop({tipo:"Saída",local:"Galpão Trevo",endereco:S.patio},true)});
 $("#addPatioEnd").addEventListener("click",()=>{if(!S.patio){toast("Cadastre antes o endereço do Galpão em Cadastros → Locais");return}addStop({tipo:"Retorno",local:"Galpão Trevo",endereco:S.patio})});
 $("#fStops").addEventListener("click",e=>{const row=e.target.closest(".stop");if(!row)return;
-  if(e.target.closest(".rm")){row.remove();updateFormState()}
+  if(e.target.closest(".rm")){row.remove();updateFormState();sugCli()}
   else if(e.target.closest(".up")&&row.previousElementSibling){row.parentNode.insertBefore(row,row.previousElementSibling);updateFormState()}
   else if(e.target.closest(".dn")&&row.nextElementSibling){row.parentNode.insertBefore(row.nextElementSibling,row);updateFormState()}});
 /* arrastar a parada pela alça (⠿ + número) com o mouse ou o dedo */
@@ -1836,7 +1875,7 @@ $("#fStops").addEventListener("pointerdown",e=>{const h=e.target.closest(".shand
 $("#fStops").addEventListener("input",e=>{const row=e.target.closest(".stop");if(!row)return;
   if(e.target.classList.contains("send"))e.target.dataset.auto="";
   if(e.target.classList.contains("slocal"))e.target.dataset.auto="";
-  if(e.target.classList.contains("slocal")){const a=row.querySelector(".send");if(!a.value||a.dataset.auto){const v=lookupAddr(e.target.value.trim());a.value=v;a.dataset.auto=v?"1":""}}});
+  if(e.target.classList.contains("slocal")){const a=row.querySelector(".send");if(!a.value||a.dataset.auto){const v=lookupAddr(e.target.value.trim());a.value=v;a.dataset.auto=v?"1":""}sugCli()}});
 $("#fromPrev").addEventListener("click",e=>{const a=e.target.closest("[data-addfrom]");if(!a)return;e.preventDefault();const fp=$("#fromPrev");addStop({tipo:"Saída",local:fp.dataset.local||"",endereco:fp.dataset.addr||""},true)});
 $("#form").addEventListener("change",updateFormState);
 ["#fTruck","#fStatus"].forEach(sel=>$(sel).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;pick(sel,b.dataset.v);if(sel==="#fStatus")$("#fAuto").checked=false;updateFormState()}));
@@ -2041,6 +2080,7 @@ function sQuery(){
 const EXATO={clientes:["cliente","cliente"],destinos:["local","destino"],locais:["local","trajeto"],residuos:["residuo","resíduo"],motoristas:["motorista","motorista"]};
 function exatoOk(r,x){const k=norm(x.nome);
   if(x.g==="clientes")return norm(r.cliente)===k;if(x.g==="destinos")return norm(r.destino)===k;
+  if(x.g==="locais"){const l=S.locais.get(locKey(x.nome));if(l&&l.tipo==="destino"&&partesDestino(r.destino).some(n=>norm(n)===k))return true}
   if(x.g==="locais")return(r.paradas||[]).some(p=>norm(p.local)===k);if(x.g==="motoristas")return norm(r.motorista)===k;
   if(x.g==="residuos")return(r.residuos&&r.residuos.length)?r.residuos.some(y=>norm(y.tipo)===k):norm(r.residuo)===k;return true}
 function verRotas(g,nome){if(!EXATO[g])return;const tab=CAD.tab;closeModal("scrimCad");sReset(false);pick("#sMode","rotas");
@@ -2627,6 +2667,7 @@ async function loadUso(){try{S.uso=await API.call("apiUso",[]);fillLists();if(CA
 const CADMAP=col=>({residuos:[S.residuos,S.resCol],motoristas:[S.motoristas,S.motCol],clientes:[S.clientes,S.cliCol],destinos:[S.destinos,S.dstCol]})[col];
 async function cadSet(col,id,body){
   const[map,c]=CADMAP(col);
+  if(!id){const ja=[...map].find(([,x])=>norm(x.nome)===norm(body.nome));if(ja)return true}
   id=id||uid(map,body.nome);map.set(id,body);fillLists();if(CAD.open)renderCad();
   try{await c.doc(id).set(body);return true}catch(e){return writeErr(e)}
 }
@@ -2639,7 +2680,7 @@ async function saveLocal(oldId,nome,endereco,obs,tipo){
   const k=locKey(nome);if(!k){toast("Informe o nome do local");return false}
   const ex=S.locais.get(k);if(ex&&ex._id!==oldId){toast("Já existe um local com esse nome");return false}
   const old=oldId?[...S.locais].find(([,x])=>x._id===oldId):null;
-  const body={nome,endereco,obs,tipo:tipo||(old&&old[1].tipo)||""};
+  const body={nome,endereco,obs,tipo:tipo!==undefined?tipo:((old&&old[1].tipo)||"")};
   const sameKey=old&&old[0]===k;const id=sameKey?oldId:(ex?ex._id:k);
   if(old)S.locais.delete(old[0]);S.locais.set(k,Object.assign({_id:id},body));renderCad();
   try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
@@ -2656,7 +2697,7 @@ const actBtns=(id,extra)=>(extra||"")+'<button type="button" class="btn sm" data
 const editBtns='<button type="button" class="btn sm primary" data-act="save">Salvar</button> <button type="button" class="btn sm ghost" data-act="cancel">Cancelar</button>';
 const LISTA={
   clientes:{map:()=>S.clientes,ok:()=>S.cliOk,g:"clientes",tipo:"cliente",col:"Cliente (contrato)",um:"cliente",plural:"clientes",busca:"Procurar cliente",novo:"Novo cliente",ph:"Nome do cliente (ex.: Hermes Pardini)",obsPh:"Ex.: contrato, contato",semTit:"Clientes usados nas rotas e ainda sem cadastro",
-    nota:"O <b>cliente</b> é o contrato que está sendo atendido. Não tem endereço: o endereço fica no trajeto (aba Endereços). Corrigir o nome aqui corrige o cliente em todas as rotas e repetições."},
+    nota:"O <b>cliente</b> é o contrato que está sendo atendido. Não tem endereço: os lugares ficam na aba <b>Endereços</b>. Ao escolher o cliente na rota, a agenda sugere o endereço de coleta dele com um clique (sem obrigar). Corrigir o nome aqui corrige o cliente em todas as rotas e repetições."},
   destinos:{map:()=>S.destinos,ok:()=>S.dstOk,g:"destinos",tipo:"destino",col:"Destino",um:"destino",plural:"destinos",busca:"Procurar destino",novo:"Novo destino",ph:"Nome do destino (ex.: J&E)",obsPh:"Ex.: aceita madeira, horário",semTit:"Destinos usados nas rotas e ainda sem cadastro",
     nota:"O <b>destino</b> é para onde o resíduo vai (destinador, aterro, galpão). Corrigir o nome aqui corrige o destino em todas as rotas e repetições. O endereço do destino, se precisar, fica na aba Endereços."}};
 /* separa "Vital (comum) / J&E (madeira)" em "Vital" e "J&E" */
@@ -2665,7 +2706,7 @@ function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm)
 function renderCad(){
   if(!CAD.open)return;
   document.querySelectorAll("#cTabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===CAD.tab)));
-  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nCli").textContent=S.clientes.size||"";$("#nDst").textContent=S.destinos.size||"";$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
+  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nCli").textContent=S.clientes.size||"";$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
   const box=$("#cBody");let h="";const ed=CAD.edit;
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
   if(CAD.tab==="clientes"||CAD.tab==="destinos"){const K=LISTA[CAD.tab];const map=K.map();
@@ -2677,19 +2718,27 @@ function renderCad(){
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>'+K.col+'</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum '+K.um+' cadastrado ainda.</p>')+'</div>';
     const known=list.map(x=>x.nome);const sc=semCadastro(K.g,known);
     const kn=new Set(known.map(norm));const novos=new Set();sc.forEach(x=>(K.g==="destinos"?partesDestino(x.nome):[x.nome]).forEach(n=>{if(!kn.has(norm(n)))novos.add(norm(n))}));
-    if(novos.size)h+='<div class="cadbar"><button type="button" class="btn sm" data-act="addall" data-g="'+CAD.tab+'">＋ Cadastrar de uma vez os '+novos.size+' '+K.plural+' usados nas rotas</button></div>';
+    if(novos.size)h+='<div class="cadbar"><button type="button" class="btn sm" data-act="addall" data-g="'+CAD.tab+'"'+(CAD.busy?' disabled':'')+'>＋ Cadastrar de uma vez os '+novos.size+' '+K.plural+' usados nas rotas</button></div>';
     h+=fixHtml(K.tipo,sc,known,K.semTit);
     h+='<p class="cnote">'+K.nota+'</p>';
   }else   if(CAD.tab==="locais"){
     h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
     h+=bar("Procurar local ou endereço","Novo endereço");
-    const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
-    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local (ex.: Hermes – Aimorés)"></td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
+    const nD=[...S.locais.values()].filter(x=>x.tipo==="destino").length;
+    h+='<div class="cfilt" role="group" aria-label="Mostrar"><button type="button" class="btn sm'+(CAD.soDst?'':' on')+'" data-act="fdst" data-v="">Todos</button><button type="button" class="btn sm'+(CAD.soDst?' on':'')+'" data-act="fdst" data-v="1">'+ic("flag")+' Só destinos ('+nD+')</button></div>';
+    const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo"&&(!CAD.soDst||x.tipo==="destino")).sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
+    const dchk=on=>'<label class="dchk"><input type="checkbox" id="eDst"'+(on?' checked':'')+'> É destino</label>';
+    const dpill=x=>x.tipo==="destino"?' <span class="dpill" title="Aparece na lista de Destino da rota">'+ic("flag")+' destino</span>':'';
+    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local (ex.: Hermes – Aimorés)">'+dchk(x?x.tipo==="destino":!!ed.dst)+'</td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs+(x.tipo==="destino"?" destino":"")))+'"><td><b>'+esc(x.nome)+'</b>'+dpill(x)+'</td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
     const sc=semCadastro("locais",list.map(x=>x.nome));
-    h+=fixHtml("local",sc,list.map(x=>x.nome),"Locais usados no trajeto e ainda sem cadastro");
-    h+='<p class="cnote">Aqui ficam os <b>lugares com endereço</b> usados no trajeto (coleta, descarte, saída). Corrigir o nome ou o endereço aqui corrige o trajeto de todas as rotas. Os endereços salvos aqui aparecem sozinhos quando você digita o nome do local no trajeto. Um endereço novo só é guardado quando você confirma.</p>';
+    const todos=[...S.locais.values()].map(x=>x.nome);
+    h+=fixHtml("local",sc,todos,"Locais usados no trajeto e ainda sem cadastro");
+    const kl=new Set(todos.map(norm));const dsem=new Map();
+    if(S.uso)Object.values(S.uso.destinos||{}).forEach(x=>partesDestino(x.nome).forEach(n=>{const k=norm(n);if(!k||kl.has(k))return;const o=dsem.get(k)||{nome:n,n:0};o.n+=x.n;dsem.set(k,o)}));
+    if(dsem.size)h+='<h4 class="csec">Destinos usados nas rotas e ainda sem endereço</h4>'+[...dsem.values()].sort((a,b)=>b.n-a.n).slice(0,30).map(x=>'<div class="fixrow"><b>'+ic("flag")+' '+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><button type="button" class="btn sm" data-act="addfrom" data-dst="1" data-nome="'+esc(x.nome)+'">＋ Cadastrar endereço</button></div>').join("");
+    h+='<p class="cnote">Aqui ficam <b>todos os lugares com endereço</b>: onde o caminhão coleta e para onde leva o resíduo. Marque <b>É destino</b> nos destinadores (Vital, J&amp;E, Inovar…): eles aparecem na lista de <b>Destino</b> da rota e, ao escolher um, a parada de <b>Descarte</b> entra sozinha no trajeto com o endereço certo. Corrigir o nome ou o endereço aqui corrige todas as rotas.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
@@ -2776,10 +2825,10 @@ $("#cBody").addEventListener("click",async e=>{
   if(a==="patio"){openPatio();return}
   if(a==="ver"){verRotas(b.dataset.g,b.dataset.nome);return}
   if(a==="new"){CAD.edit={id:""};CAD.confirm=null;renderCad();return}
-  if(a==="addall"){const K=LISTA[b.dataset.g];const known=new Set([...K.map().values()].map(x=>norm(x.nome)));const nomes=new Map();
+  if(a==="addall"){if(CAD.busy)return;const K=LISTA[b.dataset.g];const known=new Set([...K.map().values()].map(x=>norm(x.nome)));const nomes=new Map();
     semCadastro(K.g,[...known]).forEach(x=>(K.g==="destinos"?partesDestino(x.nome):[x.nome]).forEach(n=>{if(!known.has(norm(n))&&!nomes.has(norm(n)))nomes.set(norm(n),n)}));
-    if(!nomes.size){toast("Nada para cadastrar");return}b.disabled=true;b.textContent="Cadastrando "+nomes.size+"…";
-    let ok=0;for(const n of nomes.values())if(await cadSet(b.dataset.g,null,{nome:n,obs:""}))ok++;toast(ok+" "+K.plural+" cadastrado(s)");renderCad();return}
+    if(!nomes.size){toast("Nada para cadastrar");return}CAD.busy=true;b.disabled=true;b.textContent="Cadastrando "+nomes.size+"…";
+    let ok=0;try{for(const n of nomes.values())if(await cadSet(b.dataset.g,null,{nome:n,obs:""}))ok++}finally{CAD.busy=false}toast(ok+" "+K.plural+" cadastrado(s)");renderCad();return}
   if(a==="edit"){CAD.edit={id};CAD.confirm=null;renderCad();return}
   if(a==="cancel"){CAD.edit=null;renderCad();return}
   if(a==="ask"){CAD.confirm=id;renderCad();return}
@@ -2790,14 +2839,18 @@ $("#cBody").addEventListener("click",async e=>{
     if(g==="local"){const l=S.locais.get(locKey(para));if(l&&l.endereco)ex={enderecoDe:"",enderecoPara:l.endereco}}
     if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
     await propagar(g,b.dataset.de,para,ex);return}
-  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
+  if(a==="fdst"){CAD.soDst=!!b.dataset.v;renderCad();return}
+  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome,dst:!!b.dataset.dst};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
     const nome=($("#eNome").value||"").trim();if(!nome){toast("Informe o nome");$("#eNome").focus();return}
     const eid=CAD.edit&&CAD.edit.id;let ok;
     if(tab==="locais"){const old=eid?[...S.locais.values()].find(x=>x._id===eid):null;const end=($("#eEnd").value||"").trim();
-      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim());
-      if(ok&&old&&(old.nome!==nome||old.endereco!==end))await propagar("local",old.nome,nome,old.endereco!==end?{enderecoDe:old.endereco,enderecoPara:end}:{})}
+      const dst=$("#eDst")&&$("#eDst").checked?"destino":"";
+      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim(),dst);
+      if(ok&&old&&(old.nome!==nome||old.endereco!==end))await propagar("local",old.nome,nome,old.endereco!==end?{enderecoDe:old.endereco,enderecoPara:end}:{});
+      if(ok&&old&&old.nome!==nome&&(dst||old.tipo==="destino"))await propagar("destino",old.nome,nome);
+      if(ok!==false)fillLists()}
     else if(tab==="clientes"||tab==="destinos"){const K=LISTA[tab];const map=K.map();const dup=[...map].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse "+K.um+" já está cadastrado");return}
       const old=eid&&map.get(eid)?Object.assign({},map.get(eid)):null;ok=await cadSet(tab,eid||null,Object.assign({},old||{},{nome,obs:($("#eObs").value||"").trim()}));
       if(ok&&old&&old.nome!==nome)await propagar(K.tipo,old.nome,nome)}
@@ -2948,7 +3001,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.1";
+const VERSAO_TELA="7.2";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -2965,8 +3018,8 @@ async function startData(){
   try{S.assets=await window.claude.use("assets")}catch(e){S.assets=null}
   banner("Carregando as rotas…","info");
   S.col=db.collection("rotas");S.serCol=db.collection("series");S.locCol=db.collection("locais");S.cfgDoc=db.doc("config/geral");
-  S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");S.dstCol=db.collection("destinos");
-  [["cliCol","clientes","cliOk"],["dstCol","destinos","dstOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
+  S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");
+  [["cliCol","clientes","cliOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
   subscribeWeek();subscribeSeries();
   S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
