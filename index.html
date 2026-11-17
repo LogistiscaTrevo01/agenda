@@ -443,6 +443,12 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .mtrlist{display:flex;flex-direction:column;gap:6px}.mtrrow{display:flex;gap:6px;align-items:center}.mtrrow input{flex:1;min-width:0}
 .mtrrm{width:36px;height:36px;flex:none}.mtradd{margin-top:6px}
 .anxlist{display:flex;gap:8px;flex-wrap:wrap}
+.anxwrap{position:relative;border:2px dashed transparent;border-radius:12px;padding:6px;margin:-8px;transition:border-color .15s,background .15s}
+.anxwrap.dragon{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.anxwrap.dragon::after{content:"Solte aqui para anexar";position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:15px;color:var(--accent);background:color-mix(in srgb,var(--surface) 80%,transparent);border-radius:10px;pointer-events:none}
+.modal.dragform{outline:3px dashed color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:-6px}
+.dropdica{width:100%}
+@media (pointer:coarse){.dropdica{display:none}}
 .anxlist:empty{display:none}
 .anx{position:relative;width:84px;height:84px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:26px}
 .anx img{width:100%;height:100%;object-fit:cover;display:block;font-size:10px;color:transparent;background:var(--line-soft)}
@@ -836,7 +842,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <div class="anxwrap">
             <span class="sublbl">Fotos e arquivos</span>
             <div class="anxlist" id="fAnx"></div>
-            <div class="anxbtns"><button type="button" class="btn sm" id="addAnx"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Adicionar foto ou arquivo</button><span class="hint" id="anxHint">MTR assinado, foto da caçamba, comprovante em PDF</span></div>
+            <div class="anxbtns"><button type="button" class="btn sm" id="addAnx"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Adicionar foto ou arquivo</button><span class="hint" id="anxHint">MTR assinado, foto da caçamba, comprovante em PDF</span><span class="hint dropdica">ou <b>arraste os arquivos para cá</b> · Ctrl+V cola um print</span></div>
             <input type="file" id="fFile" multiple accept="image/*,application/pdf,video/mp4,video/webm" hidden>
           </div>
         </div>
@@ -2110,7 +2116,7 @@ function renderAnexos(){
     (isImg(a)?'<img src="'+esc(blobUrl(a.id))+'" alt="'+esc(a.nome)+'" loading="lazy">':'<span>'+(isPdf(a)?ic("file"):isVid(a)?ic("film"):ic("clip"))+'</span><small>'+esc(a.nome)+'</small>')+
     (S.assets&&!S.readOnly?'<button type="button" class="rmx" data-rm="'+i+'" aria-label="Remover anexo">✕</button>':'')+'</div>').join("")+
     (E.uploading?'<div class="anx loading">Enviando '+E.uploading+'…</div>':'');
-  $("#addAnx").style.display=S.assets&&!S.readOnly?"":"none";
+  $("#addAnx").style.display=S.assets&&!S.readOnly?"":"none";{const dd=$(".dropdica");if(dd)dd.style.display=S.assets&&!S.readOnly?"":"none"}
   $("#anxHint").textContent=S.assets?(list.length?list.length+" anexo(s). Toque para ver.":"MTR assinado, foto da caçamba, comprovante em PDF"):(list.length?list.length+" anexo(s). Toque para ver.":"Só quem edita a agenda pode anexar arquivos.");
 }
 $("#addAnx").addEventListener("click",()=>$("#fFile").click());
@@ -2128,9 +2134,14 @@ async function shrinkImage(file){
     const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(bmp,0,0,c.width,c.height);
     return await new Promise(res=>c.toBlob(b=>res(b),"image/jpeg",0.82));}catch(e){return null}
 }
-$("#fFile").addEventListener("change",async e=>{
-  const files=[...e.target.files];e.target.value="";if(!files.length||!E)return;
-  if(!S.assets){toast("Só quem edita a agenda pode anexar arquivos");return}
+$("#fFile").addEventListener("change",e=>{const files=[...e.target.files];e.target.value="";anexarArquivos(files)});
+const ANX_OK=t=>/^image\/|^application\/pdf$|^video\/(mp4|webm)$/.test(t||"");
+async function anexarArquivos(files){
+  files=[...(files||[])];if(!files.length||!E)return;
+  if(!S.assets||S.readOnly){toast("Só quem edita a agenda pode anexar arquivos");return}
+  const fora=files.filter(f=>!ANX_OK(guessType(f)));files=files.filter(f=>ANX_OK(guessType(f)));
+  if(fora.length)toast("Não aceito: "+fora.map(f=>f.name).slice(0,3).join(", ")+". Use foto, PDF ou vídeo MP4.");
+  if(!files.length)return;
   const cur=E;
   for(const f of files){
     cur.uploading=f.name;renderAnexos();
@@ -2143,8 +2154,19 @@ $("#fFile").addEventListener("change",async e=>{
     }catch(err){const c=err&&err.code;
       toast(c==="too_large"?"Arquivo grande demais (máximo 20 MB)":c==="unsupported_type"?"Formato não aceito. Use foto (JPG, PNG), PDF ou vídeo MP4":c==="quota_or_state"?"O espaço de anexos da agenda acabou":"Não foi possível enviar "+f.name)}
   }
-  cur.uploading="";if(E===cur){renderAnexos();toast("Anexo pronto. Salve a rota para guardar.")}
-});
+  cur.uploading="";if(E===cur){renderAnexos();toast((files.length>1?files.length+" anexos prontos":"Anexo pronto")+". Salve a rota para guardar."+(fora.length?" Ficou de fora (formato não aceito): "+fora.map(f=>f.name).slice(0,3).join(", "):""))}
+}
+/* arrastar e soltar arquivos na janela da rota (e Ctrl+V de print/foto) */
+{let nDrag=0;const temArq=e=>e.dataTransfer&&[...(e.dataTransfer.types||[])].indexOf("Files")>=0;
+ const formAberto=()=>$("#scrim").classList.contains("open")&&!!E&&!!S.assets&&!S.readOnly;
+ const liga=on=>{const z=$(".anxwrap");if(z)z.classList.toggle("dragon",on);$("#scrim .modal")&&$("#scrim .modal").classList.toggle("dragform",on)};
+ window.addEventListener("dragenter",e=>{if(!temArq(e))return;e.preventDefault();if(formAberto()){nDrag++;liga(true)}});
+ window.addEventListener("dragover",e=>{if(!temArq(e))return;e.preventDefault();e.dataTransfer.dropEffect=formAberto()?"copy":"none"});
+ window.addEventListener("dragleave",e=>{if(!temArq(e))return;nDrag=Math.max(0,nDrag-1);if(!nDrag)liga(false)});
+ window.addEventListener("drop",e=>{if(!temArq(e))return;e.preventDefault();nDrag=0;liga(false);
+   if(!formAberto()){toast("Abra uma rota para anexar arquivos");return}
+   const z=$(".anxwrap");if(z)z.scrollIntoView({block:"nearest",behavior:"smooth"});anexarArquivos(e.dataTransfer.files)});
+ document.addEventListener("paste",e=>{if(!formAberto())return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];if(!fs.length)return;e.preventDefault();anexarArquivos(fs.map((f,i)=>f.name&&f.name!=="image.png"?f:new File([f],"print-"+new Date().toISOString().slice(0,19).replace(/[T:]/g,"-")+(fs.length>1?"-"+(i+1):"")+".png",{type:f.type||"image/png"})))})}
 /* visualizador */
 let V={list:[],i:0};
 function openViewer(list,i){V={list,i};showView();$("#viewer").classList.add("open");$("#viewer").setAttribute("aria-hidden","false")}
@@ -3327,7 +3349,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="8.5";
+const VERSAO_TELA="8.6";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
