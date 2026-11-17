@@ -2737,7 +2737,8 @@ function renderCad(){
     h+=fixHtml("local",sc,todos,"Locais usados no trajeto e ainda sem cadastro");
     const kl=new Set(todos.map(norm));const dsem=new Map();
     if(S.uso)Object.values(S.uso.destinos||{}).forEach(x=>partesDestino(x.nome).forEach(n=>{const k=norm(n);if(!k||kl.has(k))return;const o=dsem.get(k)||{nome:n,n:0};o.n+=x.n;dsem.set(k,o)}));
-    if(dsem.size)h+='<h4 class="csec">Destinos usados nas rotas e ainda sem endereço</h4>'+[...dsem.values()].sort((a,b)=>b.n-a.n).slice(0,30).map(x=>'<div class="fixrow"><b>'+ic("flag")+' '+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><button type="button" class="btn sm" data-act="addfrom" data-dst="1" data-nome="'+esc(x.nome)+'">＋ Cadastrar endereço</button></div>').join("");
+    const dopts='<option value="">Trocar por…</option>'+[...S.locais.values()].filter(l=>l.tipo==="destino"||l.nome==="Galpão Trevo").map(l=>l.nome).sort((a,b)=>a.localeCompare(b,"pt")).map(n=>'<option>'+esc(n)+'</option>').join("");
+    if(dsem.size)h+='<h4 class="csec">Destinos usados nas rotas e ainda sem endereço</h4><p class="cnote" style="margin-top:0">Se for um destino que já está cadastrado com outro nome (ex.: Macaúbas = Vital), escolha o nome certo e clique em <b>Corrigir nas rotas</b>. Se for um lugar novo, clique em <b>Cadastrar endereço</b>.</p>'+[...dsem.values()].sort((a,b)=>b.n-a.n).slice(0,30).map(x=>'<div class="fixrow"><b>'+ic("flag")+' '+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><select aria-label="Destino certo">'+dopts+'</select><button type="button" class="btn sm primary" data-act="fixdst" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-dst="1" data-nome="'+esc(x.nome)+'">＋ Cadastrar endereço</button></div>').join("");
     h+='<p class="cnote">Aqui ficam <b>todos os lugares com endereço</b>: onde o caminhão coleta e para onde leva o resíduo. Marque <b>É destino</b> nos destinadores (Vital, J&amp;E, Inovar…): eles aparecem na lista de <b>Destino</b> da rota e, ao escolher um, a parada de <b>Descarte</b> entra sozinha no trajeto com o endereço certo. Corrigir o nome ou o endereço aqui corrige todas as rotas.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
@@ -2803,6 +2804,14 @@ async function propagar(tipo,de,para,ex){
     else{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);n=r&&r.alteradas||0}
     if(n)toast("Corrigido também em "+n+" rota(s)");API.refresh();loadUso();return true}
   catch(e){if(e&&e.code==="invalid_request")toast("Atualize o Code.gs no Google para corrigir as rotas automaticamente");else writeErr(e);return false}}
+/* troca um destino por outro, inclusive dentro de "Vital / J&E (madeira)", e acerta a parada de Descarte */
+async function trocarDestino(de,para){const k=norm(de);const l=S.locais.get(locKey(para));const end=l?l.endereco:"";let n=0;
+  const troca=v=>String(v||"").split(/(\s*\/\s*|\s*\+\s*)/).map((seg,i)=>{if(i%2)return seg;const nome=seg.replace(/\([^)]*\)/g,"").trim();return nome&&norm(nome)===k?seg.replace(nome,para):seg}).join("");
+  const muda=r=>{const x=Object.assign({},r);let m=false;const d=troca(x.destino);if(d!==(x.destino||"")){x.destino=d;m=true}
+    x.paradas=(x.paradas||[]).map(p=>{if(norm(p.local)!==k)return p;m=true;return Object.assign({},p,{local:para,endereco:p.endereco||end})});return m?x:null};
+  try{const g=await S.col.get();for(const d of g.docs){if(!d.exists)continue;const r=clean(d.data());const x=muda(r);if(x){S.rotas.set(d.id,r);if(await put("rotas",d.id,x))n++}}}catch(e){writeErr(e)}
+  for(const[id,s0]of [...S.series]){const x=muda(s0);if(x&&await put("series",id,x))n++}
+  return n}
 /* Code.gs antigo (antes da 7.0): a própria tela corrige cliente, destino ou trajeto, um campo de cada vez */
 async function renomearNaTela(tipo,de,para,ex){const k=norm(de);let n=0;
   const muda=r=>{const x=Object.assign({},r);let m=false;
@@ -2840,6 +2849,8 @@ $("#cBody").addEventListener("click",async e=>{
     if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
     await propagar(g,b.dataset.de,para,ex);return}
   if(a==="fdst"){CAD.soDst=!!b.dataset.v;renderCad();return}
+  if(a==="fixdst"){const sel=b.closest(".fixrow").querySelector("select");const para=sel.value;if(!para){sel.focus();toast("Escolha o destino certo na lista");return}if(!guard())return;
+    b.disabled=true;b.textContent="Corrigindo…";const n=await trocarDestino(b.dataset.de,para);toast(n?"Corrigido em "+n+" rota(s)/repetição(ões)":"Nada para corrigir");API.refresh();await loadUso();renderCad();return}
   if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome,dst:!!b.dataset.dst};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
@@ -3001,7 +3012,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.2";
+const VERSAO_TELA="7.3";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
