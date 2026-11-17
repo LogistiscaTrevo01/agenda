@@ -273,6 +273,15 @@ body.colando .toast,body.colando .undobar{bottom:120px}
 .dver{list-style:none;margin:8px 0 2px;padding:0;flex-basis:100%;display:flex;flex-direction:column;gap:4px}
 .dver button{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:100%;text-align:left;background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid rgba(127,127,127,.3);border-radius:8px;padding:6px 10px;font:inherit;color:inherit;cursor:pointer}
 .dver button:hover{border-color:var(--accent)}.dver .dq{font-weight:700;min-width:110px}.dver small{flex-basis:100%;color:var(--muted)}
+.nbad{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--danger,#d92d20);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.smot{margin-top:10px}.smot h4{display:flex;align-items:center;gap:6px}
+.smrow{display:grid;grid-template-columns:120px minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:8px 10px;border:1px solid var(--line,rgba(127,127,127,.3));border-radius:10px;margin:6px 0}
+.smrow .smq{font-weight:700;display:flex;flex-direction:column;align-items:flex-start;gap:3px}.smrow .smt{min-width:0}.smrow .smt small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.smrow .smin{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px;max-width:520px}.smrow input{width:150px!important}
+.smrow.smbulk{grid-template-columns:minmax(0,1fr) auto}
+@media (max-width:900px){.smrow,.smrow.smbulk{grid-template-columns:110px minmax(0,1fr)}.smrow .smin{grid-column:1/-1;justify-content:flex-start;max-width:none}}
+.smchip{border:1px dashed var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:2px 9px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.smbulk{background:color-mix(in srgb,var(--accent) 7%,transparent);border-style:dashed}
 .fsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:6px 0 2px}.fsug:empty{display:none}
 .fsug button{border:1px dashed var(--accent);background:transparent;color:var(--accent);font:inherit;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer}
 .fsug button:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
@@ -682,6 +691,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <a class="btn mapday" id="mapPoli" data-s="Poli" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg><span class="lbl"> Rota do Poliguindaste</span></a>
     <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg><span class="lbl"> WhatsApp</span></button>
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
+    <button class="btn" id="btnSemMot" type="button" title="Rotas que ainda estão sem motorista: preencha direto na lista"><span data-ic="user"></span><span class="lbl"> Sem motorista</span><span class="nbad" id="nSemMot" hidden></span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
     <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
     <button class="btn" id="btnHelp" type="button" title="Vídeo e passo a passo de como usar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span class="lbl"> Ajuda</span></button>
@@ -864,7 +874,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <input type="date" id="sDe" aria-label="De" hidden><input type="date" id="sAte" aria-label="Até" hidden></div>
       </div>
       <div class="quick" id="sQuick">
-        <button type="button" data-q="saida"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg> Saídas</button><button type="button" data-q="coleta"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg> Coletas</button><button type="button" data-q="descarte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Descartes</button><button type="button" data-q="mtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> Com MTR</button><button type="button" data-q="semmtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4M12 17h.01"/></svg> Concluídas sem MTR</button><button type="button" data-q="anexos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Com anexos</button><button type="button" data-q="cancel">✕ Canceladas</button><button type="button" data-q="limpar">Limpar filtros</button>
+        <button type="button" data-q="saida"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg> Saídas</button><button type="button" data-q="coleta"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg> Coletas</button><button type="button" data-q="descarte"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Descartes</button><button type="button" data-q="mtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8M16 17H8M10 9H8"/></svg> Com MTR</button><button type="button" data-q="semmtr"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4M12 17h.01"/></svg> Concluídas sem MTR</button><button type="button" data-q="anexos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg> Com anexos</button><button type="button" data-q="cancel">✕ Canceladas</button><button type="button" data-q="semmot"><span data-ic="user"></span> Sem motorista</button><button type="button" data-q="limpar">Limpar filtros</button>
       </div>
       <div id="sOut" class="sout"></div>
     </form>
@@ -1001,6 +1011,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <details><summary><b>4</b> Buscar rotas e Lista de MTRs</summary><ol>
           <li>Clique em <b>Buscar</b>. Digite cliente, resíduo, nº do MTR, motorista, endereço… A busca roda enquanto você digita, em <b>todas</b> as rotas.</li>
           <li>Use os filtros (caminhão, tipo de parada, status, MTR, anexos, período) ou os atalhos: Saídas, Coletas, Descartes, Canceladas…</li>
+          <li><b>Sem motorista:</b> o botão <b>Sem motorista</b> na barra de cima (o número vermelho é o que falta na semana na tela) abre a lista de todas as rotas e repetições sem motorista. Escolha o nome e clique em <b>Salvar</b> ali mesmo. Numa repetição, salvar preenche todos os dias. Também dá para preencher de uma vez todas as do mesmo caminhão.</li>
           <li>Clique num resultado para <b>abrir a rota</b>. O botão <b>Exportar resultado</b> gera um Excel.</li>
           <li><b>Lista de MTRs:</b> mostra um MTR por linha, marca os <b>repetidos</b> e lista as <b>rotas concluídas sem MTR</b>, onde você digita o número e salva ali mesmo.</li></ol></details>
         <details><summary><b>5</b> Cadastros (locais, resíduos, motoristas)</summary><ol>
@@ -1523,7 +1534,7 @@ function render(){
   const wd=weekDays();
   if(S.view==="dia"){const d=S.anchor;$("#rangeLabel").textContent=DAYN[d.getDay()]+", "+d.getDate()+" de "+MONTHS[d.getMonth()]+" de "+d.getFullYear();}
   else{const a=wd[0],b=wd[6];$("#rangeLabel").textContent=(a.getMonth()===b.getMonth()?pad(a.getDate()):a.getDate()+" de "+MONTHS[a.getMonth()])+" – "+b.getDate()+" de "+MONTHS[b.getMonth()]+" de "+b.getFullYear();}
-  $("#goDate").value=iso(S.anchor);
+  $("#goDate").value=iso(S.anchor);semMotBadge();
   [["#mapBau","Baú"],["#mapPoli","Poliguindaste"]].forEach(([sel,t])=>{const a=$(sel);a.style.display=S.view==="dia"?"":"none";if(S.view!=="dia")return;
     const o=routeDay(iso(S.anchor),t);
     const lb=a.querySelector(".lbl");if(lb)lb.textContent=o.url?" Rota do "+t+(o.parts.length>1?" ("+o.parts.length+" trechos)":""):" "+t+": sem endereços";
@@ -2209,6 +2220,7 @@ $("#sPer").addEventListener("change",()=>{const c=$("#sPer").value==="custom";$(
 $("#sTruck").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;pick("#sTruck",b.dataset.v);sLater()});
 $("#sQuick").addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;const k=b.dataset.q;
   if(k==="limpar"){sReset(false);runSearch();$("#sTxt").focus();return}
+  if(k==="semmot"){abrirSemMot(true);return}
   sReset(true);
   if(k==="saida")$("#sTipo").value="Saída";else if(k==="coleta")$("#sTipo").value="Coleta";else if(k==="descarte")$("#sTipo").value="Descarte";
   else if(k==="mtr")$("#sMtr").value="com";else if(k==="semmtr"){$("#sMtr").value="sem";$("#sStatus").value="Concluído"}
@@ -2532,6 +2544,49 @@ $("#fhCopy").addEventListener("click",async()=>{
   fhSavePag()});
 $("#fhMail").addEventListener("click",()=>fhSavePag());
 
+/* ---------- rotas sem motorista: lista para preencher na hora ---------- */
+const semMot=r=>!String(r.motorista||"").trim()&&eff(r)!=="Cancelado";
+function semMotBadge(){const b=$("#nSemMot");if(!b)return;let n=0;const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);
+  for(const r of S.items.values())if(r.data>=a&&r.data<=z&&semMot(r))n++;b.hidden=!n;b.textContent=n;
+  $("#btnSemMot").title=n?n+" rota(s) sem motorista na semana na tela. Clique para ver todas e preencher.":"Rotas que ainda estão sem motorista: preencha direto na lista"}
+async function abrirSemMot(jaAberta){if(!jaAberta){sReset(false);openModal("scrimSearch")}else sReset(false);S.sLast=null;sSeq++;
+  const out=$("#sOut");out.innerHTML='<p class="sempty">Procurando as rotas sem motorista…</p>';
+  let rot=[];try{const g=await S.col.get();rot=g.docs.filter(d=>d.exists).map(d=>[d.id,clean(d.data())]).filter(([,r])=>semMot(r))}catch(e){out.innerHTML='<p class="sempty">Não foi possível carregar as rotas agora. Tente de novo.</p>';return}
+  const hoje=iso(new Date());
+  const ser=[...S.series].filter(([,x])=>!String(x.motorista||"").trim()&&!(seriesEnd(x)&&seriesEnd(x)<hoje));
+  const fut=rot.filter(([,r])=>r.data>=hoje).sort((a,b)=>(a[1].data+a[1].ini).localeCompare(b[1].data+b[1].ini));
+  const past=rot.filter(([,r])=>r.data<hoje).sort((a,b)=>(b[1].data+b[1].ini).localeCompare(a[1].data+a[1].ini));
+  S.semMotL={ser,rot};S.sLast={q:{},list:fut.concat(past).map(([,r])=>r)};
+  const chips=t=>[...S.motoristas.values()].filter(m=>m.nome&&(!m.caminhao||m.caminhao===t)).map(m=>'<button type="button" class="smchip" data-smfill="'+esc(m.nome)+'">'+esc(m.nome)+'</button>').join("");
+  const campo=(k,t,label,ir)=>'<span class="smin"><input list="dlMot" placeholder="Motorista" data-smin="'+esc(k)+'" aria-label="Motorista">'+chips(t)+'<button type="button" class="btn sm primary" data-smsave="'+esc(k)+'">'+(label||"Salvar")+'</button>'+(ir?'<button type="button" class="btn sm ghost" '+ir+'>Abrir</button>':'')+'</span>';
+  const linha=(k,quando,r,extra,ir)=>'<div class="smrow" data-smrow="'+esc(k)+'"><span class="smq">'+quando+'<span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></span><span class="smt"><b>'+esc(r.ini+"–"+r.fim)+'</b> · '+esc(r.cliente||r.servico||"Rota")+'<small>'+esc([r.servico&&r.cliente?r.servico:"",extra].filter(Boolean).join(" · "))+'</small></span>'+campo(k,r.caminhao,"Salvar",ir)+'</div>';
+  const tot=ser.length+rot.length;
+  let h='<div class="shead"><b>'+ic("user")+' Sem motorista: '+ser.length+' repetição(ões) e '+rot.length+' rota(s)</b><span class="hint">canceladas não entram</span><span class="spacer"></span>'+(rot.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Excel</button>':'')+'</div>';
+  if(!tot){out.innerHTML=h+'<p class="sempty">Tudo certo: nenhuma rota sem motorista. 👍</p>';return}
+  ["Baú","Poliguindaste"].forEach(t=>{const n=ser.filter(([,x])=>x.caminhao===t).length+fut.filter(([,r])=>r.caminhao===t).length;
+    if(n>1)h+='<div class="smrow smbulk" data-smrow="bulk:'+t+'"><span class="smt"><b>Preencher de uma vez</b> as '+n+' do <b>'+t+'</b> (repetições e rotas daqui para frente)<small>As anteriores ficam para você conferir uma a uma.</small></span>'+campo("bulk:"+t,t,"Preencher as "+n)+'</div>'});
+  if(ser.length)h+='<h4>'+ic("repeat")+' Repetições ('+ser.length+') — salvar aqui preenche todos os dias</h4>'+ser.map(([sid,x])=>linha("s:"+sid,ic("repeat")+" Repete",x,recSummary(x),'data-ser="'+esc(sid)+'"')).join("");
+  const dia=r=>DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmmyy(r.data);
+  h+='<h4>Próximas ('+fut.length+')</h4>'+(fut.length?fut.slice(0,200).map(([id,r])=>linha("r:"+id,dia(r),r,r.serie?"dia alterado de uma repetição":"",'data-go="'+esc(r.data)+'" data-id="'+esc(id)+'"')).join(""):'<p class="sempty">Nenhuma rota avulsa sem motorista daqui para frente.</p>');
+  if(past.length)h+='<h4>Anteriores ('+past.length+')</h4>'+past.slice(0,200).map(([id,r])=>linha("r:"+id,dia(r),r,"já passou",'data-go="'+esc(r.data)+'" data-id="'+esc(id)+'"')).join("");
+  out.innerHTML='<div class="smot">'+h+'</div>'}
+async function salvarMotRota(id,v){const cur=await S.col.doc(id).get();if(!cur.exists)return false;const base=cur.data();if(String(base.motorista||"").trim())return true;
+  await S.col.doc(id).set(Object.assign({},base,{motorista:v,atualizado:new Date().toISOString()}),base.atualizado||undefined);return true}
+async function salvarMotSerie(sid,v){const x=S.series.get(sid);if(!x)return false;if(!await put("series",sid,Object.assign({},x,{motorista:v})))return false;
+  try{const g=await S.col.where("serie","==",sid).get();for(const d of g.docs){if(d.exists&&!String((d.data()||{}).motorista||"").trim())await salvarMotRota(d.id,v)}}catch(e){}return true}
+async function salvarMot(k,v){if(k.startsWith("s:"))return salvarMotSerie(k.slice(2),v);return salvarMotRota(k.slice(2),v)}
+$("#btnSemMot").addEventListener("click",()=>abrirSemMot(false));
+$("#sOut").addEventListener("click",async e=>{
+  const f=e.target.closest("[data-smfill]");if(f){const inp=f.closest(".smin").querySelector("input");inp.value=f.dataset.smfill;inp.focus();return}
+  const b=e.target.closest("[data-smsave]");if(!b)return;e.stopPropagation();const k=b.dataset.smsave;const inp=b.closest(".smin").querySelector("input");const v=inp.value.trim();
+  if(!v){inp.focus();toast("Digite ou escolha o motorista");return}if(!guard())return;b.disabled=true;
+  try{if(k.startsWith("bulk:")){const t=k.slice(5);const L=S.semMotL||{ser:[],rot:[]};const hoje=iso(new Date());let n=0;
+      for(const[sid,x]of L.ser)if(x.caminhao===t&&await salvarMotSerie(sid,v))n++;
+      for(const[id,r]of L.rot)if(r.caminhao===t&&r.data>=hoje&&await salvarMot("r:"+id,v))n++;
+      toast(v+" colocado em "+n+" rota(s)/repetição(ões) do "+t);API.refresh();abrirSemMot(true);return}
+    if(await salvarMot(k,v)){toast(v+" salvo");const row=b.closest("[data-smrow]");row&&row.remove();API.refresh()}else b.disabled=false}
+  catch(x){b.disabled=false;writeErr(x)}},true);
+$("#sOut").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("[data-smin]")){e.preventDefault();const b=e.target.closest(".smin").querySelector("[data-smsave]");b&&b.click()}});
 /* ---------- copiar uma rota e colar em outro dia ---------- */
 function clipBody(r){const b=clean(r);["serie","serieData","id","virtual","excluidas","freq","inicio"].forEach(k=>delete b[k]);b.status="Agendado";b.auto=true;b.anexos=[];b.mtr="";delete b.atualizado;return b}
 function clipSet(r){S.clip=clipBody(r);try{localStorage.setItem("agendaClip",JSON.stringify(S.clip))}catch(e){}clipShow();toast("Rota copiada. Escolha o dia na barra de baixo ou clique num horário vazio da agenda.")}
@@ -3055,7 +3110,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.4";
+const VERSAO_TELA="7.5";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
