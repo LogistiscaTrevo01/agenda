@@ -282,6 +282,30 @@ body.colando .toast,body.colando .undobar{bottom:120px}
 @media (max-width:900px){.smrow,.smrow.smbulk{grid-template-columns:110px minmax(0,1fr)}.smrow .smin{grid-column:1/-1;justify-content:flex-start;max-width:none}}
 .smchip{border:1px dashed var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:2px 9px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .smbulk{background:color-mix(in srgb,var(--accent) 7%,transparent);border-style:dashed}
+.btn.ia{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent);font-weight:700}
+.audsec{margin:12px 0 4px;display:flex;align-items:center;gap:8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.auditem{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:4px 10px;align-items:start;padding:8px 10px;border:1px solid var(--line,rgba(127,127,127,.3));border-left-width:4px;border-radius:10px;margin:6px 0;cursor:pointer}
+.auditem:hover{border-color:var(--accent)}.auditem.erro{border-left-color:var(--danger,#d92d20)}.auditem.aviso{border-left-color:#e0a100}.auditem.info{border-left-color:var(--muted)}
+.auditem .at{font-weight:600}.auditem small{display:block;color:var(--muted);margin-top:2px}.auditem .ab{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.audok{padding:18px;text-align:center;color:var(--muted)}
+.audtop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.iamodal .mbody{display:flex;flex-direction:column;gap:10px}
+.ianote{font-size:13px;color:var(--muted);margin:0}
+.iamsgs{display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow:auto;padding:2px}
+.iamsg{padding:10px 12px;border-radius:12px;line-height:1.45;font-size:14px;max-width:92%}
+.iamsg.eu{align-self:flex-end;background:var(--accent);color:#fff}
+.iamsg.ia{align-self:flex-start;background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid var(--line,rgba(127,127,127,.3))}
+.iamsg.erro{border-color:var(--danger,#d92d20);color:var(--danger,#d92d20)}
+.iamsg ul{margin:4px 0;padding-left:20px}.iamsg p{margin:4px 0}.iamsg table{border-collapse:collapse;margin:6px 0;font-size:13px}.iamsg td,.iamsg th{border:1px solid var(--line,rgba(127,127,127,.35));padding:3px 6px;text-align:left}
+.iamsg .ihd{font-weight:700;margin-top:8px}
+.iachips{display:flex;flex-wrap:wrap;gap:6px}.iachips button{border:1px dashed var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.iaform{display:flex;gap:8px;align-items:flex-end}.iaform textarea{flex:1;width:100%!important;min-width:0;resize:vertical;min-height:48px}
+@media (max-width:1560px){#btnExport .lbl,#btnFech .lbl,#btnHelp .lbl,#btnCopy .lbl{display:none}}
+.iafoot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.iathink{align-self:flex-start;color:var(--muted);font-size:13px}
+.vizl{font-size:12px;color:var(--muted);margin-top:4px}.vizl b{color:inherit}
+.geobar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px;font-size:13px;color:var(--muted)}
+.nocoord{font-size:11px;color:var(--muted);margin-left:6px}
 .fsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:6px 0 2px}.fsug:empty{display:none}
 .fsug button{border:1px dashed var(--accent);background:transparent;color:var(--accent);font:inherit;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer}
 .fsug button:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
@@ -692,6 +716,8 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg><span class="lbl"> WhatsApp</span></button>
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
     <button class="btn" id="btnSemMot" type="button" title="Rotas que ainda estão sem motorista: preencha direto na lista"><span data-ic="user"></span><span class="lbl"> Sem motorista</span><span class="nbad" id="nSemMot" hidden></span></button>
+    <button class="btn" id="btnAud" type="button" title="Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"><span data-ic="check2"></span><span class="lbl"> Auditoria</span><span class="nbad" id="nAud" hidden></span></button>
+    <button class="btn ia" id="btnIA" type="button" title="Assistente com IA: monta rotas, aponta problemas e responde sobre a semana"><span data-ic="sparkle"></span><span class="lbl"> Assistente</span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
     <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
     <button class="btn" id="btnHelp" type="button" title="Vídeo e passo a passo de como usar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span class="lbl"> Ajuda</span></button>
@@ -880,6 +906,30 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     </form>
   </div>
 </div>
+<div class="scrim" id="scrimAud" aria-hidden="true">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="audTitle">
+    <header><h2 id="audTitle">Auditoria da semana</h2><button class="icon-btn" type="button" data-close="scrimAud" aria-label="Fechar">✕</button></header>
+    <div class="mbody" id="audBody"></div>
+  </div>
+</div>
+<div class="scrim" id="scrimIA" aria-hidden="true">
+  <div class="modal wide iamodal" role="dialog" aria-modal="true" aria-labelledby="iaTitle">
+    <header><h2 id="iaTitle"><span data-ic="sparkle"></span> Assistente</h2><button class="icon-btn" type="button" data-close="scrimIA" aria-label="Fechar">✕</button></header>
+    <div class="mbody">
+      <p class="ianote">Ele enxerga a <b>semana que está na tela</b> (rotas, repetições, endereços, distâncias estimadas e a auditoria). Ele só <b>sugere</b>: quem muda a agenda é você. Não manda nomes de motoristas, nº de MTR nem observações.</p>
+      <div class="iamsgs" id="iaMsgs" aria-live="polite"></div>
+      <div class="iachips" id="iaChips">
+        <button type="button" data-p="Faça uma auditoria da semana: o que está errado, arriscado ou pode ser melhorado? Separe por prioridade.">Auditar a semana</button>
+        <button type="button" data-p="Para hoje, sugira a melhor ordem das paradas de cada caminhão, com horários estimados e justificativa.">Melhor ordem de hoje</button>
+        <button type="button" data-p="Quais clientes ficam perto uns dos outros e poderiam ser atendidos na mesma rota? Monte grupos por região.">Clientes próximos</button>
+        <button type="button" data-p="Tem rotas nesta semana que dá para juntar ou trocar de dia para economizar deslocamento? Mostre o ganho estimado.">Juntar rotas</button>
+        <button type="button" data-p="Algum caminhão está sobrecarregado ou ocioso em algum dia da semana? Sugira como equilibrar.">Equilibrar caminhões</button>
+      </div>
+      <form id="iaForm" class="iaform"><textarea id="iaTxt" rows="2" placeholder="Ex.: monte a rota do Poliguindaste de quinta com Magna, Roca e Adfer" aria-label="Pergunta"></textarea><button type="submit" class="btn primary" id="iaGo"><span data-ic="send"></span> Enviar</button></form>
+      <div class="iafoot"><button type="button" class="btn sm ghost" id="iaLimpa">Nova conversa</button><span class="uso" id="iaInfo"></span></div>
+    </div>
+  </div>
+</div>
 <div class="scrim" id="scrimExport" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="xTitle" style="width:min(560px,100%)">
     <header><h2 id="xTitle">Baixar planilha do Excel</h2><button class="icon-btn" type="button" data-close="scrimExport" aria-label="Fechar">✕</button></header>
@@ -1011,6 +1061,8 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <details><summary><b>4</b> Buscar rotas e Lista de MTRs</summary><ol>
           <li>Clique em <b>Buscar</b>. Digite cliente, resíduo, nº do MTR, motorista, endereço… A busca roda enquanto você digita, em <b>todas</b> as rotas.</li>
           <li>Use os filtros (caminhão, tipo de parada, status, MTR, anexos, período) ou os atalhos: Saídas, Coletas, Descartes, Canceladas…</li>
+          <li><b>Auditoria:</b> o botão <b>Auditoria</b> confere a semana na tela: horários que se cruzam, deslocamento que não dá tempo, saída depois das 07:20, sem motorista, sem MTR, parada sem endereço e destino fora do trajeto. Clique no item para abrir a rota. “Tempo real” consulta o Google Maps.</li>
+          <li><b>Assistente:</b> faz perguntas sobre a semana na tela (montar rota, clientes próximos, juntar rotas, auditoria). Ele só sugere; quem muda é você. Para ele saber as distâncias, use <b>Cadastros → Endereços → Calcular coordenadas</b>.</li>
           <li><b>Sem motorista:</b> o botão <b>Sem motorista</b> na barra de cima (o número vermelho é o que falta na semana na tela) abre a lista de todas as rotas e repetições sem motorista. Escolha o nome e clique em <b>Salvar</b> ali mesmo. Numa repetição, salvar preenche todos os dias. Também dá para preencher de uma vez todas as do mesmo caminhão.</li>
           <li>Clique num resultado para <b>abrir a rota</b>. O botão <b>Exportar resultado</b> gera um Excel.</li>
           <li><b>Lista de MTRs:</b> mostra um MTR por linha, marca os <b>repetidos</b> e lista as <b>rotas concluídas sem MTR</b>, onde você digita o número e salva ali mesmo.</li></ol></details>
@@ -1195,7 +1247,7 @@ const DEST_DEF=["Inovar","CTR Santa Luzia","J&E","Classe A"];
 const $=s=>document.querySelector(s);
 const HOUR=64;
 const PIN='<svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg>';
-const ICP={"building":"<rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/><path d=\"M9 22v-4h6v4\"/><path d=\"M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01\"/>","flag":"<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"/>","moon":"<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z\"/>","user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/>", "wa": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/><path d=\"M9 10h.01M12 10h.01M15 10h.01\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m21 21-4.3-4.3\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"8\" ry=\"3\"/><path d=\"M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5\"/><path d=\"M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "calplus": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5\"/>", "recycle": "<path d=\"M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5\"/><path d=\"M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1\"/><path d=\"m14 16-3 3 3 3\"/><path d=\"M8.3 13.6 7.2 9.5 3.1 10.6\"/><path d=\"m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8\"/><path d=\"m13.4 9.6 4.1 1.1 1.1-4.1\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v5h5\"/><path d=\"M16 13H8M16 17H8M10 9H8\"/>", "clip": "<path d=\"m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5\"/>", "truck": "<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>", "exit": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "box": "<path d=\"M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12\"/>", "alert": "<path d=\"m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3\"/><path d=\"M12 9v4M12 17h.01\"/>", "archive": "<rect x=\"2\" y=\"3\" width=\"20\" height=\"5\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"14\" height=\"14\" rx=\"2\"/><path d=\"M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>", "edit": "<path d=\"M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z\"/>", "trash": "<path d=\"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9v12h14V9\"/><path d=\"M10 21v-6h4v6\"/>", "save": "<path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\"/><path d=\"M17 21v-8H7v8M7 3v5h8\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "stop": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" rx=\"1\"/>", "film": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4\"/>"};
+const ICP={"sparkle":"<path d=\"M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z\"/><path d=\"M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z\"/>","check2":"<path d=\"M9 11l3 3L22 4\"/><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"/>","send":"<path d=\"M22 2 11 13\"/><path d=\"M22 2 15 22l-4-9-9-4z\"/>","navi":"<path d=\"M3 11l19-9-9 19-2-8z\"/>","building":"<rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/><path d=\"M9 22v-4h6v4\"/><path d=\"M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01\"/>","flag":"<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"/>","moon":"<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z\"/>","user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/>", "wa": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/><path d=\"M9 10h.01M12 10h.01M15 10h.01\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m21 21-4.3-4.3\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"8\" ry=\"3\"/><path d=\"M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5\"/><path d=\"M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "calplus": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5\"/>", "recycle": "<path d=\"M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5\"/><path d=\"M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1\"/><path d=\"m14 16-3 3 3 3\"/><path d=\"M8.3 13.6 7.2 9.5 3.1 10.6\"/><path d=\"m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8\"/><path d=\"m13.4 9.6 4.1 1.1 1.1-4.1\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v5h5\"/><path d=\"M16 13H8M16 17H8M10 9H8\"/>", "clip": "<path d=\"m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5\"/>", "truck": "<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>", "exit": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "box": "<path d=\"M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12\"/>", "alert": "<path d=\"m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3\"/><path d=\"M12 9v4M12 17h.01\"/>", "archive": "<rect x=\"2\" y=\"3\" width=\"20\" height=\"5\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"14\" height=\"14\" rx=\"2\"/><path d=\"M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>", "edit": "<path d=\"M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z\"/>", "trash": "<path d=\"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9v12h14V9\"/><path d=\"M10 21v-6h4v6\"/>", "save": "<path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\"/><path d=\"M17 21v-8H7v8M7 3v5h8\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "stop": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" rx=\"1\"/>", "film": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4\"/>"};
 const ic=n=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICP[n]+'</svg>';
 const PIN_S=PIN.replace('width="16" height="16"','width="14" height="14"');
 const norm=s=>String(s||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -1319,6 +1371,7 @@ async function rememberAddr(nome,endereco){
   const k=locKey(nome);if(!k||!endereco)return true;
   const cur=S.locais.get(k);
   const body={nome:String(nome),endereco:String(endereco),obs:cur&&cur.obs||"",tipo:cur&&cur.tipo||""};
+  if(cur&&cur.lat&&cur.geoEnd===String(endereco).trim())Object.assign(body,{lat:cur.lat,lng:cur.lng,geoEnd:cur.geoEnd,geoPrec:cur.geoPrec||""});
   const id=cur&&cur._id||k;S.locais.set(k,Object.assign({_id:id},body));
   if(S.locCol){try{await S.locCol.doc(id).set(body)}catch(e){return writeErr(e)}}
   return true;
@@ -1536,7 +1589,7 @@ function render(){
   const wd=weekDays();
   if(S.view==="dia"){const d=S.anchor;$("#rangeLabel").textContent=DAYN[d.getDay()]+", "+d.getDate()+" de "+MONTHS[d.getMonth()]+" de "+d.getFullYear();}
   else{const a=wd[0],b=wd[6];$("#rangeLabel").textContent=(a.getMonth()===b.getMonth()?pad(a.getDate()):a.getDate()+" de "+MONTHS[a.getMonth()])+" – "+b.getDate()+" de "+MONTHS[b.getMonth()]+" de "+b.getFullYear();}
-  $("#goDate").value=iso(S.anchor);semMotBadge();
+  $("#goDate").value=iso(S.anchor);semMotBadge();try{audBadge()}catch(e){}
   [["#mapBau","Baú"],["#mapPoli","Poliguindaste"]].forEach(([sel,t])=>{const a=$(sel);a.style.display=S.view==="dia"?"":"none";if(S.view!=="dia")return;
     const o=routeDay(iso(S.anchor),t);
     const lb=a.querySelector(".lbl");if(lb)lb.textContent=o.url?" Rota do "+t+(o.parts.length>1?" ("+o.parts.length+" trechos)":""):" "+t+": sem endereços";
@@ -2589,6 +2642,98 @@ $("#sOut").addEventListener("click",async e=>{
     if(await salvarMot(k,v)){toast(v+" salvo");const row=b.closest("[data-smrow]");row&&row.remove();API.refresh()}else b.disabled=false}
   catch(x){b.disabled=false;writeErr(x)}},true);
 $("#sOut").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("[data-smin]")){e.preventDefault();const b=e.target.closest(".smin").querySelector("[data-smsave]");b&&b.click()}});
+/* ---------- distâncias estimadas (linha reta x 1,35; 30 km/h na cidade) ---------- */
+const GEO_F=1.35,GEO_V=30;
+const temCoord=l=>!!(l&&l.lat&&l.lng&&String(l.geoEnd||"")===String(l.endereco||"").trim());
+function locCoord(nome,end){const l=S.locais.get(locKey(nome));if(temCoord(l))return l;if(end){const e=String(end).trim();for(const x of S.locais.values())if(temCoord(x)&&x.endereco.trim()===e)return x}return null}
+function kmEst(a,b){if(!a||!b)return null;const R=6371,r=x=>x*Math.PI/180;const dLa=r(b.lat-a.lat),dLo=r(b.lng-a.lng);
+  const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2;return Math.round(2*R*Math.asin(Math.sqrt(h))*GEO_F*10)/10}
+const minEst=km=>Math.round(km/GEO_V*60);
+function vizinhos(l,n){return[...S.locais.values()].filter(x=>x!==l&&temCoord(x)).map(x=>({l:x,km:kmEst(l,x)})).sort((a,b)=>a.km-b.km).slice(0,n||6)}
+function vizHtml(l){const v=vizinhos(l,6);return'<div class="vizl">Mais perto (estimativa): '+(v.length?v.map(x=>'<b>'+esc(x.l.nome)+'</b> '+String(x.km).replace(".",",")+' km (~'+minEst(x.km)+' min)').join(" · "):"nenhum outro com coordenada")+'</div>'}
+/* ---------- auditoria por regras da semana na tela ---------- */
+function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);const hoje=iso(new Date()),amanha=iso(addDays(new Date(),1));
+  const its=[...S.items].filter(([,r])=>r.data>=a&&r.data<=z&&eff(r)!=="Cancelado");
+  const add=(nivel,titulo,det,id,r,extra)=>out.push({nivel,titulo,det,id,r,extra:extra||null});
+  const nomeR=r=>DAYN[parseIso(r.data).getDay()].slice(0,3)+" "+ddmm(parseIso(r.data))+" · "+(r.caminhao==="Baú"?"Baú":"Poli")+" "+r.ini+" · "+(r.cliente||r.servico||"Rota");
+  const semCoord=new Set();
+  ["Baú","Poliguindaste"].forEach(t=>wd.forEach(d=>{const ds=iso(d);
+    const L=its.filter(([,r])=>r.data===ds&&r.caminhao===t).sort((x,y)=>toMin(x[1].ini)-toMin(y[1].ini));
+    for(let i=1;i<L.length;i++){const[pa,A]=L[i-1],[pb,B]=L[i];const gap=toMin(B.ini)-toMin(A.fim);
+      if(gap<0)add("erro","Horários se cruzam",nomeR(A)+" (até "+A.fim+") e "+nomeR(B)+" (começa "+B.ini+")",pb,B);
+      else{const sa=stopsOf(A),sb=stopsOf(B);const pA=sa[sa.length-1],pB=sb[0];if(!pA||!pB)continue;
+        const cA=locCoord(pA.local,pA.endereco),cB=locCoord(pB.local,pB.endereco);
+        if(!cA||!cB){[[pA,cA],[pB,cB]].forEach(([p,c])=>{if(!c&&(p.local||p.endereco))semCoord.add(p.local||p.endereco)});continue}
+        const km=kmEst(cA,cB),mn=minEst(km);
+        if(mn>gap+5)add("aviso","Deslocamento apertado","De "+(pA.local||"última parada")+" ("+nomeR(A)+") até "+(pB.local||"1ª parada")+" ("+nomeR(B)+"): ~"+String(km).replace(".",",")+" km, ~"+mn+" min estimados, mas só há "+gap+" min entre as rotas.",pb,B,{trajeto:[pA.endereco||cA.endereco,pB.endereco||cB.endereco]})}}
+    if(L.length&&d.getDay()>=1&&d.getDay()<=5){const[p0,F]=L[0];if(toMin(F.ini)>toMin("07:20"))add("info","Saída depois das 07:20","1ª rota do "+t+" em "+DAYN[d.getDay()].slice(0,3)+" "+ddmm(d)+" começa às "+F.ini+". Regra: sair do galpão até 07:20.",p0,F)}}));
+  for(const[id,r]of its){const st=stopsOf(r);
+    if(r.data>=hoje&&!String(r.motorista||"").trim())add("aviso","Sem motorista",nomeR(r),id,r);
+    if(!String(r.mtr||"").trim()){if(r.data>=hoje&&r.data<=amanha)add("aviso","MTR ainda não lançado",nomeR(r)+" — regra: toda coleta sai com o MTR emitido.",id,r);
+      else if(r.data<hoje&&eff(r)==="Concluído")add("aviso","Concluída sem MTR",nomeR(r),id,r)}
+    if(!st.length)add("info","Rota sem trajeto",nomeR(r)+" — sem paradas, não entra no mapa nem nas distâncias.",id,r);
+    st.forEach(p=>{if(p.local&&!p.endereco)add("aviso","Parada sem endereço",nomeR(r)+" — "+p.tipo+": "+p.local,id,r)});
+    partesDestino(r.destino).forEach(n=>{if(norm(n)==="galpao trevo")return;const l=S.locais.get(locKey(n));
+      if(!l||!l.endereco)add("info","Destino sem endereço cadastrado",nomeR(r)+" — destino "+n,id,r);
+      else if(st.length&&!st.some(p=>norm(p.local)===norm(l.nome)))add("info","Destino fora do trajeto",nomeR(r)+" — destino "+l.nome+" não aparece nas paradas.",id,r)});
+    if(r.data<hoje&&!r.auto&&r.status==="Agendado")add("info","Status não atualizado",nomeR(r)+" — já passou e continua Agendado.",id,r)}
+  if(semCoord.size)add("info","Endereços sem coordenada","Calcule em Cadastros → Endereços para conferir deslocamentos: "+[...semCoord].slice(0,8).join(", ")+(semCoord.size>8?"…":""),null,null);
+  const ord={erro:0,aviso:1,info:2};out.sort((x,y)=>ord[x.nivel]-ord[y.nivel]||(x.r&&y.r?(x.r.data+x.r.ini).localeCompare(y.r.data+y.r.ini):0));return out}
+function audBadge(){const b=$("#nAud");if(!b)return;const n=auditar().filter(x=>x.nivel!=="info").length;b.hidden=!n;b.textContent=n;$("#btnAud").title=n?n+" ponto(s) para conferir na semana na tela":"Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"}
+function renderAud(){const L=auditar();S.audL=L;const wd=weekDays();
+  const nm={erro:"Erros",aviso:"Atenção",info:"Para melhorar"};const ic2={erro:"⛔",aviso:"⚠️",info:"ℹ️"};
+  let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span><button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise ao Assistente</button></div>';
+  if(!L.length)h+='<p class="audok">Nada para corrigir nesta semana. 👍</p>';
+  ["erro","aviso","info"].forEach(nv=>{const X=L.map((x,i)=>[x,i]).filter(([x])=>x.nivel===nv);if(!X.length)return;h+='<div class="audsec">'+nm[nv]+' ('+X.length+')</div>';
+    h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj" data-tj="'+i+'"></small></span><span class="ab">'+(x.extra&&x.extra.trajeto?'<button type="button" class="btn sm ghost" data-tjb="'+i+'" title="Consulta o Google Maps">Tempo real</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
+  h+='<p class="cnote">A auditoria olha a semana que está na tela. As distâncias são estimativas (linha reta × 1,35, 30 km/h); “Tempo real” consulta o Google Maps.</p>';
+  $("#audBody").innerHTML=h}
+$("#btnAud").addEventListener("click",()=>{renderAud();openModal("scrimAud")});
+$("#audBody").addEventListener("click",async e=>{
+  const ia=e.target.closest('[data-aud="ia"]');if(ia){closeModal("scrimAud");abrirIA("Analise a auditoria automática desta semana: explique os problemas mais importantes e diga como resolver cada um, em ordem de prioridade.");return}
+  const tb=e.target.closest("[data-tjb]");if(tb){e.stopPropagation();const x=S.audL[tb.dataset.tjb];const box=$('#audBody [data-tj="'+tb.dataset.tjb+'"]');tb.disabled=true;box.textContent="Consultando o Google Maps…";
+    try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);box.textContent="Google Maps: "+String(r.km).replace(".",",")+" km, "+r.min+" min de carro."}catch(err){box.textContent=/apiTrajeto/.test(err&&err.message||"")?"Publique o Code.gs 9 para consultar o tempo real.":(err&&err.message||"Não foi possível consultar agora.")}tb.disabled=false;return}
+  const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
+/* ---------- Assistente (IA): contexto compacto da semana na tela ---------- */
+function ctxIA(){const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);const hoje=new Date();const L=[];const f=(n)=>String(n).replace(".",",");
+  L.push("Hoje: "+DAYN[hoje.getDay()]+" "+ddmmyy(iso(hoje))+". Semana na tela: "+ddmmyy(a)+" a "+ddmmyy(z)+".");
+  const g=S.locais.get(locKey("Galpão Trevo"));L.push("Base: Galpão Trevo — "+(S.patio||g&&g.endereco||"sem endereço")+".");
+  const its=[...S.items].filter(([,r])=>r.data>=a&&r.data<=z).sort((x,y)=>(x[1].data+x[1].caminhao+x[1].ini).localeCompare(y[1].data+y[1].caminhao+y[1].ini));
+  L.push("","ROTAS DA SEMANA ("+its.length+"):");
+  its.forEach(([,r])=>{const st=stopsOf(r);L.push("- "+DAYN[parseIso(r.data).getDay()].slice(0,3)+" "+ddmm(parseIso(r.data))+" · "+r.caminhao+" · "+r.ini+"–"+r.fim+" · cliente: "+(r.cliente||"-")+" · serviço: "+(r.servico||"-")+" · destino: "+(r.destino||"-")+
+    " · resíduos: "+(resText(r.residuos||[])||r.residuo||"-")+" · trajeto: "+(st.length?st.map(p=>p.tipo+" "+(p.local||p.endereco)).join(" > "):"sem paradas")+" · status: "+eff(r)+" · motorista: "+(String(r.motorista||"").trim()?"sim":"NÃO")+" · MTR: "+(String(r.mtr||"").trim()?"sim":"NÃO")+(r.serie?" · rota que se repete":""))});
+  const reps=[...S.series.values()].filter(x=>!(seriesEnd(x)&&seriesEnd(x)<iso(hoje)));
+  if(reps.length){L.push("","REPETIÇÕES ATIVAS ("+reps.length+"):");reps.forEach(x=>L.push("- "+x.caminhao+" · "+(x.cliente||x.servico)+" · "+recSummary(x)+" · destino: "+(x.destino||"-")))}
+  const usados=new Set();its.forEach(([,r])=>{stopsOf(r).forEach(p=>{const l=locCoord(p.local,p.endereco);if(l)usados.add(l)});partesDestino(r.destino).forEach(n=>{const l=S.locais.get(locKey(n));if(l)usados.add(l)})});
+  [...S.locais.values()].forEach(l=>{if(l.tipo==="destino"||l.nome==="Galpão Trevo")usados.add(l)});
+  L.push("","ENDEREÇOS CADASTRADOS (nome | tipo | endereço):");
+  [...S.locais.values()].sort((x,y)=>x.nome.localeCompare(y.nome,"pt")).forEach(l=>L.push("- "+l.nome+" | "+(l.tipo==="destino"?"DESTINO (destinador)":l.nome==="Galpão Trevo"?"BASE":"cliente/coleta")+" | "+(l.endereco||"sem endereço")+(temCoord(l)?"":" | sem coordenada")));
+  const comC=[...usados].filter(temCoord);
+  if(comC.length>1){L.push("","DISTÂNCIAS ESTIMADAS (km por estrada ≈ linha reta × 1,35; tempo ≈ 30 km/h). Para cada lugar, os mais próximos:");
+    comC.forEach(l=>{const v=[...S.locais.values()].filter(x=>x!==l&&temCoord(x)).map(x=>[x,kmEst(l,x)]).sort((p,q)=>p[1]-q[1]).slice(0,8);L.push("- "+l.nome+": "+v.map(([x,k])=>x.nome+" "+f(k)+" km/~"+minEst(k)+" min").join("; "))})}
+  const au=auditar();if(au.length){L.push("","AUDITORIA AUTOMÁTICA DA SEMANA:");au.slice(0,60).forEach(x=>L.push("- ["+x.nivel+"] "+x.titulo+": "+x.det))}
+  return L.join("\n")}
+function mdHtml(t){const lin=String(t||"").split(/\r?\n/);let h="",ul=false,tb=[];const inl=x=>esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(^|[^*])\*([^*]+)\*/g,"$1<i>$2</i>").replace(/`([^`]+)`/g,"<code>$1</code>");
+  const fechaUl=()=>{if(ul){h+="</ul>";ul=false}};const fechaTb=()=>{if(!tb.length)return;const rows=tb.filter(r=>!/^\s*\|?\s*:?-{2,}/.test(r)).map(r=>r.replace(/^\s*\|/,"").replace(/\|\s*$/,"").split("|").map(c=>c.trim()));
+    h+="<table>"+rows.map((r,i)=>"<tr>"+r.map(c=>(i?"<td>":"<th>")+inl(c)+(i?"</td>":"</th>")).join("")+"</tr>").join("")+"</table>";tb=[]};
+  lin.forEach(l=>{if(/^\s*\|.*\|\s*$/.test(l)){fechaUl();tb.push(l);return}fechaTb();
+    const m=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);if(m){if(!ul){h+="<ul>";ul=true}h+="<li>"+inl(m[1])+"</li>";return}fechaUl();
+    if(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)){h+="<hr>";return}
+    const hd=l.match(/^\s*#{1,6}\s+(.*)$/);if(hd){h+='<div class="ihd">'+inl(hd[1])+'</div>';return}if(l.trim())h+="<p>"+inl(l)+"</p>"});
+  fechaUl();fechaTb();return h}
+S.iaHist=[];
+function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<p class="ianote">Pergunte qualquer coisa sobre a semana, ou use um dos atalhos abaixo.</p>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Pensando… (leva uns 20 a 40 segundos)</div>':"");box.scrollTop=box.scrollHeight}
+async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return;if(!guard())return;S.iaBusy=true;$("#iaGo").disabled=true;
+  const hist=S.iaHist.filter(m=>!m.erro).slice(-8).map(m=>({role:m.role,texto:m.texto}));S.iaHist.push({role:"user",texto:txt});$("#iaTxt").value="";iaRender(true);
+  try{const r=await API.call("apiIA",[{pergunta:txt,contexto:ctxIA(),historico:hist}]);S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Modelo: "+r.modelo+" · "+r.usadasHoje+" de "+r.limite+" perguntas hoje"}
+  catch(e){const m=e&&e.message||"";S.iaHist.push({role:"model",erro:true,texto:/INVALIDO: apiIA/.test(m)?"O Google ainda está com o Code.gs antigo. Publique o Code.gs 9 (Implantar → Gerenciar implantações → ✏️ → Nova versão).":m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora."})}
+  finally{S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
+function abrirIA(pergunta){openModal("scrimIA");iaRender(false);if(pergunta)iaEnviar(pergunta);else setTimeout(()=>$("#iaTxt").focus(),30)}
+$("#btnIA").addEventListener("click",()=>abrirIA());
+$("#iaForm").addEventListener("submit",e=>{e.preventDefault();iaEnviar($("#iaTxt").value)});
+$("#iaTxt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();iaEnviar($("#iaTxt").value)}});
+$("#iaChips").addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(b)iaEnviar(b.dataset.p)});
+$("#iaLimpa").addEventListener("click",()=>{S.iaHist=[];$("#iaInfo").textContent="";iaRender(false)});
 /* ---------- copiar uma rota e colar em outro dia ---------- */
 function clipBody(r){const b=clean(r);["serie","serieData","id","virtual","excluidas","freq","inicio"].forEach(k=>delete b[k]);b.status="Agendado";b.auto=true;b.anexos=[];b.mtr="";delete b.atualizado;return b}
 function clipSet(r){S.clip=clipBody(r);try{localStorage.setItem("agendaClip",JSON.stringify(S.clip))}catch(e){}clipShow();toast("Rota copiada. Escolha o dia na barra de baixo ou clique num horário vazio da agenda.")}
@@ -2765,6 +2910,7 @@ async function saveLocal(oldId,nome,endereco,obs,tipo){
   const ex=S.locais.get(k);if(ex&&ex._id!==oldId){toast("Já existe um local com esse nome");return false}
   const old=oldId?[...S.locais].find(([,x])=>x._id===oldId):null;
   const body={nome,endereco,obs,tipo:tipo!==undefined?tipo:((old&&old[1].tipo)||"")};
+  if(old&&old[1].lat&&String(old[1].geoEnd||"")===String(endereco||"").trim())Object.assign(body,{lat:old[1].lat,lng:old[1].lng,geoEnd:old[1].geoEnd,geoPrec:old[1].geoPrec||""});
   const sameKey=old&&old[0]===k;const id=sameKey?oldId:(ex?ex._id:k);
   if(old)S.locais.delete(old[0]);S.locais.set(k,Object.assign({_id:id},body));renderCad();
   try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
@@ -2820,13 +2966,15 @@ function renderCad(){
   }else   if(CAD.tab==="locais"){
     h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
     h+=bar("Procurar local ou endereço","Novo endereço");
+    {const comE=[...S.locais.values()].filter(l=>l.endereco.trim());const okC=comE.filter(temCoord).length;
+     h+='<div class="geobar">'+PIN_S+' <span><b>'+okC+'</b> de '+comE.length+' endereços com coordenadas (usadas para distâncias, auditoria e Assistente)</span>'+(okC<comE.length?'<button type="button" class="btn sm primary" data-act="geo">Calcular coordenadas que faltam</button>':'<button type="button" class="btn sm ghost" data-act="geo">Recalcular</button>')+'</div>'}
     const nD=[...S.locais.values()].filter(x=>x.tipo==="destino").length;
     h+='<div class="cfilt" role="group" aria-label="Mostrar"><button type="button" class="btn sm'+(CAD.soDst?'':' on')+'" data-act="fdst" data-v="">Todos</button><button type="button" class="btn sm'+(CAD.soDst?' on':'')+'" data-act="fdst" data-v="1">'+ic("flag")+' Só destinos ('+nD+')</button></div>';
     const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo"&&(!CAD.soDst||x.tipo==="destino")).sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
     const dchk=on=>'<label class="dchk"><input type="checkbox" id="eDst"'+(on?' checked':'')+'> É destino</label>';
     const dpill=x=>x.tipo==="destino"?' <span class="dpill" title="Aparece na lista de Destino da rota">'+ic("flag")+' destino</span>':'';
     const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local (ex.: Hermes – Aimorés)">'+dchk(x?x.tipo==="destino":!!ed.dst)+'</td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs+(x.tipo==="destino"?" destino":"")))+'"><td><b>'+esc(x.nome)+'</b>'+dpill(x)+'</td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs+(x.tipo==="destino"?" destino":"")))+'"><td><b>'+esc(x.nome)+'</b>'+dpill(x)+(x.endereco?(temCoord(x)?' <button type="button" class="usolink" data-act="viz" data-id="'+esc(x._id)+'" title="Lugares mais perto">perto ▾</button>':'<span class="nocoord" title="Clique em Calcular coordenadas">sem coordenada</span>'):'')+(CAD.viz===x._id?vizHtml(x):'')+'</td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
     h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
     const sc=semCadastro("locais",list.map(x=>x.nome));
     const todos=[...S.locais.values()].map(x=>x.nome);
@@ -2947,6 +3095,10 @@ $("#cBody").addEventListener("click",async e=>{
   if(a==="dver"){const k=norm(b.dataset.nome);if(CAD.dopen.has(k))CAD.dopen.delete(k);else CAD.dopen.add(k);renderCad();return}
   if(a==="drota"){closeModal("scrimCad");openFound(b.dataset.ds,id);return}
   if(a==="dserie"){closeModal("scrimCad");openSeries(id);return}
+  if(a==="viz"){CAD.viz=CAD.viz===id?null:id;renderCad();return}
+  if(a==="geo"){if(!guard())return;const refazer=b.textContent.indexOf("Recalcular")>=0;b.disabled=true;b.textContent="Calculando… (pode levar 1 minuto)";
+    try{const r=await API.call("apiGeo",[refazer]);toast(r.feitos.length+" endereço(s) com coordenada"+(r.falhas.length?" · não achados: "+r.falhas.join(", "):"")+(r.faltam?" · faltam "+r.faltam+", clique de novo":""));API.refresh()}
+    catch(x){toast(x&&x.code==="invalid_request"&&/apiGeo/.test(x.message)?"Publique o Code.gs 9 para calcular as coordenadas":(x&&x.message||"Não foi possível agora"))}finally{renderCad()}return}
   if(a==="fdst"){CAD.soDst=!!b.dataset.v;renderCad();return}
   if(a==="fixdst"){const sel=b.closest(".fixrow").querySelector("select");const para=sel.value;if(!para){sel.focus();toast("Escolha o destino certo na lista");return}if(!guard())return;
     b.disabled=true;b.textContent="Corrigindo…";const n=await trocarDestino(b.dataset.de,para);CAD.todas=null;toast(n?"Corrigido em "+n+" rota(s)/repetição(ões)":"Nada para corrigir");API.refresh();await loadUso();renderCad();return}
@@ -3112,7 +3264,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.6";
+const VERSAO_TELA="8.0";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -3132,7 +3284,7 @@ async function startData(){
   S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");
   [["cliCol","clientes","cliOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
   subscribeWeek();subscribeSeries();
-  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
+  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||""),lat:Number(x.lat)||null,lng:Number(x.lng)||null,geoEnd:String(x.geoEnd||""),geoPrec:String(x.geoPrec||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.motCol.onSnapshot(snap=>{S.motoristas.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.motoristas.set(d.id,{nome:String(x.nome),caminhao:String(x.caminhao||""),telefone:String(x.telefone||""),pagamento:String(x.pagamento||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.cfgDoc.onSnapshot(d=>{S.cfg=d.exists?Object.assign({},d.data()||{}):{};S.patio=String(S.cfg.patio||"");render();if(CAD.open)renderCad();if(!S.cfgOk){S.cfgOk=true;seedV5()}},()=>{});
