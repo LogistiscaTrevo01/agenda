@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script>try{var t=localStorage.getItem("agendaTema");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -404,6 +405,9 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 }
 .lfilt{margin:0 0 8px}.pill.ltipo.cliente{border-left-color:var(--brand,#241F59)}.pill.ltipo.destino{border-left-color:var(--accent,#FDB913)}.pill.ltipo.ambos{border-left-color:var(--ok)}
 .secwarn{color:#8a5a00;background:#fff1d6;border-radius:8px;padding:8px 10px;font-weight:600}
+.btn.tema{background:transparent;border-color:rgba(255,255,255,.28);color:var(--top-ink,#fff)}
+.btn.tema:hover{background:rgba(255,255,255,.12)}
+@media (max-width:640px){.btn.tema .lbl{display:none}.btn.tema{padding:0 9px}}
 /* ===== v5 ===== */
 .top .who{display:inline-flex;align-items:center;gap:8px;font-size:13px;opacity:.9}
 .top .who b{font-weight:600}
@@ -629,6 +633,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <span class="bsep" aria-hidden="true"></span>
     <span class="btitle">Agenda de Rotas <small>Baú · Poliguindaste</small></span>
   </div>
+  <button class="btn tema" id="btnTema" type="button" title="Mudar para o modo escuro" aria-label="Mudar para o modo escuro"></button>
   <span class="who" id="who" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> <b id="whoName">LogisticaTrevo</b><button class="btn sair" id="btnLogout" type="button" title="Sair deste aparelho">Sair</button></span>
   <button class="btn primary" id="btnNew" type="button">＋ Nova rota</button>
 </div>
@@ -883,11 +888,13 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="cTitle">
     <header><h2 id="cTitle">Cadastros</h2><button class="icon-btn" type="button" data-close="scrimCad" aria-label="Fechar">✕</button></header>
     <div class="tabs" role="tablist" id="cTabs">
-      <button type="button" role="tab" data-tab="locais" aria-selected="true"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Clientes e destinos<span class="n" id="nLoc"></span></button>
+      <button type="button" role="tab" data-tab="clientes" aria-selected="true"><span data-ic="building"></span> Clientes<span class="n" id="nCli"></span></button>
+      <button type="button" role="tab" data-tab="destinos" aria-selected="false"><span data-ic="flag"></span> Destinos<span class="n" id="nDst"></span></button>
+      <button type="button" role="tab" data-tab="locais" aria-selected="false"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg> Endereços<span class="n" id="nLoc"></span></button>
       <button type="button" role="tab" data-tab="residuos" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Resíduos<span class="n" id="nRes"></span></button>
       <button type="button" role="tab" data-tab="motoristas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Motoristas<span class="n" id="nMot"></span></button>
       <button type="button" role="tab" data-tab="series" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Repetições<span class="n" id="nSer"></span></button>
-      <button type="button" role="tab" data-tab="seg" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Segurança e backup</button>
+      <button type="button" role="tab" data-tab="seg" aria-selected="false" title="Segurança e backup"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Segurança</button>
     </div>
     <div class="mbody" id="cBody"></div>
   </div>
@@ -1149,7 +1156,7 @@ const DEST_DEF=["Inovar","CTR Santa Luzia","J&E","Classe A"];
 const $=s=>document.querySelector(s);
 const HOUR=64;
 const PIN='<svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg>';
-const ICP={"user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/>", "wa": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/><path d=\"M9 10h.01M12 10h.01M15 10h.01\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m21 21-4.3-4.3\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"8\" ry=\"3\"/><path d=\"M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5\"/><path d=\"M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "calplus": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5\"/>", "recycle": "<path d=\"M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5\"/><path d=\"M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1\"/><path d=\"m14 16-3 3 3 3\"/><path d=\"M8.3 13.6 7.2 9.5 3.1 10.6\"/><path d=\"m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8\"/><path d=\"m13.4 9.6 4.1 1.1 1.1-4.1\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v5h5\"/><path d=\"M16 13H8M16 17H8M10 9H8\"/>", "clip": "<path d=\"m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5\"/>", "truck": "<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>", "exit": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "box": "<path d=\"M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12\"/>", "alert": "<path d=\"m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3\"/><path d=\"M12 9v4M12 17h.01\"/>", "archive": "<rect x=\"2\" y=\"3\" width=\"20\" height=\"5\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"14\" height=\"14\" rx=\"2\"/><path d=\"M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>", "edit": "<path d=\"M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z\"/>", "trash": "<path d=\"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9v12h14V9\"/><path d=\"M10 21v-6h4v6\"/>", "save": "<path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\"/><path d=\"M17 21v-8H7v8M7 3v5h8\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "stop": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" rx=\"1\"/>", "film": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4\"/>"};
+const ICP={"building":"<rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/><path d=\"M9 22v-4h6v4\"/><path d=\"M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01\"/>","flag":"<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"/>","moon":"<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z\"/>","user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/>", "wa": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/><path d=\"M9 10h.01M12 10h.01M15 10h.01\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m21 21-4.3-4.3\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"8\" ry=\"3\"/><path d=\"M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5\"/><path d=\"M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "calplus": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5\"/>", "recycle": "<path d=\"M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5\"/><path d=\"M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1\"/><path d=\"m14 16-3 3 3 3\"/><path d=\"M8.3 13.6 7.2 9.5 3.1 10.6\"/><path d=\"m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8\"/><path d=\"m13.4 9.6 4.1 1.1 1.1-4.1\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v5h5\"/><path d=\"M16 13H8M16 17H8M10 9H8\"/>", "clip": "<path d=\"m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6a4 4 0 0 1 5.7 5.7l-8.6 8.6a2 2 0 0 1-2.8-2.8l8.5-8.5\"/>", "truck": "<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>", "exit": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "box": "<path d=\"M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12\"/>", "alert": "<path d=\"m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3\"/><path d=\"M12 9v4M12 17h.01\"/>", "archive": "<rect x=\"2\" y=\"3\" width=\"20\" height=\"5\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"14\" height=\"14\" rx=\"2\"/><path d=\"M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>", "edit": "<path d=\"M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z\"/>", "trash": "<path d=\"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9v12h14V9\"/><path d=\"M10 21v-6h4v6\"/>", "save": "<path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\"/><path d=\"M17 21v-8H7v8M7 3v5h8\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "stop": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" rx=\"1\"/>", "film": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4\"/>"};
 const ic=n=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICP[n]+'</svg>';
 const PIN_S=PIN.replace('width="16" height="16"','width="14" height="14"');
 const norm=s=>String(s||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -1170,7 +1177,7 @@ const fmtH=h=>(Math.round(h*10)/10).toString().replace(".",",")+" h";
 /* ---------- estado ---------- */
 const S={rotas:new Map(),series:new Map(),items:new Map(),view:(window.innerWidth<760?"dia":"semana"),anchor:new Date(),weekend:true,
   col:null,serCol:null,unsub:null,readOnly:false,subWeek:null,locais:new Map(),locCol:null,cfgDoc:null,patio:"",cfg:{},
-  residuos:new Map(),motoristas:new Map(),resCol:null,motCol:null,uso:null,started:false,ver:new Map()};
+  residuos:new Map(),clientes:new Map(),destinos:new Map(),cliOk:null,dstOk:null,motoristas:new Map(),resCol:null,motCol:null,uso:null,started:false,ver:new Map()};
 try{const w=localStorage.getItem("agenda.weekend");if(w!==null)S.weekend=w==="1";const v=localStorage.getItem("agenda.view");if(v&&window.innerWidth>=760)S.view=v;}catch(e){}
 $("#chkWeekend").checked=S.weekend;
 
@@ -1611,8 +1618,9 @@ function fillLists(){
   for(const x of S.motoristas.values())if(x.nome)sets.mot.add(x.nome);
   if(S.uso)Object.values(S.uso.clientes||{}).forEach(x=>sets.cli.add(x.nome));
   const put=(id,s)=>{$(id).innerHTML=[...s].sort((a,b)=>a.localeCompare(b,"pt")).map(v=>'<option value="'+esc(v)+'">').join("")};
-  for(const l of S.locais.values()){if(!l.nome||l.nome==="Galpão Trevo")continue;if(l.tipo!=="destino")sets.cli.add(l.nome);if(l.tipo==="destino"||l.tipo==="ambos")sets.dest.add(l.nome)}
-  const locs=new Set([...sets.cli,...sets.dest]);for(const l of S.locais.values())if(l.nome)locs.add(l.nome);
+  for(const x of S.clientes.values())sets.cli.add(x.nome);for(const x of S.destinos.values())sets.dest.add(x.nome);
+  const locs=new Set();for(const l of S.locais.values())if(l.nome)locs.add(l.nome);if(S.uso)Object.values(S.uso.locais||{}).forEach(x=>locs.add(x.nome));
+  for(const r of S.rotas.values())(r.paradas||[]).forEach(p=>p.local&&locs.add(p.local));
   put("#dlLoc",locs);put("#dlCli",sets.cli);put("#dlDest",sets.dest);put("#dlRes",sets.res);put("#dlMot",sets.mot);
 }
 
@@ -2557,6 +2565,9 @@ $("#calScroll").addEventListener("scroll",()=>{if(CTX.id&&!$("#ctxMenu.sheet"))c
 /* ---------- Ajuda: vídeo e passo a passo ---------- */
 function openHelp(tab){openModal("scrimHelp");hTab(tab||"video")}
 function hTab(t){document.querySelectorAll("#hTabs [data-ht]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.ht===t)));$("#hVideo").hidden=t!=="video";$("#hPassos").hidden=t!=="passos";if(t!=="video")$("#hVid").pause()}
+$("#btnTema").addEventListener("click",()=>{const n=temaAtual()==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem("agendaTema",n)}catch(e){}temaBtn()});
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",temaBtn)}catch(e){}
+temaBtn();document.querySelectorAll("[data-ic]").forEach(e=>{e.outerHTML=ic(e.dataset.ic)});
 $("#btnHelp").addEventListener("click",()=>openHelp());
 $("#lHelp").addEventListener("click",e=>{e.preventDefault();openHelp()});
 $("#hTabs").addEventListener("click",e=>{const b=e.target.closest("[data-ht]");if(b)hTab(b.dataset.ht)});
@@ -2571,19 +2582,20 @@ const _closeM=closeModal;
 function dicaAjuda(){try{if(localStorage.getItem("agenda.dicaAjuda"))return;localStorage.setItem("agenda.dicaAjuda","1")}catch(e){return}setTimeout(()=>toast("Novo por aqui? Clique em Ajuda para ver o vídeo e o passo a passo."),1500)}
 
 /* ---------- Cadastros: locais, resíduos, motoristas, repetições e segurança ---------- */
-const CAD={open:false,tab:"locais",q:"",edit:null,confirm:null,info:null,overr:null};
+const CAD={open:false,tab:"clientes",q:"",edit:null,confirm:null,info:null,overr:null};
 function usoN(g,nome){if(!S.uso)return null;const x=(S.uso[g]||{})[norm(nome)];return x?x.n:0}
 function usoHtml(g,nome){const n=usoN(g,nome);return n===null?'<span class="uso">…</span>':'<span class="uso">'+(n?'<b>'+n+'</b> rota'+(n>1?"s":""):"nenhuma")+'</span>'}
 function uid(map,nome){let k=locKey(nome)||("x"+Date.now().toString(36));if(!map.has(k))return k;let i=2;while(map.has(k+"-"+i))i++;return k+"-"+i}
 async function loadUso(){try{S.uso=await API.call("apiUso",[]);fillLists();if(CAD.open)renderCad()}catch(e){}}
+const CADMAP=col=>({residuos:[S.residuos,S.resCol],motoristas:[S.motoristas,S.motCol],clientes:[S.clientes,S.cliCol],destinos:[S.destinos,S.dstCol]})[col];
 async function cadSet(col,id,body){
-  const map=col==="residuos"?S.residuos:S.motoristas;const c=col==="residuos"?S.resCol:S.motCol;
+  const[map,c]=CADMAP(col);
   id=id||uid(map,body.nome);map.set(id,body);fillLists();if(CAD.open)renderCad();
   try{await c.doc(id).set(body);return true}catch(e){return writeErr(e)}
 }
 async function cadDel(col,id){
   if(col==="locais"){const k=[...S.locais].find(([,x])=>x._id===id);if(k)S.locais.delete(k[0]);if(CAD.open)renderCad();try{await S.locCol.doc(id).delete();return true}catch(e){return writeErr(e)}}
-  const map=col==="residuos"?S.residuos:S.motoristas;const c=col==="residuos"?S.resCol:S.motCol;
+  const[map,c]=CADMAP(col);
   map.delete(id);fillLists();if(CAD.open)renderCad();try{await c.doc(id).delete();return true}catch(e){return writeErr(e)}
 }
 async function saveLocal(oldId,nome,endereco,obs,tipo){
@@ -2605,33 +2617,42 @@ async function loadOverr(){const ids=[...S.series.keys()];if(!ids.length){CAD.ov
 const actBtns=(id,extra)=>(extra||"")+'<button type="button" class="btn sm" data-act="edit" data-id="'+esc(id)+'">'+ic("edit")+' Editar</button> '+
   (CAD.confirm===id?'<button type="button" class="btn sm danger" data-act="del" data-id="'+esc(id)+'">Confirmar exclusão</button> <button type="button" class="btn sm ghost" data-act="nodel">Não</button>':'<button type="button" class="btn sm danger" data-act="ask" data-id="'+esc(id)+'" title="Excluir">'+ic("trash")+'</button>');
 const editBtns='<button type="button" class="btn sm primary" data-act="save">Salvar</button> <button type="button" class="btn sm ghost" data-act="cancel">Cancelar</button>';
-const LOC_TIPOS=[["cliente","Cliente"],["destino","Destino"],["ambos","Cliente e destino"]];
-function locTipo(x){if(x.tipo)return x.tipo;const c=usoN("clientes",x.nome)||0,d=usoN("destinos",x.nome)||0;return c&&d?"ambos":d?"destino":"cliente"}
-function locTipoHtml(t){return'<span class="pill ltipo '+t+'">'+(LOC_TIPOS.find(x=>x[0]===t)||["",""])[1]+'</span>'}
-function locUso(nome){if(!S.uso)return'<span class="uso">…</span>';const c=usoN("clientes",nome)||0,d=usoN("destinos",nome)||0,l=usoN("locais",nome)||0;
-  const p=[];if(c)p.push("<b>"+c+"</b> como cliente");if(d)p.push("<b>"+d+"</b> como destino");if(l&&!c&&!d)p.push("<b>"+l+"</b> no trajeto");
-  return'<span class="uso">'+(p.join(" · ")||"nenhuma")+'</span>'}
+const LISTA={
+  clientes:{map:()=>S.clientes,ok:()=>S.cliOk,g:"clientes",tipo:"cliente",col:"Cliente (contrato)",um:"cliente",plural:"clientes",busca:"Procurar cliente",novo:"Novo cliente",ph:"Nome do cliente (ex.: Hermes Pardini)",obsPh:"Ex.: contrato, contato",semTit:"Clientes usados nas rotas e ainda sem cadastro",
+    nota:"O <b>cliente</b> é o contrato que está sendo atendido. Não tem endereço: o endereço fica no trajeto (aba Endereços). Corrigir o nome aqui corrige o cliente em todas as rotas e repetições."},
+  destinos:{map:()=>S.destinos,ok:()=>S.dstOk,g:"destinos",tipo:"destino",col:"Destino",um:"destino",plural:"destinos",busca:"Procurar destino",novo:"Novo destino",ph:"Nome do destino (ex.: J&E)",obsPh:"Ex.: aceita madeira, horário",semTit:"Destinos usados nas rotas e ainda sem cadastro",
+    nota:"O <b>destino</b> é para onde o resíduo vai (destinador, aterro, galpão). Corrigir o nome aqui corrige o destino em todas as rotas e repetições. O endereço do destino, se precisar, fica na aba Endereços."}};
+/* separa "Vital (comum) / J&E (madeira)" em "Vital" e "J&E" */
+const partesDestino=t=>String(t||"").split(/\s*\/\s*|\s*\+\s*/).map(x=>x.replace(/\([^)]*\)/g,"").trim()).filter(Boolean);
 function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm));return Object.values(S.uso[g]||{}).filter(x=>!k.has(norm(x.nome))&&x.nome!=="Galpão Trevo").sort((a,b)=>b.n-a.n)}
 function renderCad(){
   if(!CAD.open)return;
   document.querySelectorAll("#cTabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===CAD.tab)));
-  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
+  $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nCli").textContent=S.clientes.size||"";$("#nDst").textContent=S.destinos.size||"";$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
   const box=$("#cBody");let h="";const ed=CAD.edit;
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
-  if(CAD.tab==="locais"){
+  if(CAD.tab==="clientes"||CAD.tab==="destinos"){const K=LISTA[CAD.tab];const map=K.map();
+    if(K.ok()===false){h+='<p class="cempty" style="text-align:left">Esta lista precisa do <b>Code.gs novo</b> no Google (versão 7.0). Cole o Code.gs no Apps Script e faça Implantar → Gerenciar implantações → ✏️ → Nova versão.</p>';box.innerHTML=h;return}
+    h+=bar(K.busca,K.novo);
+    const list=[...map].map(([id,x])=>Object.assign({_id:id},x)).sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
+    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:(ed.nome||""))+'" placeholder="'+K.ph+'"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="'+K.obsPh+'"></td><td>'+(x?usoHtml(K.g,x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml(K.g,x.nome)+'</td><td class="act">'+actBtns(id)+'</td></tr>'};
+    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>'+K.col+'</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum '+K.um+' cadastrado ainda.</p>')+'</div>';
+    const known=list.map(x=>x.nome);const sc=semCadastro(K.g,known);
+    const kn=new Set(known.map(norm));const novos=new Set();sc.forEach(x=>(K.g==="destinos"?partesDestino(x.nome):[x.nome]).forEach(n=>{if(!kn.has(norm(n)))novos.add(norm(n))}));
+    if(novos.size)h+='<div class="cadbar"><button type="button" class="btn sm" data-act="addall" data-g="'+CAD.tab+'">＋ Cadastrar de uma vez os '+novos.size+' '+K.plural+' usados nas rotas</button></div>';
+    h+=fixHtml(K.tipo,sc,known,K.semTit);
+    h+='<p class="cnote">'+K.nota+'</p>';
+  }else   if(CAD.tab==="locais"){
     h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
-    h+=bar("Procurar cliente, destino ou endereço","Novo cliente ou destino");
-    const lf=CAD.lf||"";h+='<div class="seg lfilt" role="group" aria-label="Mostrar">'+[["","Todos"],["cliente","Clientes"],["destino","Destinos"]].map(([v,t])=>'<button type="button" data-act="lf" data-v="'+v+'" aria-pressed="'+(lf===v)+'">'+t+'</button>').join("")+'</div>';
-    const all=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
-    const list=all.filter(x=>{const t=locTipo(x);return!lf||t===lf||t==="ambos"});
-    const tsel=v=>'<select id="eTipo">'+LOC_TIPOS.map(([k,t])=>'<option value="'+k+'"'+(k===v?" selected":"")+'>'+t+'</option>').join("")+'</select>';
-    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:(ed.nome||""))+'" placeholder="Nome do cliente ou destino"></td><td>'+tsel(x?locTipo(x):(ed.tipo||"cliente"))+'</td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?locUso(x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
-      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td data-l="Tipo">'+locTipoHtml(locTipo(x))+'</td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+locUso(x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
-    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Nome</th><th>Tipo</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum '+(lf==="destino"?"destino":lf==="cliente"?"cliente":"cliente ou destino")+' salvo ainda.</p>')+'</div>';
-    const known=all.map(x=>x.nome);const kk=new Set(known.map(norm).concat(["galpao trevo"]));const sc=new Map();
-    ["clientes","destinos","locais"].forEach(g=>Object.values(S.uso&&S.uso[g]||{}).forEach(x=>{const k=norm(x.nome);if(kk.has(k))return;const o=sc.get(k)||{nome:x.nome,n:0,g:new Set()};o.n=Math.max(o.n,x.n);o.g.add(g);sc.set(k,o)}));
-    h+=fixHtml("local",[...sc.values()].sort((a,b)=>b.n-a.n),known,"Clientes e destinos usados nas rotas e ainda sem cadastro");
-    h+='<p class="cnote">Corrigir o nome aqui corrige também o <b>cliente</b>, o <b>destino</b> e o <b>trajeto</b> de todas as rotas e repetições que usam esse nome. Os endereços salvos aparecem sozinhos quando você digita o nome no trajeto.</p>';
+    h+=bar("Procurar local ou endereço","Novo endereço");
+    const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
+    const row=(x)=>{const id=x?x._id:"";if(ed&&ed.id===id)return'<tr data-edit="1"><td><input id="eNome" value="'+esc(x?x.nome:"")+'" placeholder="Nome do local (ex.: Hermes – Aimorés)"></td><td><input id="eEnd" value="'+esc(x?x.endereco:"")+'" placeholder="Rua, nº, bairro, cidade"></td><td><input id="eObs" value="'+esc(x?x.obs:"")+'" placeholder="Ex.: portaria 2, horário"></td><td>'+(x?usoHtml("locais",x.nome):"")+'</td><td class="act">'+editBtns+'</td></tr>';
+      return'<tr data-k="'+esc(norm(x.nome+" "+x.endereco+" "+x.obs))+'"><td><b>'+esc(x.nome)+'</b></td><td>'+(x.endereco?'<span class="addr">'+esc(x.endereco)+'</span>':'<span class="noaddr">sem endereço</span>')+'</td><td class="addr">'+esc(x.obs)+'</td><td data-l="Usado em">'+usoHtml("locais",x.nome)+'</td><td class="act">'+actBtns(id,x.endereco?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(mapsSearch(x.endereco))+'" title="Ver no Google Maps">'+PIN_S+'</a> ':'')+'</td></tr>'};
+    h+='<div class="cscroll"><table class="ctable"><thead><tr><th>Local</th><th>Endereço</th><th>Observação</th><th>Usado em</th><th></th></tr></thead><tbody>'+(ed&&ed.id===""?row(null):"")+list.map(row).join("")+'</tbody></table>'+(list.length?'':'<p class="cempty">Nenhum local salvo ainda.</p>')+'</div>';
+    const sc=semCadastro("locais",list.map(x=>x.nome));
+    h+=fixHtml("local",sc,list.map(x=>x.nome),"Locais usados no trajeto e ainda sem cadastro");
+    h+='<p class="cnote">Aqui ficam os <b>lugares com endereço</b> usados no trajeto (coleta, descarte, saída). Corrigir o nome ou o endereço aqui corrige o trajeto de todas as rotas. Os endereços salvos aqui aparecem sozinhos quando você digita o nome do local no trajeto. Um endereço novo só é guardado quando você confirma.</p>';
   }else if(CAD.tab==="residuos"){
     h+=bar("Procurar tipo de resíduo","Novo resíduo");
     const list=[...S.residuos].sort((a,b)=>a[1].nome.localeCompare(b[1].nome,"pt"));
@@ -2689,24 +2710,38 @@ function fixHtml(g,sc,nomes,titulo){if(!sc.length)return"";
   return'<h4 class="csec">'+titulo+'</h4><p class="cnote" style="margin-top:0">Se for o mesmo que já está cadastrado com outro nome (erro de digitação), escolha o nome certo e clique em <b>Corrigir nas rotas</b>.</p>'+
     sc.slice(0,40).map(x=>'<div class="fixrow"><b>'+esc(x.nome)+'</b><span class="uso">('+x.n+' rota'+(x.n>1?"s":"")+')</span><select aria-label="Nome certo">'+opts+'</select><button type="button" class="btn sm primary" data-act="fix" data-g="'+g+'" data-de="'+esc(x.nome)+'">Corrigir nas rotas</button><button type="button" class="btn sm" data-act="addfrom" data-nome="'+esc(x.nome)+'">＋ Cadastrar</button></div>').join("")}
 /* corrige o nome (e o que mudou) em todas as rotas e repetições */
+let SRVV=null;async function srvVer(){if(SRVV!==null)return SRVV;try{const p=await API.call("ping",[]);SRVV=p&&p.versao||0}catch(e){SRVV=0}return SRVV}
 async function propagar(tipo,de,para,ex){
-  try{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);let n=r&&r.alteradas||0;
-    if(tipo==="local"&&de!==para)n+=await clienteAntigo(de,para);
+  try{let n=0;
+    if(["cliente","destino","local"].includes(tipo)&&await srvVer()<7)n=await renomearNaTela(tipo,de,para,ex||{});
+    else{const r=await API.call("apiRenomear",[tipo,de,para,ex||{}]);n=r&&r.alteradas||0}
     if(n)toast("Corrigido também em "+n+" rota(s)");API.refresh();loadUso();return true}
   catch(e){if(e&&e.code==="invalid_request")toast("Atualize o Code.gs no Google para corrigir as rotas automaticamente");else writeErr(e);return false}}
-/* o Code.gs antigo (antes da 6.9) não troca o nome do cliente: a tela faz isso por ele */
-async function clienteAntigo(de,para){let v=0;try{const p=await API.call("ping",[]);v=p&&p.versao||0}catch(e){}if(v>=6)return 0;
-  let n=0;const k=norm(de);
-  try{const g=await S.col.get();for(const d of g.docs){if(!d.exists)continue;const r=clean(d.data());if(norm(r.cliente)===k&&r.cliente!==para){S.rotas.set(d.id,r);if(await put("rotas",d.id,Object.assign({},r,{cliente:para})))n++}}}catch(e){}
-  for(const[id,s]of [...S.series])if(norm(s.cliente)===k&&s.cliente!==para){if(await put("series",id,Object.assign({},s,{cliente:para})))n++}
+/* Code.gs antigo (antes da 7.0): a própria tela corrige cliente, destino ou trajeto, um campo de cada vez */
+async function renomearNaTela(tipo,de,para,ex){const k=norm(de);let n=0;
+  const muda=r=>{const x=Object.assign({},r);let m=false;
+    if(tipo==="cliente"&&norm(x.cliente)===k&&x.cliente!==para){x.cliente=para;m=true}
+    if(tipo==="destino"&&norm(x.destino)===k&&x.destino!==para){x.destino=para;m=true}
+    if(tipo==="local")x.paradas=(x.paradas||[]).map(p=>{if(norm(p.local)!==k)return p;const q=Object.assign({},p);if(q.local!==para){q.local=para;m=true}
+      if(ex.enderecoPara!==undefined&&q.endereco!==ex.enderecoPara&&(!q.endereco||q.endereco===ex.enderecoDe)){q.endereco=ex.enderecoPara;m=true}return q});
+    return m?x:null};
+  try{const g=await S.col.get();for(const d of g.docs){if(!d.exists)continue;const r=clean(d.data());const x=muda(r);if(x){S.rotas.set(d.id,r);if(await put("rotas",d.id,x))n++}}}catch(e){}
+  for(const[id,s0]of [...S.series]){const x=muda(s0);if(x&&await put("series",id,x))n++}
   return n}
+/* modo claro / escuro (fica guardado neste aparelho) */
+function temaAtual(){const t=document.documentElement.getAttribute("data-theme");return t==="dark"||t==="light"?t:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
+function temaBtn(){const b=$("#btnTema");if(!b)return;const d=temaAtual()==="dark";b.innerHTML=ic(d?"sun":"moon")+'<span class="lbl"> '+(d?"Claro":"Escuro")+'</span>';
+  const t=d?"Mudar para o modo claro":"Mudar para o modo escuro";b.title=t;b.setAttribute("aria-label",t)}
 function filterCad(){const k=norm(CAD.q);document.querySelectorAll("#cBody tr[data-k]").forEach(tr=>{tr.hidden=!!k&&!tr.dataset.k.includes(k)})}
 $("#cBody").addEventListener("keydown",e=>{if(!e.target.closest("[data-edit]"))return;if(e.key==="Enter"){e.preventDefault();$("#cBody [data-act=save]").click()}else if(e.key==="Escape"){e.stopPropagation();CAD.edit=null;renderCad()}});
 $("#cBody").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;const tab=CAD.tab;
   if(a==="patio"){openPatio();return}
-  if(a==="new"){CAD.edit={id:"",tipo:CAD.lf||"cliente"};CAD.confirm=null;renderCad();return}
-  if(a==="lf"){CAD.lf=b.dataset.v;CAD.edit=null;renderCad();return}
+  if(a==="new"){CAD.edit={id:""};CAD.confirm=null;renderCad();return}
+  if(a==="addall"){const K=LISTA[b.dataset.g];const known=new Set([...K.map().values()].map(x=>norm(x.nome)));const nomes=new Map();
+    semCadastro(K.g,[...known]).forEach(x=>(K.g==="destinos"?partesDestino(x.nome):[x.nome]).forEach(n=>{if(!known.has(norm(n))&&!nomes.has(norm(n)))nomes.set(norm(n),n)}));
+    if(!nomes.size){toast("Nada para cadastrar");return}b.disabled=true;b.textContent="Cadastrando "+nomes.size+"…";
+    let ok=0;for(const n of nomes.values())if(await cadSet(b.dataset.g,null,{nome:n,obs:""}))ok++;toast(ok+" "+K.plural+" cadastrado(s)");renderCad();return}
   if(a==="edit"){CAD.edit={id};CAD.confirm=null;renderCad();return}
   if(a==="cancel"){CAD.edit=null;renderCad();return}
   if(a==="ask"){CAD.confirm=id;renderCad();return}
@@ -2717,14 +2752,17 @@ $("#cBody").addEventListener("click",async e=>{
     if(g==="local"){const l=S.locais.get(locKey(para));if(l&&l.endereco)ex={enderecoDe:"",enderecoPara:l.endereco}}
     if(g==="residuo"){const c=resCad(para);if(c&&c[1].classe)ex={classe:c[1].classe}}
     await propagar(g,b.dataset.de,para,ex);return}
-  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome,tipo:(usoN("destinos",b.dataset.nome)&&!usoN("clientes",b.dataset.nome))?"destino":"cliente"};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
+  if(a==="addfrom"){CAD.edit={id:"",nome:b.dataset.nome};renderCad();const n=$("#eNome");if(n)n.value=b.dataset.nome;const x=$("#eEnd")||$("#eObs");if(x)x.focus();return}
   if(!guard())return;
   if(a==="save"){
     const nome=($("#eNome").value||"").trim();if(!nome){toast("Informe o nome");$("#eNome").focus();return}
     const eid=CAD.edit&&CAD.edit.id;let ok;
     if(tab==="locais"){const old=eid?[...S.locais.values()].find(x=>x._id===eid):null;const end=($("#eEnd").value||"").trim();
-      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim(),$("#eTipo")?$("#eTipo").value:"");
+      ok=await saveLocal(eid||null,nome,end,($("#eObs").value||"").trim());
       if(ok&&old&&(old.nome!==nome||old.endereco!==end))await propagar("local",old.nome,nome,old.endereco!==end?{enderecoDe:old.endereco,enderecoPara:end}:{})}
+    else if(tab==="clientes"||tab==="destinos"){const K=LISTA[tab];const map=K.map();const dup=[...map].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse "+K.um+" já está cadastrado");return}
+      const old=eid&&map.get(eid)?Object.assign({},map.get(eid)):null;ok=await cadSet(tab,eid||null,Object.assign({},old||{},{nome,obs:($("#eObs").value||"").trim()}));
+      if(ok&&old&&old.nome!==nome)await propagar(K.tipo,old.nome,nome)}
     else if(tab==="residuos"){const dup=[...S.residuos].find(([k,x])=>k!==eid&&norm(x.nome)===norm(nome));if(dup){toast("Esse tipo de resíduo já existe");return}const old=eid&&S.residuos.get(eid)?Object.assign({},S.residuos.get(eid)):null;const cla=$("#eCla").value;
       ok=await cadSet("residuos",eid||null,Object.assign({},old||{},{nome,classe:cla}));
       if(ok&&old&&(old.nome!==nome||(old.classe||"")!==cla))await propagar("residuo",old.nome,nome,(old.classe||"")!==cla?{classe:cla}:{})}
@@ -2872,7 +2910,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="6.9";
+const VERSAO_TELA="7.0";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -2889,7 +2927,8 @@ async function startData(){
   try{S.assets=await window.claude.use("assets")}catch(e){S.assets=null}
   banner("Carregando as rotas…","info");
   S.col=db.collection("rotas");S.serCol=db.collection("series");S.locCol=db.collection("locais");S.cfgDoc=db.doc("config/geral");
-  S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");
+  S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");S.dstCol=db.collection("destinos");
+  [["cliCol","clientes","cliOk"],["dstCol","destinos","dstOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
   subscribeWeek();subscribeSeries();
   S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
