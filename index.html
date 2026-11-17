@@ -273,6 +273,7 @@ body.colando .toast,body.colando .undobar{bottom:120px}
 .dver{list-style:none;margin:8px 0 2px;padding:0;flex-basis:100%;display:flex;flex-direction:column;gap:4px}
 .dver button{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:100%;text-align:left;background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid rgba(127,127,127,.3);border-radius:8px;padding:6px 10px;font:inherit;color:inherit;cursor:pointer}
 .dver button:hover{border-color:var(--accent)}.dver .dq{font-weight:700;min-width:110px}.dver small{flex-basis:100%;color:var(--muted)}
+.nbad[hidden]{display:none!important}
 .nbad{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--danger,#d92d20);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
 .smot{margin-top:10px}.smot h4{display:flex;align-items:center;gap:6px}
 .smrow{display:grid;grid-template-columns:120px minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:8px 10px;border:1px solid var(--line,rgba(127,127,127,.3));border-radius:10px;margin:6px 0}
@@ -289,6 +290,21 @@ body.colando .toast,body.colando .undobar{bottom:120px}
 .auditem .at{font-weight:600}.auditem small{display:block;color:var(--muted);margin-top:2px}.auditem .ab{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .audok{padding:18px;text-align:center;color:var(--muted)}
 .audtop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.jbtn{position:fixed;right:20px;bottom:20px;z-index:46;display:flex;align-items:center;gap:8px;padding:6px 16px 6px 6px;border:0;border-radius:999px;background:linear-gradient(135deg,#7a5af8,#2e90fa);color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 8px 24px rgba(46,144,250,.35),0 2px 6px rgba(0,0,0,.25);transition:transform .15s}
+.jbtn:hover{transform:translateY(-2px)}.jbtn[aria-expanded="true"]{opacity:0;pointer-events:none}
+.jav{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);color:#fff;font-weight:800;font-size:18px;flex:none}
+.jpanel{position:fixed;right:20px;bottom:20px;z-index:47;width:min(440px,calc(100vw - 24px));height:min(680px,calc(100vh - 40px));display:none;flex-direction:column;gap:8px;padding:10px 12px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--line,rgba(127,127,127,.3));border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.jpanel.open{display:flex}
+.jhead{display:flex;align-items:center;gap:10px;padding:2px 0 8px;border-bottom:1px solid var(--line,rgba(127,127,127,.25))}
+.jhead .jav{background:linear-gradient(135deg,#7a5af8,#2e90fa);width:38px;height:38px}
+.jtit{flex:1;min-width:0;display:flex;flex-direction:column}.jtit small{color:var(--muted);font-size:12px}
+.jpanel .iamsgs{flex:1;max-height:none;min-height:0}
+.jpanel .iamsg{max-width:96%;font-size:13.5px}
+.jpanel .iachips{gap:5px}.jpanel .iachips button{font-size:12px;padding:4px 9px}
+.jpanel .iaform textarea{min-height:42px;max-height:140px}
+.jfoot{font-size:11.5px;line-height:1.3}
+body.colando .jbtn{bottom:96px}
+@media (max-width:640px){.jpanel{right:6px;left:6px;bottom:6px;width:auto;height:calc(100vh - 12px)}.jbtn{right:12px;bottom:12px}.jbtn .jnome{display:none}.jbtn{padding:6px}}
 .iamodal .mbody{display:flex;flex-direction:column;gap:10px}
 .ianote{font-size:13px;color:var(--muted);margin:0}
 .iamsgs{display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow:auto;padding:2px}
@@ -717,7 +733,6 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
     <button class="btn" id="btnSemMot" type="button" title="Rotas que ainda estão sem motorista: preencha direto na lista"><span data-ic="user"></span><span class="lbl"> Sem motorista</span><span class="nbad" id="nSemMot" hidden></span></button>
     <button class="btn" id="btnAud" type="button" title="Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"><span data-ic="check2"></span><span class="lbl"> Auditoria</span><span class="nbad" id="nAud" hidden></span></button>
-    <button class="btn ia" id="btnIA" type="button" title="Assistente com IA: monta rotas, aponta problemas e responde sobre a semana"><span data-ic="sparkle"></span><span class="lbl"> Assistente</span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
     <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
     <button class="btn" id="btnHelp" type="button" title="Vídeo e passo a passo de como usar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span class="lbl"> Ajuda</span></button>
@@ -912,24 +927,6 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <div class="mbody" id="audBody"></div>
   </div>
 </div>
-<div class="scrim" id="scrimIA" aria-hidden="true">
-  <div class="modal wide iamodal" role="dialog" aria-modal="true" aria-labelledby="iaTitle">
-    <header><h2 id="iaTitle"><span data-ic="sparkle"></span> Assistente</h2><button class="icon-btn" type="button" data-close="scrimIA" aria-label="Fechar">✕</button></header>
-    <div class="mbody">
-      <p class="ianote">Ele enxerga a <b>semana que está na tela</b> (rotas, repetições, endereços, distâncias estimadas e a auditoria). Ele só <b>sugere</b>: quem muda a agenda é você. Não manda nomes de motoristas, nº de MTR nem observações.</p>
-      <div class="iamsgs" id="iaMsgs" aria-live="polite"></div>
-      <div class="iachips" id="iaChips">
-        <button type="button" data-p="Faça uma auditoria da semana: o que está errado, arriscado ou pode ser melhorado? Separe por prioridade.">Auditar a semana</button>
-        <button type="button" data-p="Para hoje, sugira a melhor ordem das paradas de cada caminhão, com horários estimados e justificativa.">Melhor ordem de hoje</button>
-        <button type="button" data-p="Quais clientes ficam perto uns dos outros e poderiam ser atendidos na mesma rota? Monte grupos por região.">Clientes próximos</button>
-        <button type="button" data-p="Tem rotas nesta semana que dá para juntar ou trocar de dia para economizar deslocamento? Mostre o ganho estimado.">Juntar rotas</button>
-        <button type="button" data-p="Algum caminhão está sobrecarregado ou ocioso em algum dia da semana? Sugira como equilibrar.">Equilibrar caminhões</button>
-      </div>
-      <form id="iaForm" class="iaform"><textarea id="iaTxt" rows="2" placeholder="Ex.: monte a rota do Poliguindaste de quinta com Magna, Roca e Adfer" aria-label="Pergunta"></textarea><button type="submit" class="btn primary" id="iaGo"><span data-ic="send"></span> Enviar</button></form>
-      <div class="iafoot"><button type="button" class="btn sm ghost" id="iaLimpa">Nova conversa</button><span class="uso" id="iaInfo"></span></div>
-    </div>
-  </div>
-</div>
 <div class="scrim" id="scrimExport" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="xTitle" style="width:min(560px,100%)">
     <header><h2 id="xTitle">Baixar planilha do Excel</h2><button class="icon-btn" type="button" data-close="scrimExport" aria-label="Fechar">✕</button></header>
@@ -1062,7 +1059,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
           <li>Clique em <b>Buscar</b>. Digite cliente, resíduo, nº do MTR, motorista, endereço… A busca roda enquanto você digita, em <b>todas</b> as rotas.</li>
           <li>Use os filtros (caminhão, tipo de parada, status, MTR, anexos, período) ou os atalhos: Saídas, Coletas, Descartes, Canceladas…</li>
           <li><b>Auditoria:</b> o botão <b>Auditoria</b> confere a semana na tela: horários que se cruzam, deslocamento que não dá tempo, saída depois das 07:20, sem motorista, sem MTR, parada sem endereço e destino fora do trajeto. Clique no item para abrir a rota. “Tempo real” consulta o Google Maps.</li>
-          <li><b>Assistente:</b> faz perguntas sobre a semana na tela (montar rota, clientes próximos, juntar rotas, auditoria). Ele só sugere; quem muda é você. Para ele saber as distâncias, use <b>Cadastros → Endereços → Calcular coordenadas</b>.</li>
+          <li><b>Júlia (botão no canto de baixo, à direita):</b> a assistente com IA. Responde sobre a semana na tela (montar rota, clientes próximos, juntar rotas, auditoria). Ela só sugere; quem muda é você. A conversa fica aberta enquanto você mexe na agenda. Para ela saber as distâncias, use <b>Cadastros → Endereços → Calcular coordenadas</b>.</li>
           <li><b>Sem motorista:</b> o botão <b>Sem motorista</b> na barra de cima (o número vermelho é o que falta na semana na tela) abre a lista de todas as rotas e repetições sem motorista. Escolha o nome e clique em <b>Salvar</b> ali mesmo. Numa repetição, salvar preenche todos os dias. Também dá para preencher de uma vez todas as do mesmo caminhão.</li>
           <li>Clique num resultado para <b>abrir a rota</b>. O botão <b>Exportar resultado</b> gera um Excel.</li>
           <li><b>Lista de MTRs:</b> mostra um MTR por linha, marca os <b>repetidos</b> e lista as <b>rotas concluídas sem MTR</b>, onde você digita o número e salva ali mesmo.</li></ol></details>
@@ -1122,6 +1119,21 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
 <datalist id="dlLoc"></datalist><datalist id="dlCli"></datalist><datalist id="dlDest"></datalist><datalist id="dlRes"></datalist><datalist id="dlMot"></datalist>
 <div class="toast" id="toast" role="status"></div>
 <div class="clipbar" id="clipBar" role="region" aria-label="Rota copiada"></div>
+<button type="button" class="jbtn" id="btnJulia" aria-label="Conversar com a Júlia" aria-expanded="false" title="Júlia, assistente de logística"><span class="jav">J</span><span class="jnome">Júlia</span></button>
+<section class="jpanel" id="juliaPanel" role="dialog" aria-label="Júlia, assistente de logística" aria-hidden="true">
+  <header class="jhead"><span class="jav">J</span><div class="jtit"><b>Júlia</b><small>Assistente de logística · vê a semana na tela</small></div>
+    <button type="button" class="icon-btn" id="iaLimpa" title="Nova conversa" aria-label="Nova conversa">↺</button><button type="button" class="icon-btn" id="juliaFecha" aria-label="Fechar">✕</button></header>
+  <div class="iamsgs" id="iaMsgs" aria-live="polite"></div>
+  <div class="iachips" id="iaChips">
+    <button type="button" data-p="Faça uma auditoria da semana: o que está errado, arriscado ou pode ser melhorado? Separe por prioridade.">Auditar a semana</button>
+    <button type="button" data-p="Para hoje, sugira a melhor ordem das paradas de cada caminhão, com horários estimados.">Melhor ordem de hoje</button>
+    <button type="button" data-p="Quais clientes ficam perto uns dos outros e poderiam ser atendidos na mesma rota? Monte grupos por região.">Clientes próximos</button>
+    <button type="button" data-p="Tem rotas nesta semana que dá para juntar ou trocar de dia para economizar deslocamento?">Juntar rotas</button>
+    <button type="button" data-p="Algum caminhão está sobrecarregado ou ocioso em algum dia da semana? Sugira como equilibrar.">Equilibrar caminhões</button>
+  </div>
+  <form id="iaForm" class="iaform"><textarea id="iaTxt" rows="2" placeholder="Pergunte à Júlia… (Enter envia)" aria-label="Pergunta"></textarea><button type="submit" class="btn primary" id="iaGo" aria-label="Enviar"><span data-ic="send"></span></button></form>
+  <div class="jfoot"><span class="uso" id="iaInfo">Ela só sugere: quem muda a agenda é você. Não recebe nome de motorista, nº de MTR nem observações.</span></div>
+</section>
 <div class="undobar" id="undobar" role="status" aria-live="polite"><span id="undoMsg"></span><button type="button" id="undoBtn">Desfazer</button><button type="button" id="undoClose" aria-label="Fechar">✕</button></div>
 
 <script>
@@ -2682,7 +2694,7 @@ function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[
 function audBadge(){const b=$("#nAud");if(!b)return;const n=auditar().filter(x=>x.nivel!=="info").length;b.hidden=!n;b.textContent=n;$("#btnAud").title=n?n+" ponto(s) para conferir na semana na tela":"Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"}
 function renderAud(){const L=auditar();S.audL=L;const wd=weekDays();
   const nm={erro:"Erros",aviso:"Atenção",info:"Para melhorar"};const ic2={erro:"⛔",aviso:"⚠️",info:"ℹ️"};
-  let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span><button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise ao Assistente</button></div>';
+  let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span><button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise à Júlia</button></div>';
   if(!L.length)h+='<p class="audok">Nada para corrigir nesta semana. 👍</p>';
   ["erro","aviso","info"].forEach(nv=>{const X=L.map((x,i)=>[x,i]).filter(([x])=>x.nivel===nv);if(!X.length)return;h+='<div class="audsec">'+nm[nv]+' ('+X.length+')</div>';
     h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj" data-tj="'+i+'"></small></span><span class="ab">'+(x.extra&&x.extra.trajeto?'<button type="button" class="btn sm ghost" data-tjb="'+i+'" title="Consulta o Google Maps">Tempo real</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
@@ -2722,14 +2734,20 @@ function mdHtml(t){const lin=String(t||"").split(/\r?\n/);let h="",ul=false,tb=[
     const hd=l.match(/^\s*#{1,6}\s+(.*)$/);if(hd){h+='<div class="ihd">'+inl(hd[1])+'</div>';return}if(l.trim())h+="<p>"+inl(l)+"</p>"});
   fechaUl();fechaTb();return h}
 S.iaHist=[];
-function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<p class="ianote">Pergunte qualquer coisa sobre a semana, ou use um dos atalhos abaixo.</p>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Pensando… (leva uns 20 a 40 segundos)</div>':"");box.scrollTop=box.scrollHeight}
+function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Júlia está pensando… <span id="iaSeg">0</span> s</div>':"");box.scrollTop=box.scrollHeight;
+  clearInterval(S.iaTimer);if(pensando){const t0=Date.now();S.iaTimer=setInterval(()=>{const e=$("#iaSeg");if(e)e.textContent=Math.round((Date.now()-t0)/1000);else clearInterval(S.iaTimer)},1000)}}
 async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return;if(!guard())return;S.iaBusy=true;$("#iaGo").disabled=true;
   const hist=S.iaHist.filter(m=>!m.erro).slice(-8).map(m=>({role:m.role,texto:m.texto}));S.iaHist.push({role:"user",texto:txt});$("#iaTxt").value="";iaRender(true);
-  try{const r=await API.call("apiIA",[{pergunta:txt,contexto:ctxIA(),historico:hist}]);S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Modelo: "+r.modelo+" · "+r.usadasHoje+" de "+r.limite+" perguntas hoje"}
+  const t0=Date.now();try{const r=await API.call("apiIA",[{pergunta:txt,contexto:ctxIA(),historico:hist}]);S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
   catch(e){const m=e&&e.message||"";S.iaHist.push({role:"model",erro:true,texto:/INVALIDO: apiIA/.test(m)?"O Google ainda está com o Code.gs antigo. Publique o Code.gs 9 (Implantar → Gerenciar implantações → ✏️ → Nova versão).":m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora."})}
   finally{S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
-function abrirIA(pergunta){openModal("scrimIA");iaRender(false);if(pergunta)iaEnviar(pergunta);else setTimeout(()=>$("#iaTxt").focus(),30)}
-$("#btnIA").addEventListener("click",()=>abrirIA());
+function juliaAberta(){return $("#juliaPanel").classList.contains("open")}
+function juliaFecha(){const p=$("#juliaPanel");p.classList.remove("open");p.setAttribute("aria-hidden","true");$("#btnJulia").setAttribute("aria-expanded","false")}
+function abrirIA(pergunta){const p=$("#juliaPanel");if(!juliaAberta()){p.classList.add("open");p.setAttribute("aria-hidden","false");$("#btnJulia").setAttribute("aria-expanded","true");iaRender(!!S.iaBusy)}
+  if(pergunta)iaEnviar(pergunta);else setTimeout(()=>$("#iaTxt").focus(),30)}
+$("#btnJulia").addEventListener("click",()=>abrirIA());
+$("#juliaFecha").addEventListener("click",juliaFecha);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&juliaAberta()&&!document.querySelector(".scrim.open")){juliaFecha()}});
 $("#iaForm").addEventListener("submit",e=>{e.preventDefault();iaEnviar($("#iaTxt").value)});
 $("#iaTxt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();iaEnviar($("#iaTxt").value)}});
 $("#iaChips").addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(b)iaEnviar(b.dataset.p)});
@@ -2967,7 +2985,7 @@ function renderCad(){
     h+='<div class="galp"><b>'+ic("home")+' Galpão Trevo</b><span class="addr">'+(S.patio?esc(S.patio):'<span class="noaddr">sem endereço</span>')+'</span><button type="button" class="btn sm" data-act="patio">Editar</button></div>';
     h+=bar("Procurar local ou endereço","Novo endereço");
     {const comE=[...S.locais.values()].filter(l=>l.endereco.trim());const okC=comE.filter(temCoord).length;
-     h+='<div class="geobar">'+PIN_S+' <span><b>'+okC+'</b> de '+comE.length+' endereços com coordenadas (usadas para distâncias, auditoria e Assistente)</span>'+(okC<comE.length?'<button type="button" class="btn sm primary" data-act="geo">Calcular coordenadas que faltam</button>':'<button type="button" class="btn sm ghost" data-act="geo">Recalcular</button>')+'</div>'}
+     h+='<div class="geobar">'+PIN_S+' <span><b>'+okC+'</b> de '+comE.length+' endereços com coordenadas (usadas para distâncias, auditoria e pela Júlia)</span>'+(okC<comE.length?'<button type="button" class="btn sm primary" data-act="geo">Calcular coordenadas que faltam</button>':'<button type="button" class="btn sm ghost" data-act="geo">Recalcular</button>')+'</div>'}
     const nD=[...S.locais.values()].filter(x=>x.tipo==="destino").length;
     h+='<div class="cfilt" role="group" aria-label="Mostrar"><button type="button" class="btn sm'+(CAD.soDst?'':' on')+'" data-act="fdst" data-v="">Todos</button><button type="button" class="btn sm'+(CAD.soDst?' on':'')+'" data-act="fdst" data-v="1">'+ic("flag")+' Só destinos ('+nD+')</button></div>';
     const list=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo"&&(!CAD.soDst||x.tipo==="destino")).sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
@@ -3264,7 +3282,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="8.0";
+const VERSAO_TELA="8.1";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
