@@ -1129,7 +1129,9 @@ function snapOf(rows){const docs=(rows||[]).map(r=>({id:r.id,exists:true,data:()
 function newId(){const a="abcdefghijklmnopqrstuvwxyz0123456789";let s="";const r=new Uint8Array(20);crypto.getRandomValues(r);r.forEach(x=>s+=a[x%a.length]);return s}
 function listen(run){const L={run};listeners.add(L);run();return()=>listeners.delete(L)}
 function refreshAll(){listeners.forEach(L=>L.run())}
-async function poll(){if(document.hidden||!getTok())return;try{const v=await call("apiRev",[]);if(rev!==null&&v!==rev){rev=v;refreshAll()}else rev=v}catch(e){}}
+/* confere novidades a cada 12 s enquanto alguém mexe; parado há mais de 10 min, a cada 60 s (economiza a cota diária do Google) */
+let ultUso=Date.now(),ultPoll=0;["pointerdown","keydown","wheel","touchstart"].forEach(ev=>addEventListener(ev,()=>{const parado=Date.now()-ultUso>600000;ultUso=Date.now();if(parado)poll()},{passive:true,capture:true}));
+async function poll(){if(document.hidden||!getTok())return;const ag=Date.now();if(ag-ultUso>600000&&ag-ultPoll<58000)return;ultPoll=ag;try{const v=await call("apiRev",[]);if(rev!==null&&v!==rev){rev=v;refreshAll()}else rev=v}catch(e){}}
 setInterval(poll,12000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
 window.addEventListener("focus",poll);
@@ -2551,7 +2553,7 @@ function semMotBadge(){const b=$("#nSemMot");if(!b)return;let n=0;const wd=weekD
   $("#btnSemMot").title=n?n+" rota(s) sem motorista na semana na tela. Clique para ver todas e preencher.":"Rotas que ainda estão sem motorista: preencha direto na lista"}
 async function abrirSemMot(jaAberta){if(!jaAberta){sReset(false);openModal("scrimSearch")}else sReset(false);S.sLast=null;sSeq++;
   const out=$("#sOut");out.innerHTML='<p class="sempty">Procurando as rotas sem motorista…</p>';
-  let rot=[];try{const g=await S.col.get();rot=g.docs.filter(d=>d.exists).map(d=>[d.id,clean(d.data())]).filter(([,r])=>semMot(r))}catch(e){out.innerHTML='<p class="sempty">Não foi possível carregar as rotas agora. Tente de novo.</p>';return}
+  const desde=iso(addDays(new Date(),-90));let rot=[];try{const g=await S.col.where("data",">=",desde).get();rot=g.docs.filter(d=>d.exists).map(d=>[d.id,clean(d.data())]).filter(([,r])=>semMot(r))}catch(e){out.innerHTML='<p class="sempty">Não foi possível carregar as rotas agora. Tente de novo.</p>';return}
   const hoje=iso(new Date());
   const ser=[...S.series].filter(([,x])=>!String(x.motorista||"").trim()&&!(seriesEnd(x)&&seriesEnd(x)<hoje));
   const fut=rot.filter(([,r])=>r.data>=hoje).sort((a,b)=>(a[1].data+a[1].ini).localeCompare(b[1].data+b[1].ini));
@@ -2561,7 +2563,7 @@ async function abrirSemMot(jaAberta){if(!jaAberta){sReset(false);openModal("scri
   const campo=(k,t,label,ir)=>'<span class="smin"><input list="dlMot" placeholder="Motorista" data-smin="'+esc(k)+'" aria-label="Motorista">'+chips(t)+'<button type="button" class="btn sm primary" data-smsave="'+esc(k)+'">'+(label||"Salvar")+'</button>'+(ir?'<button type="button" class="btn sm ghost" '+ir+'>Abrir</button>':'')+'</span>';
   const linha=(k,quando,r,extra,ir)=>'<div class="smrow" data-smrow="'+esc(k)+'"><span class="smq">'+quando+'<span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span></span><span class="smt"><b>'+esc(r.ini+"–"+r.fim)+'</b> · '+esc(r.cliente||r.servico||"Rota")+'<small>'+esc([r.servico&&r.cliente?r.servico:"",extra].filter(Boolean).join(" · "))+'</small></span>'+campo(k,r.caminhao,"Salvar",ir)+'</div>';
   const tot=ser.length+rot.length;
-  let h='<div class="shead"><b>'+ic("user")+' Sem motorista: '+ser.length+' repetição(ões) e '+rot.length+' rota(s)</b><span class="hint">canceladas não entram</span><span class="spacer"></span>'+(rot.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Excel</button>':'')+'</div>';
+  let h='<div class="shead"><b>'+ic("user")+' Sem motorista: '+ser.length+' repetição(ões) e '+rot.length+' rota(s)</b><span class="hint">canceladas não entram · anteriores: últimos 90 dias</span><span class="spacer"></span>'+(rot.length?'<button type="button" class="btn sm" id="sExp">'+ic("download")+' Excel</button>':'')+'</div>';
   if(!tot){out.innerHTML=h+'<p class="sempty">Tudo certo: nenhuma rota sem motorista. 👍</p>';return}
   ["Baú","Poliguindaste"].forEach(t=>{const n=ser.filter(([,x])=>x.caminhao===t).length+fut.filter(([,r])=>r.caminhao===t).length;
     if(n>1)h+='<div class="smrow smbulk" data-smrow="bulk:'+t+'"><span class="smt"><b>Preencher de uma vez</b> as '+n+' do <b>'+t+'</b> (repetições e rotas daqui para frente)<small>As anteriores ficam para você conferir uma a uma.</small></span>'+campo("bulk:"+t,t,"Preencher as "+n)+'</div>'});
@@ -2768,12 +2770,12 @@ async function saveLocal(oldId,nome,endereco,obs,tipo){
   try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
 }
 /* rotas e repetições que usam um destino (lista aberta na própria aba Endereços) */
-async function carregarTodas(){if(CAD.todas||CAD.carregando)return;CAD.carregando=true;
-  try{const g=await S.col.get();CAD.todas=g.docs.filter(d=>d.exists).map(d=>({id:d.id,r:clean(d.data())}))}catch(e){CAD.todas=[];toast("Não foi possível carregar as rotas agora")}
+async function carregarTodas(nome){const k=norm(nome);CAD.todas=CAD.todas||{};if(CAD.todas[k]||CAD.carregando)return;CAD.carregando=true;
+  try{const r=await API.call("apiSearch",[{texto:nome}]);CAD.todas[k]=(r.itens||[]).map(x=>({id:x.id,r:clean(x.data)}))}catch(e){CAD.todas[k]=[];toast("Não foi possível carregar as rotas agora")}
   finally{CAD.carregando=false}if(CAD.open)renderCad()}
 function dverHtml(nome){const k=norm(nome);const usa=r=>partesDestino(r.destino).some(n=>norm(n)===k);
-  if(!CAD.todas){setTimeout(carregarTodas,0);return'<div class="dver"><span class="uso">Carregando as rotas…</span></div>'}
-  const rot=CAD.todas.filter(x=>usa(x.r)).sort((a,b)=>(a.r.data+a.r.ini).localeCompare(b.r.data+b.r.ini));
+  if(!CAD.todas||!CAD.todas[k]){setTimeout(()=>carregarTodas(nome),0);return'<div class="dver"><span class="uso">Carregando as rotas…</span></div>'}
+  const rot=CAD.todas[k].filter(x=>usa(x.r)).sort((a,b)=>(a.r.data+a.r.ini).localeCompare(b.r.data+b.r.ini));
   const ser=[...S.series].filter(([,s])=>usa(s));const hoje=iso(new Date());
   const li=(attrs,quando,r,extra)=>'<li><button type="button" '+attrs+'><span class="dq">'+quando+'</span><span class="pill '+truckCls(r.caminhao)+'">'+esc(r.caminhao)+'</span> <b>'+esc(r.ini+"–"+r.fim)+'</b> · '+esc(r.cliente||r.servico||"Rota")+'<small>Destino: '+esc(r.destino)+(extra||"")+'</small></button></li>';
   const h=ser.map(([id,s])=>li('data-act="dserie" data-id="'+esc(id)+'"','↻ '+esc(recSummary(s)),s,(seriesEnd(s)&&seriesEnd(s)<hoje?" · já terminou":" · repetição"))).join("")+
@@ -2876,7 +2878,7 @@ function renderCad(){
     else if(I.erro)h+='<div class="seccard"><h4>Não foi possível verificar</h4><p>'+esc(I.erro)+'</p></div>';
     else h+='<div class="seccard"><h4>'+ic("save")+' Backup automático</h4><p class="big">'+(I.ultimoBackup?esc(I.ultimoBackup):"ainda não feito")+'</p><p>'+I.backups+' cópia(s) guardada(s) na pasta “Agenda de Rotas – backups” do Google Drive. Uma por dia, as últimas '+I.guardados+'.</p></div>'+
       '<div class="seccard"><h4>'+ic("database")+' Seus dados</h4><p class="big">'+I.rotas+' rotas</p><p>Guardadas na planilha “Agenda de Rotas – dados” do Google Drive, com histórico de versões.</p>'+
-      (I.rotas>=4000?'<p class="secwarn">A agenda está perto do limite em que fica mais lenta (cerca de 5.000 rotas). Peça para arquivar as rotas com mais de 1 ano.</p>':'<p>A agenda continua rápida até cerca de 5.000 rotas guardadas (as repetições não contam). Perto disso, as rotas com mais de 1 ano vão para um arquivo.</p>')+'</div>';
+      (I.rotas>=3000?'<p class="secwarn">A agenda está perto do limite em que fica mais lenta (cerca de 5.000 rotas). Peça para arquivar as rotas com mais de 1 ano.</p>':'<p>A agenda continua rápida até cerca de 5.000 rotas guardadas (as repetições não contam). Perto disso, as rotas com mais de 1 ano vão para um arquivo.</p>')+'</div>';
     h+='<div class="seccard"><h4>'+ic("lock")+' Acesso</h4><p class="secok">Só entra quem tem usuário e senha.</p><p>A senha é conferida no Google, não fica escrita no site. Cada aparelho fica conectado por até 30 dias.</p></div>'+
       '<div class="seccard"><h4>'+ic("clock")+' O site expira?</h4><p class="secok">Não.</p><p>GitHub Pages e Google Apps Script são gratuitos e sem prazo. O que precisa de cuidado é a conta Google da logística: deixe a verificação em duas etapas ligada.</p></div></div>';
     h+='<div class="secbtns"><button type="button" class="btn primary" data-act="backup">'+ic("save")+' Fazer backup agora</button><button type="button" class="btn" data-act="full">'+ic("download")+' Baixar agenda completa (Excel)</button><button type="button" class="btn" data-act="logout">Sair deste aparelho</button></div>';
@@ -3110,7 +3112,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="7.5";
+const VERSAO_TELA="7.6";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
