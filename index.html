@@ -319,6 +319,24 @@ body.colando .toast,body.colando .undobar{bottom:120px}
 .jpanel .iamsg{max-width:96%;font-size:13.5px}
 .jpanel .iachips{gap:5px}.jpanel .iachips button{font-size:12px;padding:4px 9px}
 .jpanel .iaform textarea{min-height:42px;max-height:140px}
+.japr{margin-top:8px;border:1px dashed var(--accent);border-radius:10px;padding:8px 10px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.japr.salvo{border-style:solid;border-color:#22c55e;background:color-mix(in srgb,#22c55e 10%,transparent)}.japr.ignorado{opacity:.55}
+.japt{font-size:12px;color:var(--muted)}.japt b{color:var(--ink)}.japx{margin:3px 0 6px;font-weight:600}.japb{display:flex;gap:6px;justify-content:flex-end}
+.jfb{display:flex;gap:4px;justify-content:flex-end;margin-top:4px}.jfb button{border:1px solid transparent;background:none;border-radius:8px;padding:1px 6px;cursor:pointer;opacity:.55;font-size:14px}
+.jfb button:hover,.jfb button.on{opacity:1;border-color:var(--line,rgba(127,127,127,.35))}
+.jmodos{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.jmodo{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer;padding:4px 10px;border-radius:999px;border:1px solid var(--line,rgba(127,127,127,.3))}
+.jmodo input{width:auto;margin:0}.jmodo small{font-weight:500;color:var(--muted)}
+.jmodo:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.jsabe{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px}
+.jcad .jtop{border:1px solid var(--line,rgba(127,127,127,.3));border-radius:12px;margin:8px 0;background:var(--surface)}
+.jcad .jtop summary{cursor:pointer;padding:10px 12px;display:flex;align-items:center;gap:8px;list-style:none}
+.jcad .jtop summary::-webkit-details-marker{display:none}.jcad .jtop summary::before{content:"▸";color:var(--muted)}.jcad .jtop[open] summary::before{content:"▾"}
+.jcad .jtop summary small{color:var(--muted);margin-left:auto;font-size:12px}
+.jcad .jbody{padding:0 12px 12px;display:flex;flex-direction:column;gap:8px}
+.jcad .jbody textarea{width:100%;min-height:170px;resize:vertical;font-size:13px;line-height:1.45}
+.jcad .jbtns{display:flex;gap:8px;justify-content:flex-end}
+.jcad .jtam{font-size:12px;color:var(--muted)}
 .jfoot{flex:none;font-size:11.5px;line-height:1.3}
 .jpanel .iaform,.jpanel .iachips{flex:none}
 .jx{width:40px;height:40px;font-size:18px}
@@ -1002,6 +1020,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
       <button type="button" role="tab" data-tab="residuos" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.3-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/></svg> Resíduos<span class="n" id="nRes"></span></button>
       <button type="button" role="tab" data-tab="motoristas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Motoristas<span class="n" id="nMot"></span></button>
       <button type="button" role="tab" data-tab="series" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Repetições<span class="n" id="nSer"></span></button>
+      <button type="button" role="tab" data-tab="julia" aria-selected="false" title="O que a Júlia sabe"><span data-ic="sparkle"></span> Júlia<span class="n" id="nJul"></span></button>
       <button type="button" role="tab" data-tab="seg" aria-selected="false" title="Segurança e backup"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Segurança</button>
     </div>
     <div class="mbody" id="cBody"></div>
@@ -1157,7 +1176,9 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <button type="button" data-p="Quais clientes ficam perto uns dos outros e poderiam ser atendidos na mesma rota? Monte grupos por região.">Clientes próximos</button>
     <button type="button" data-p="Tem rotas nesta semana que dá para juntar ou trocar de dia para economizar deslocamento?">Juntar rotas</button>
     <button type="button" data-p="Algum caminhão está sobrecarregado ou ocioso em algum dia da semana? Sugira como equilibrar.">Equilibrar caminhões</button>
+    <button type="button" data-ensinar="1">📚 Ensinar uma regra</button>
   </div>
+  <div class="jmodos"><label class="jmodo" title="Raciocina mais: use para montar rotas e reorganizar o dia. Demora mais (até ~1 min)."><input type="checkbox" id="iaPensar"> 🧠 Pensar mais <small>mais lento, para montar rotas</small></label><button type="button" class="jsabe" id="iaSabe" title="Ver e editar o que a Júlia sabe">📚 O que ela sabe</button></div>
   <form id="iaForm" class="iaform"><textarea id="iaTxt" rows="2" placeholder="Pergunte à Júlia… (Enter envia)" aria-label="Pergunta"></textarea><button type="submit" class="btn primary" id="iaGo" aria-label="Enviar"><span data-ic="send"></span></button></form>
   <div class="jfoot"><span class="uso" id="iaInfo">Ela só sugere: quem muda a agenda é você. Não recebe nome de motorista, nº de MTR nem observações.</span></div>
 </section>
@@ -2762,7 +2783,37 @@ $("#audBody").addEventListener("click",async e=>{
     try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);box.textContent="Google Maps: "+String(r.km).replace(".",",")+" km, "+r.min+" min de carro."}catch(err){box.textContent=/apiTrajeto/.test(err&&err.message||"")?"Publique o Code.gs 9 para consultar o tempo real.":(err&&err.message||"Não foi possível consultar agora.")}tb.disabled=false;return}
   const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
 /* ---------- Assistente (IA): contexto compacto da semana na tela ---------- */
-function ctxIA(){const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);const hoje=new Date();const L=[];const f=(n)=>String(n).replace(".",",");
+async function carregarConh(force){if(!force&&S.conh instanceof Map&&Date.now()-(S.conhT||0)<60000)return S.conh;
+  try{const g=await S.db.collection("conhecimento").get();S.conh=new Map(g.docs.filter(d=>d.exists).map(d=>[d.id,Object.assign({nome:"",texto:""},d.data()||{})]));S.conhT=Date.now()}
+  catch(e){if(!(S.conh instanceof Map))S.conh="erro"}return S.conh}
+async function rotasPeriodo(a,z){const k=a+"|"+z;if(S.perK===k&&Date.now()-S.perT<90000)return S.perL;
+  const g=await S.col.where("data",">=",a).where("data","<=",z).get();S.perL=g.docs.filter(d=>d.exists).map(d=>[d.id,clean(d.data())]);S.perK=k;S.perT=Date.now();return S.perL}
+/* rotas de um período, juntando as gravadas com os dias das repetições */
+function rotasComRepeticoes(lista,a,z){const out=lista.slice();const ov=new Set(lista.filter(([,r])=>r.serie).map(([,r])=>r.serie+"|"+r.serieData));
+  for(let d=parseIso(a);iso(d)<=z;d=addDays(d,1)){const ds=iso(d);for(const[sid,s0]of S.series)if(occurs(s0,ds)&&!ov.has(sid+"|"+ds))out.push(["v:"+sid+":"+ds,virt(s0,sid,ds)])}
+  return out.filter(([,r])=>eff(r)!=="Cancelado").sort((x,y)=>(x[1].data+x[1].caminhao+x[1].ini).localeCompare(y[1].data+y[1].caminhao+y[1].ini))}
+const IA_APRENDER=["COMO APRENDER (instrução da agenda):",
+ "- Quando a pessoa te ENSINAR algo novo e duradouro sobre a operação (regra de cliente, destino de um resíduo, horário, restrição, frequência, quem emite MTR, preferência de montagem de rota) ou te CORRIGIR, acrescente no FINAL da resposta uma linha para cada regra, exatamente assim:",
+ "  [[APRENDER: Nome do tópico | regra curta e completa, em uma linha]]",
+ "- O nome do tópico deve ser o nome do cliente como está na BASE DE CONHECIMENTO, ou 'Regras gerais da operação' para regras que valem para tudo.",
+ "- No máximo 3 por resposta. Só o que a pessoa disse ou confirmou: nunca invente, nunca repita algo que já está na base, e nunca inclua telefone, senha ou CPF.",
+ "- A pessoa decide se guarda. Não diga que já guardou."].join("\n");
+async function ctxIA(){const L=[IA_APRENDER,"",ctxSemana()];const hoje=new Date();const hj=iso(hoje);const wd=weekDays();const wa=iso(wd[0]),wz=iso(wd[6]);
+  const conh=await carregarConh();
+  if(conh instanceof Map&&conh.size){L.push("","BASE DE CONHECIMENTO DA TREVO (regras por cliente e gerais):");
+    [...conh.values()].sort((a,b)=>(/geral|pop|regra|caminh/i.test(b.nome)?1:0)-(/geral|pop|regra|caminh/i.test(a.nome)?1:0)||a.nome.localeCompare(b.nome,"pt")).forEach(t=>{L.push("### "+t.nome);L.push(String(t.texto||"").trim())})}
+  try{const a=iso(addDays(hoje,-60)),z=iso(addDays(hoje,14));const per=rotasComRepeticoes(await rotasPeriodo(a,z),a,z);
+    const prox=per.filter(([,r])=>r.data>=hj&&(r.data<wa||r.data>wz));
+    if(prox.length){L.push("","PRÓXIMAS 2 SEMANAS (fora da semana na tela, "+prox.length+" rotas):");
+      prox.forEach(([,r])=>L.push("- "+DAYN[parseIso(r.data).getDay()].slice(0,3)+" "+ddmm(parseIso(r.data))+" · "+r.caminhao+" · "+r.ini+"–"+r.fim+" · "+(r.cliente||r.servico||"-")+" · destino: "+(r.destino||"-")+" · resíduos: "+(resText(r.residuos||[])||r.residuo||"-")+(r.serie?" · repete":"")))}
+    const pas=per.filter(([,r])=>r.data<hj);const H=new Map();
+    pas.forEach(([,r])=>{const k=r.cliente||r.servico||"(sem cliente)";const o=H.get(k)||{n:0,ult:"",dias:{},dest:new Set(),cam:new Set(),res:new Set()};o.n++;if(r.data>o.ult)o.ult=r.data;
+      const dn=DAYN[parseIso(r.data).getDay()].slice(0,3);o.dias[dn]=(o.dias[dn]||0)+1;partesDestino(r.destino).forEach(x=>o.dest.add(x));o.cam.add(r.caminhao);(r.residuos||[]).forEach(x=>x.tipo&&o.res.add(x.tipo));H.set(k,o)});
+    if(H.size){L.push("","RESUMO DOS ÚLTIMOS 60 DIAS POR CLIENTE (rotas feitas, inclui repetições):");
+      [...H].sort((a,b)=>b[1].n-a[1].n).forEach(([k,o])=>L.push("- "+k+": "+o.n+" rota(s), última "+ddmm(parseIso(o.ult))+" · dias: "+Object.entries(o.dias).map(([d,n])=>d+" "+n).join(", ")+" · "+[...o.cam].join("/")+" · destinos: "+([...o.dest].join(", ")||"-")+(o.res.size?" · resíduos: "+[...o.res].join(", "):"")))}
+  }catch(e){L.push("","(Não foi possível carregar as próximas semanas e o histórico agora.)")}
+  return L.join("\n")}
+function ctxSemana(){const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);const hoje=new Date();const L=[];const f=(n)=>String(n).replace(".",",");
   L.push("Hoje: "+DAYN[hoje.getDay()]+" "+ddmmyy(iso(hoje))+". Semana na tela: "+ddmmyy(a)+" a "+ddmmyy(z)+".");
   const g=S.locais.get(locKey("Galpão Trevo"));L.push("Base: Galpão Trevo — "+(S.patio||g&&g.endereco||"sem endereço")+".");
   const its=[...S.items].filter(([,r])=>r.data>=a&&r.data<=z).sort((x,y)=>(x[1].data+x[1].caminhao+x[1].ini).localeCompare(y[1].data+y[1].caminhao+y[1].ini));
@@ -2790,15 +2841,28 @@ function mdHtml(t){const lin=String(t||"").split(/\r?\n/);let h="",ul=false,tb=[
   fechaUl();fechaTb();return h}
 S.iaHist=[];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+(m.retry&&m===S.iaHist[S.iaHist.length-1]?'<p><button type="button" class="btn sm" data-iaretry>↻ Tentar de novo</button></p>':'')+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+' Júlia está pensando… <span id="iaSeg">0</span> s</div>':"");box.scrollTop=box.scrollHeight;
+function apHtml(m,i){if(!m.aprender||!m.aprender.length)return"";
+  return m.aprender.map((a,j)=>'<div class="japr'+(a.estado?" "+a.estado:"")+'"><div class="japt">📚 '+(a.estado==="salvo"?"Guardado em":a.estado==="ignorado"?"Ignorado":"Aprendizado sugerido")+' · <b>'+esc(a.topico)+'</b></div><div class="japx">'+esc(a.texto)+'</div>'+
+    (a.estado?'':'<div class="japb"><button type="button" class="btn sm ghost" data-apr="ignorar" data-i="'+i+'" data-j="'+j+'">Ignorar</button><button type="button" class="btn sm primary" data-apr="guardar" data-i="'+i+'" data-j="'+j+'">Guardar no conhecimento</button></div>')+'</div>').join("")}
+async function guardarAprendizado(a){const L=await carregarConh(true);if(!(L instanceof Map))throw new Error("Publique o Code.gs 9.3 para a Júlia poder guardar o que aprende.");
+  const k=norm(a.topico);let alvo=null;for(const[id,t]of L){const n=norm(t.nome);if(n===k){alvo=[id,t];break}}
+  if(!alvo)for(const[id,t]of L){const n=norm(t.nome);if(n.length>=4&&(n.includes(k)||k.includes(n))){alvo=[id,t];break}}
+  const linha="- "+a.texto.replace(/^[-•]\s*/,"")+" (aprendido em "+ddmm(new Date())+")";
+  const id=alvo?alvo[0]:uid(L,a.topico);const atual=alvo?String(alvo[1].texto||"").replace(/\s+$/,""):"";
+  if(atual.indexOf(a.texto)>=0)return alvo[1].nome;
+  const body={nome:alvo?alvo[1].nome:a.topico,texto:(atual?atual+"\n":"")+linha,atualizado:new Date().toISOString()};
+  if(body.texto.length>JLIM)throw new Error("O tópico "+body.nome+" ficou grande demais. Resuma ele em Cadastros → Júlia.");
+  await S.db.collection("conhecimento").doc(id).set(body);L.set(id,body);S.conhT=Date.now();return body.nome}
+function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+(m.retry&&m===S.iaHist[S.iaHist.length-1]?'<p><button type="button" class="btn sm" data-iaretry>↻ Tentar de novo</button></p>':'')+apHtml(m,S.iaHist.indexOf(m))+(m.role==="model"&&!m.erro?'<div class="jfb"><button type="button" data-fb="bom" data-i="'+S.iaHist.indexOf(m)+'" title="Resposta boa" aria-label="Resposta boa"'+(m.fb==="bom"?' class="on"':'')+'>👍</button><button type="button" data-fb="ruim" data-i="'+S.iaHist.indexOf(m)+'" title="Errou? Clique e ensine o certo" aria-label="Resposta ruim"'+(m.fb==="ruim"?' class="on"':'')+'>👎</button></div>':'')+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+($("#iaPensar")&&$("#iaPensar").checked?' Júlia está pensando com calma… <span id="iaSeg">0</span> s (pode levar até 1 min)':' Júlia está pensando… <span id="iaSeg">0</span> s')+'</div>':"");box.scrollTop=box.scrollHeight;
   clearInterval(S.iaTimer);if(pensando){const t0=Date.now();S.iaTimer=setInterval(()=>{const e=$("#iaSeg");if(e)e.textContent=Math.round((Date.now()-t0)/1000);else clearInterval(S.iaTimer)},1000)}}
 async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return;if(!guard())return;S.iaBusy=true;$("#iaGo").disabled=true;
   const hist=S.iaHist.filter(m=>!m.erro).slice(-8).map(m=>({role:m.role,texto:m.texto}));S.iaHist.push({role:"user",texto:txt});$("#iaTxt").value="";iaRender(true);
-  S.iaUlt=txt;const t0=Date.now();const args=[{pergunta:txt,contexto:ctxIA(),historico:hist}];
+  S.iaUlt=txt;const t0=Date.now();let ctx="";try{ctx=await ctxIA()}catch(x){ctx=""}const args=[{pergunta:txt,contexto:ctx,historico:hist,modo:$("#iaPensar").checked?"pensar":"rapido"}];
   try{let r;
     // a conexão do celular às vezes cai em pedidos longos: tenta mais uma vez sozinha
     try{r=await API.call("apiIA",args)}catch(e1){if(e1&&e1.code==="unavailable"&&!/INVALIDO/.test(e1.message||"")){const t=$("#iaMsgs .iathink");if(t)t.insertAdjacentHTML("beforeend"," · a conexão caiu, tentando de novo…");await sleep(2000);r=await API.call("apiIA",args)}else throw e1}
-    S.iaHist.push({role:"model",texto:r.texto});$("#iaInfo").textContent="Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
+    const ap=[];const limpo=String(r.texto||"").replace(/\[\[\s*APRENDER\s*:\s*([^|\]]+?)\s*\|\s*([^\]]+?)\s*\]\]/gi,(m,t,x)=>{if(ap.length<3)ap.push({topico:t.trim(),texto:x.trim(),estado:""});return""}).replace(/\n{3,}/g,"\n\n").trim();
+    S.iaHist.push({role:"model",texto:limpo||"Anotado.",aprender:ap});$("#iaInfo").textContent=(r.modo==="pensar"?"🧠 ":"")+"Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
   catch(e){const m=e&&e.message||"";let msg;
     if(/INVALIDO: apiIA/.test(m))msg="O Google ainda está com o Code.gs antigo. Publique o Code.gs novo (Implantar → Gerenciar implantações → ✏️ → Nova versão).";
     else if(/LOTADO/.test(m))msg="O serviço gratuito de IA do Google está **lotado agora** (acontece em horários de pico). Nada errado com a agenda: tente de novo em 1 ou 2 minutos.";
@@ -2806,19 +2870,63 @@ async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return
     else msg=m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora.";
     S.iaHist.push({role:"model",erro:true,retry:true,texto:msg})}
   finally{S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
-$("#iaMsgs").addEventListener("click",e=>{if(!e.target.closest("[data-iaretry]")||S.iaBusy)return;
+$("#iaMsgs").addEventListener("click",async e=>{
+  const ap=e.target.closest("[data-apr]");if(ap){const m=S.iaHist[+ap.dataset.i];const a=m&&m.aprender&&m.aprender[+ap.dataset.j];if(!a)return;
+    if(ap.dataset.apr==="ignorar"){a.estado="ignorado";iaRender(S.iaBusy);return}
+    if(!guard())return;ap.disabled=true;ap.textContent="Guardando…";
+    try{a.topico=await guardarAprendizado(a);a.estado="salvo";toast("Guardado. A Júlia já usa isso nas próximas respostas.")}catch(x){toast(x&&x.message||"Não foi possível guardar agora");ap.disabled=false;ap.textContent="Guardar no conhecimento"}
+    iaRender(S.iaBusy);return}
+  const fb=e.target.closest("[data-fb]");if(fb){const m=S.iaHist[+fb.dataset.i];if(!m)return;m.fb=fb.dataset.fb;iaRender(S.iaBusy);
+    if(m.fb==="ruim"){const t=$("#iaTxt");t.value="Você errou: ";t.focus();t.setSelectionRange(t.value.length,t.value.length);toast("Diga o que estava errado e o certo. Ela vai sugerir guardar a correção.")}return}
+  if(!e.target.closest("[data-iaretry]")||S.iaBusy)return;
   const L=S.iaHist;if(L.length&&L[L.length-1].erro)L.pop();if(L.length&&L[L.length-1].role==="user")L.pop();iaEnviar(S.iaUlt)});
 function juliaAberta(){return $("#juliaPanel").classList.contains("open")}
 function juliaFecha(){const p=$("#juliaPanel");p.classList.remove("open");document.body.classList.remove("jopen");p.setAttribute("aria-hidden","true");$("#btnJulia").setAttribute("aria-expanded","false")}
 function abrirIA(pergunta){const p=$("#juliaPanel");if(!juliaAberta()){p.classList.add("open");document.body.classList.add("jopen");p.setAttribute("aria-hidden","false");$("#btnJulia").setAttribute("aria-expanded","true");iaRender(!!S.iaBusy)}
   if(pergunta)iaEnviar(pergunta);else setTimeout(()=>$("#iaTxt").focus(),30)}
 $("#btnJulia").addEventListener("click",()=>abrirIA());
+$("#iaSabe").addEventListener("click",()=>{openCad("julia")});
+try{$("#iaPensar").checked=localStorage.getItem("juliaPensar")==="1"}catch(e){}
+$("#iaPensar").addEventListener("change",e=>{try{localStorage.setItem("juliaPensar",e.target.checked?"1":"0")}catch(x){}});
 $("#juliaFecha").addEventListener("click",juliaFecha);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&juliaAberta()&&!document.querySelector(".scrim.open")){juliaFecha()}});
 $("#iaForm").addEventListener("submit",e=>{e.preventDefault();iaEnviar($("#iaTxt").value)});
 $("#iaTxt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();iaEnviar($("#iaTxt").value)}});
-$("#iaChips").addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(b)iaEnviar(b.dataset.p)});
+$("#iaChips").addEventListener("click",e=>{const en=e.target.closest("[data-ensinar]");if(en){const t=$("#iaTxt");t.value="Aprenda esta regra: ";t.focus();t.setSelectionRange(t.value.length,t.value.length);return}const b=e.target.closest("[data-p]");if(b)iaEnviar(b.dataset.p)});
 $("#iaLimpa").addEventListener("click",()=>{S.iaHist=[];$("#iaInfo").textContent="";iaRender(false)});
+/* ---------- Cadastros → Júlia: base de conhecimento ---------- */
+const JLIM=20000;
+function renderJuliaCad(){const box=$("#cBody");
+  if(!(S.conh instanceof Map)&&S.conh!=="erro"){box.innerHTML='<p class="cempty">Carregando o que a Júlia sabe…</p>';carregarConh(true).then(()=>{if(CAD.open&&CAD.tab==="julia")renderCad()});return}
+  if(S.conh==="erro"){box.innerHTML='<p class="cempty" style="text-align:left">Esta aba precisa do <b>Code.gs 9.3</b> no Google. Cole o Code.gs novo e faça Implantar → Gerenciar implantações → ✏️ → Nova versão. Depois clique em <button type="button" class="btn sm" data-jact="recarregar">Tentar de novo</button></p>';return}
+  const L=[...S.conh].map(([id,x])=>Object.assign({_id:id},x)).sort((a,b)=>(/geral|pop|regra|caminh/i.test(b.nome)?1:0)-(/geral|pop|regra|caminh/i.test(a.nome)?1:0)||a.nome.localeCompare(b.nome,"pt"));
+  const tot=L.reduce((n,x)=>n+String(x.texto||"").length,0);
+  let h='<div class="jcad"><div class="cadbar"><input type="search" id="jQ" placeholder="Procurar cliente ou assunto" value="'+esc(CAD.jq||"")+'" autocomplete="off"><button type="button" class="btn primary sm" data-jact="novo">＋ Novo tópico</button></div>';
+  h+='<p class="cnote" style="margin-top:0">Tudo que está aqui a <b>Júlia lê antes de responder</b>. Um tópico por cliente (resíduos, para onde vai cada um, frequência, horário, quem emite o MTR, restrições) e tópicos gerais (regras da operação). Escreva como explicaria para um colega novo. <b>Não coloque telefones, senhas nem CPF</b>: o texto vai para o Google. <span class="jtam">'+L.length+' tópico(s) · '+tot.toLocaleString("pt-BR")+' caracteres</span></p>';
+  if(CAD.jnovo)h+=jTopHtml({_id:"",nome:"",texto:""},true);
+  h+=L.map(x=>jTopHtml(x,CAD.jaberto===x._id)).join("")+(L.length?'':'<p class="cempty">Nenhum tópico ainda. Clique em <b>＋ Novo tópico</b>.</p>')+'</div>';
+  box.innerHTML=h;jFiltra()}
+function jTopHtml(x,aberto){const n=String(x.texto||"").split("\n").filter(l=>l.trim()).length;
+  return'<details class="jtop" data-jid="'+esc(x._id)+'" data-k="'+esc(norm(x.nome+" "+x.texto))+'"'+(aberto?" open":"")+'><summary><b>'+(esc(x.nome)||"Novo tópico")+'</b><small>'+n+' linha(s)</small></summary><div class="jbody">'+
+    '<input class="jnome" value="'+esc(x.nome)+'" placeholder="Nome do tópico (ex.: Roca, Regras gerais)" maxlength="80">'+
+    '<textarea class="jtexto" maxlength="'+JLIM+'" placeholder="Ex.: - Plástico e papelão em fardos: Santa Maria. Nunca marcar na última semana do mês. Nós não emitimos MTR.">'+esc(x.texto)+'</textarea>'+
+    '<div class="jbtns">'+(x._id?'<button type="button" class="btn sm ghost" data-jact="del">Excluir</button>':'<button type="button" class="btn sm ghost" data-jact="cancelar">Cancelar</button>')+'<button type="button" class="btn sm primary" data-jact="salvar">Salvar</button></div></div></details>'}
+function jFiltra(){const q=norm(CAD.jq||"");document.querySelectorAll("#cBody .jtop").forEach(d=>{d.hidden=!!q&&d.dataset.k.indexOf(q)<0&&d.dataset.jid!==""})}
+$("#cBody").addEventListener("input",e=>{if(e.target.id==="jQ"){CAD.jq=e.target.value;jFiltra()}});
+$("#cBody").addEventListener("click",async e=>{const b=e.target.closest("[data-jact]");if(!b)return;const a=b.dataset.jact;const top=b.closest(".jtop");const id=top?top.dataset.jid:"";
+  if(a==="recarregar"){S.conh=null;renderCad();return}
+  if(a==="novo"){CAD.jnovo=true;CAD.jaberto="";renderCad();const t=$('#cBody .jtop[data-jid=""] .jnome');t&&t.focus();return}
+  if(a==="cancelar"){CAD.jnovo=false;renderCad();return}
+  if(!guard())return;
+  if(a==="del"){if(b.dataset.ok!=="1"){b.dataset.ok="1";b.textContent="Confirmar exclusão";setTimeout(()=>{if(b.isConnected){b.dataset.ok="";b.textContent="Excluir"}},4000);return}
+    try{await S.db.collection("conhecimento").doc(id).delete();S.conh.delete(id);toast("Tópico excluído");renderCad()}catch(x){writeErr(x)}return}
+  if(a==="salvar"){const nome=top.querySelector(".jnome").value.trim(),texto=top.querySelector(".jtexto").value.replace(/\s+$/,"");
+    if(!nome){top.querySelector(".jnome").focus();toast("Dê um nome ao tópico");return}
+    if(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/.test(texto)&&!confirmaTexto(top))return;
+    const nid=id||uid(S.conh,nome);b.disabled=true;
+    try{const body={nome,texto,atualizado:new Date().toISOString()};await S.db.collection("conhecimento").doc(nid).set(body);S.conh.set(nid,body);S.conhT=Date.now();CAD.jnovo=false;CAD.jaberto=nid;toast("Salvo. A Júlia já usa na próxima pergunta.");renderCad()}
+    catch(x){b.disabled=false;writeErr(x)}}});
+function confirmaTexto(top){if(top.dataset.cpfok==="1")return true;top.dataset.cpfok="1";toast("Parece ter um CPF no texto. Tire antes de salvar (o texto vai para o Google). Se não for CPF, clique em Salvar de novo.");return false}
 /* ---------- copiar uma rota e colar em outro dia ---------- */
 function clipBody(r){const b=clean(r);["serie","serieData","id","virtual","excluidas","freq","inicio"].forEach(k=>delete b[k]);b.status="Agendado";b.auto=true;b.anexos=[];b.mtr="";delete b.atualizado;return b}
 function clipSet(r){S.clip=clipBody(r);try{localStorage.setItem("agendaClip",JSON.stringify(S.clip))}catch(e){}clipShow();toast("Rota copiada. Escolha o dia na barra de baixo ou clique num horário vazio da agenda.")}
@@ -3033,6 +3141,8 @@ function semCadastro(g,known){if(!S.uso)return[];const k=new Set(known.map(norm)
 function renderCad(){
   if(!CAD.open)return;
   document.querySelectorAll("#cTabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===CAD.tab)));
+  if(S.conh instanceof Map)$("#nJul").textContent=S.conh.size||"";
+  if(CAD.tab==="julia"){renderJuliaCad();return}
   $("#nLoc").textContent=[...S.locais.values()].filter(x=>x.nome!=="Galpão Trevo").length;$("#nCli").textContent=S.clientes.size||"";$("#nRes").textContent=S.residuos.size;$("#nMot").textContent=S.motoristas.size;$("#nSer").textContent=[...S.series.values()].filter(x=>{const e=seriesEnd(x);return!(e&&e<iso(new Date()))}).length;
   const box=$("#cBody");let h="";const ed=CAD.edit;
   const bar=(ph,label)=>'<div class="cadbar"><input type="search" id="cQ" placeholder="'+ph+'" value="'+esc(CAD.q)+'" autocomplete="off"><button type="button" class="btn primary sm" data-act="new">＋ '+label+'</button></div>';
@@ -3349,7 +3459,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="8.6";
+const VERSAO_TELA="9.1";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -3365,7 +3475,7 @@ async function startData(){
   if(!db){banner("Não foi possível conectar à planilha da agenda. Verifique a internet e recarregue a página.","warn");render();return}
   try{S.assets=await window.claude.use("assets")}catch(e){S.assets=null}
   banner("Carregando as rotas…","info");
-  S.col=db.collection("rotas");S.serCol=db.collection("series");S.locCol=db.collection("locais");S.cfgDoc=db.doc("config/geral");
+  S.db=db;S.col=db.collection("rotas");S.serCol=db.collection("series");S.locCol=db.collection("locais");S.cfgDoc=db.doc("config/geral");
   S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");
   [["cliCol","clientes","cliOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
   subscribeWeek();subscribeSeries();
