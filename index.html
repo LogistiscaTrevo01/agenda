@@ -742,6 +742,100 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
   .choice button{min-height:38px}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* ---------- mapa interativo ---------- */
+.mapa{position:fixed;inset:0;z-index:55;display:none;background:var(--bg);grid-template-columns:min(380px,36vw) 1fr}
+.mapa.open{display:grid}
+body.mapopen{overflow:hidden}
+body.mapopen .jbtn{display:none}
+.mside{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--surface);color:var(--ink);border-right:1px solid var(--line);box-shadow:2px 0 14px rgba(0,0,0,.10);z-index:2}
+.mhandle{display:none}
+.mtop{display:flex;gap:8px;align-items:center;padding:12px 12px 8px}
+.mtop .icon-btn{flex:none}
+.msearch{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px;height:46px;box-shadow:0 1px 5px rgba(0,0,0,.14);min-width:0}
+.msearch svg{flex:none;opacity:.6}
+.msearch input{border:0;outline:0;background:transparent;flex:1;font-size:15px;color:var(--ink);min-width:0;height:100%}
+.mchips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 12px 10px}.mchips::-webkit-scrollbar{display:none}
+.mchip{flex:none;white-space:nowrap;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-family:inherit}
+.mchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,var(--surface));border-color:color-mix(in srgb,var(--accent) 70%,var(--line));font-weight:600}
+.mchip i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.mchip small{opacity:.65;font-weight:400}
+.mrota{margin:0 12px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;display:grid;gap:8px;background:color-mix(in srgb,var(--line) 18%,var(--surface))}
+.mrota .mrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.mrota .mrl b{font-size:13px;width:100%}
+.mrota input[type=date]{flex:1;min-width:0;max-width:170px;font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.mrota .mchip.bau[aria-pressed="true"]{background:color-mix(in srgb,#2e8b3e 16%,var(--surface));border-color:#2e8b3e}
+.mrota .mchip.poli[aria-pressed="true"]{background:color-mix(in srgb,#1f6fc5 16%,var(--surface));border-color:#1f6fc5}
+.mrres{font-size:12.5px;display:grid;gap:6px}
+.mrres:empty{display:none}
+.mrres .mrt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mrres .mrt i{width:16px;height:4px;border-radius:2px;flex:none}
+.mrres .btn{padding:3px 9px;font-size:12px}
+.mrres .mrm{opacity:.75}
+.mtop,.mchips,.mrota,.msem{flex:none}
+.mlist{overflow:auto;flex:1;min-height:0;padding-bottom:12px;overscroll-behavior:contain}
+.msec{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.6;padding:12px 14px 6px}
+.mitem{display:flex;gap:10px;padding:10px 14px;border:0;border-top:1px solid var(--line);cursor:pointer;align-items:flex-start;background:none;width:100%;text-align:left;color:inherit;font:inherit}
+.mitem:hover,.mitem.sel{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.mitem .mdot{width:12px;height:12px;border-radius:50%;margin-top:4px;flex:none;box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(0,0,0,.15)}
+.mitem .mtx{min-width:0;flex:1}
+.mitem .mtx b{display:block;font-size:14.5px}
+.mitem .mtx small{display:block;opacity:.72;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mitem .mbadge{font-size:11px;padding:1px 7px;border-radius:999px;background:#fff1c2;color:#6b4d00;white-space:nowrap;align-self:center}
+.mitem .mbadge.rot{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--ink)}
+.mitem .btn{align-self:center;padding:3px 9px;font-size:12px;white-space:nowrap}
+.mvazio{padding:16px 14px;opacity:.7;font-size:13.5px}
+.msem{margin:10px 12px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;font-size:13px;display:grid;gap:8px}
+.mcanvas{position:relative;min-height:0;min-width:0}
+#mpMapa{position:absolute;inset:0;background:#e8eaed}
+.mfab{position:absolute;right:10px;top:84px;z-index:1000;display:grid;gap:8px}
+.mfab button{width:40px;height:40px;border-radius:8px;border:0;background:#fff;color:#333;box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;display:grid;place-items:center;font-size:12px;font-weight:700}
+.mfab button[aria-pressed="false"]{opacity:.55}
+.mbanner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:1001;background:#202124;color:#fff;border-radius:12px;padding:10px 12px 10px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:14px;max-width:calc(100% - 24px)}
+.mbanner[hidden]{display:none}
+.mbanner .btn{white-space:nowrap}
+.mbanner .btn.primary:disabled{opacity:.5}
+.mcarrega{position:absolute;inset:0;display:grid;place-items:center;z-index:1002;background:color-mix(in srgb,var(--bg) 70%,transparent);font-size:15px;text-align:center;padding:20px}
+.mcarrega[hidden]{display:none}
+.mpin{position:relative;width:30px;height:42px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.mpin svg{display:block;width:100%;height:100%}
+.mpin.g{width:36px;height:50px}
+.mpin .mq{position:absolute;right:-4px;top:-3px;width:15px;height:15px;border-radius:50%;background:#ffd34d;color:#5a3d00;font:800 11px/15px system-ui;text-align:center;border:1.5px solid #fff}
+.mpin.sel{transform:scale(1.18);transform-origin:50% 100%}
+.mpin.drag{animation:mpbob 1s ease-in-out infinite}
+@keyframes mpbob{50%{transform:translateY(-6px)}}
+.leaflet-tooltip.mlbl{background:transparent;border:0;box-shadow:none;padding:0;font:600 12px/1.2 system-ui,sans-serif;color:#202124;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap}
+.leaflet-tooltip.mlbl::before{display:none}
+.mcanvas.semnomes .mlbl,.mcanvas.longe .mlbl{display:none}
+.mnum{width:20px;height:20px;border-radius:50%;color:#fff;font:800 11px/20px system-ui;text-align:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.mnum.w{width:auto;padding:0 5px;border-radius:10px;white-space:nowrap}
+.leaflet-popup-content{margin:12px 14px;font:13.5px/1.4 system-ui,sans-serif;color:#202124}
+.leaflet-popup-content-wrapper{border-radius:12px}
+.mpop{min-width:220px;max-width:280px}
+.mpop .mpn{font-size:16px;display:block;margin-right:16px}
+.mpop .mpt{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;color:#fff;margin:4px 0}
+.mpop .mpe{color:#5f6368;margin:2px 0 6px}
+.mpop .mpa{background:#fff6d6;color:#6b4d00;border-radius:8px;padding:6px 8px;margin:6px 0;font-size:12.5px}
+.mpop .mpb{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.mpop .mpb a,.mpop .mpb button{font:600 12.5px system-ui,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid #dadce0;background:#fff;color:#1a73e8;text-decoration:none;cursor:pointer}
+.mpop .mpb a.pri{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.mpop .mps{border-top:1px solid #eee;margin-top:8px;padding-top:6px;font-size:12.5px}
+.mpop .mps button{display:block;width:100%;text-align:left;border:0;background:none;padding:4px 0;cursor:pointer;color:#202124;font:inherit}
+.mpop .mps button:hover{color:#1a73e8}
+.mpop .mps i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.mpop .mpv{color:#5f6368;font-size:12px;margin-top:6px}
+@media (max-width:760px){
+  .mapa{grid-template-columns:1fr}
+  .mcanvas{position:absolute;inset:0}
+  .mside{position:absolute;left:0;right:0;bottom:0;max-height:min(50dvh,520px);border-right:0;border-radius:18px 18px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.22);padding-bottom:env(safe-area-inset-bottom);z-index:1003}
+  .mhandle{display:block;width:100%;height:20px;border:0;background:none;cursor:pointer;flex:none;position:relative}
+  .mhandle::after{content:"";position:absolute;left:50%;top:8px;width:42px;height:5px;border-radius:3px;background:var(--line);transform:translateX(-50%)}
+  .mtop{padding-top:0}
+  .mside.mini .mchips,.mside.mini .mrota,.mside.mini .mlist,.mside.mini .msem{display:none}
+  .mfab{top:auto;bottom:calc(min(50dvh,520px) + 12px);transition:bottom .2s}
+  .mside.mini~.mcanvas .mfab,.mapa.mini .mfab{bottom:150px}
+  .mbanner{top:max(10px,env(safe-area-inset-top));font-size:13px;flex-wrap:wrap;justify-content:center}
+  .leaflet-top{top:env(safe-area-inset-top)}
+}
 </style>
 </head>
 <body>
@@ -776,6 +870,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
     <a class="btn mapday" id="mapPoli" data-s="Poli" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 1.8C8 1.8 4.8 5 4.8 9c0 5.4 6.2 12.2 6.9 12.9.2.2.5.2.6 0 .7-.7 6.9-7.5 6.9-12.9 0-4-3.2-7.2-7.2-7.2z" fill="#EA4335"/><circle cx="12" cy="9" r="2.7" fill="#7d1a12"/></svg><span class="lbl"> Rota do Poliguindaste</span></a>
     <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg><span class="lbl"> WhatsApp</span></button>
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
+    <button class="btn" id="btnMapa" type="button" title="Mapa com todos os endereços: clientes, destinos e o galpão"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span class="lbl"> Mapa</span></button>
     <button class="btn" id="btnSemMot" type="button" title="Rotas que ainda estão sem motorista: preencha direto na lista"><span data-ic="user"></span><span class="lbl"> Sem motorista</span><span class="nbad" id="nSemMot" hidden></span></button>
     <button class="btn" id="btnAud" type="button" title="Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"><span data-ic="check2"></span><span class="lbl"> Auditoria</span><span class="nbad" id="nAud" hidden></span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
@@ -1054,7 +1149,7 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
         <div class="fld"><label>Reembolsos e extras (opcional)</label><div class="resrows" id="fhExtras"></div>
           <div class="stopbtns"><button type="button" class="btn sm" id="fhAddEx">＋ Reembolso / extra</button><span class="hint">Ex.: "pagou o reparo do pneu do poliguindaste" · 50. Use valor negativo para desconto.</span></div></div>
         <div class="fld"><label for="fhPag">Dados para pagamento (CPF, banco, pix)</label><textarea id="fhPag" rows="3" placeholder="CPF: ...&#10;Banco: ...&#10;Nome completo: ...&#10;Pix: ..."></textarea>
-          <label class="autochk"><input type="checkbox" id="fhPagSave" checked> <span>Guardar no cadastro deste motorista</span></label></div>
+          <label class="autochk"><input type="checkbox" id="fhPagSave" checked> <span>Guardar no cadastro deste motorista (salva sozinho enquanto digita)</span></label><span class="hint" id="fhPagSt" aria-live="polite"></span></div>
         <div class="fld"><label for="fhTxt">E-mail (dá para editar antes de enviar)</label><input id="fhAssunto" style="margin-bottom:6px"><textarea id="fhTxt" class="watext" spellcheck="false"></textarea></div>
         <div class="fld"><div class="wabtns"><button type="button" class="btn primary" id="fhCopy"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg> Copiar e-mail (com negrito)</button><a class="btn" id="fhMail"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg> Abrir no programa de e-mail</a><span class="hint" id="fhInfo"></span></div></div>
       </div>
@@ -1165,6 +1260,27 @@ button,a,select,.lane,.dayhead,.kpi{touch-action:manipulation}
 <datalist id="dlLoc"></datalist><datalist id="dlCli"></datalist><datalist id="dlDest"></datalist><datalist id="dlRes"></datalist><datalist id="dlMot"></datalist>
 <div class="toast" id="toast" role="status"></div>
 <div class="clipbar" id="clipBar" role="region" aria-label="Rota copiada"></div>
+<div class="mapa" id="mapaWrap" aria-hidden="true" role="dialog" aria-label="Mapa dos endereços">
+  <aside class="mside" id="mpSide">
+    <button type="button" class="mhandle" id="mpHandle" aria-label="Mostrar ou esconder a lista"></button>
+    <div class="mtop">
+      <button class="icon-btn" type="button" id="mpFechar" aria-label="Fechar o mapa" title="Fechar o mapa (Esc)">✕</button>
+      <label class="msearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="mpQ" type="search" placeholder="Pesquisar local ou endereço" autocomplete="off" aria-label="Pesquisar local ou endereço"></label>
+    </div>
+    <div class="mchips" id="mpChips"></div>
+    <div class="mrota">
+      <div class="mrl"><b>Rotas do dia</b><input type="date" id="mpDia" aria-label="Dia das rotas"><button type="button" class="mchip bau" data-mpt="Baú" aria-pressed="false"><i style="background:#2e8b3e"></i>Baú</button><button type="button" class="mchip poli" data-mpt="Poliguindaste" aria-pressed="false"><i style="background:#1f6fc5"></i>Poli</button></div>
+      <div class="mrres" id="mpRotaRes"></div>
+    </div>
+    <div class="mlist" id="mpList"></div>
+  </aside>
+  <div class="mcanvas" id="mpCanvas">
+    <div id="mpMapa"></div>
+    <div class="mfab"><button type="button" id="mpAjustar" title="Mostrar todos os pontos" aria-label="Mostrar todos os pontos"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button type="button" id="mpNomes" aria-pressed="true" title="Mostrar ou esconder os nomes no mapa">Aa</button></div>
+    <div class="mbanner" id="mpBanner" hidden><span id="mpBanTxt"></span><button type="button" class="btn sm primary" id="mpBanOk">Salvar posição</button><button type="button" class="btn sm" id="mpBanNo">Cancelar</button></div>
+    <div class="mcarrega" id="mpCarrega" hidden>Carregando o mapa…</div>
+  </div>
+</div>
 <button type="button" class="jbtn" id="btnJulia" aria-label="Conversar com a Júlia" aria-expanded="false" title="Fale com a Júlia, assistente de logística"><span class="jav"><svg class="javs" viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="jcl"><circle cx="20" cy="20" r="20"/></clipPath></defs><g clip-path="url(#jcl)"><circle cx="20" cy="16.5" r="6.4" fill="#fff"/><path d="M7 40c0-9 5.8-13.6 13-13.6S33 31 33 40z" fill="#fff" opacity=".95"/></g><path d="M12.4 17a7.6 7.6 0 0 1 15.2 0" fill="none" stroke="#ffd34d" stroke-width="2.1" stroke-linecap="round"/><rect x="10.6" y="15.2" width="3.4" height="5.6" rx="1.6" fill="#ffd34d"/><rect x="26" y="15.2" width="3.4" height="5.6" rx="1.6" fill="#ffd34d"/><path d="M27.7 20.6c0 3-2 4.6-5 4.8" fill="none" stroke="#ffd34d" stroke-width="1.8" stroke-linecap="round"/><circle cx="22.4" cy="25.4" r="1.4" fill="#ffd34d"/></svg><i class="jon" aria-hidden="true"></i></span><span class="jtxt"><b class="jnome">Júlia</b><small>Assistente IA</small></span><span class="jspark" aria-hidden="true">✦</span></button>
 <section class="jpanel" id="juliaPanel" role="dialog" aria-label="Júlia, assistente de logística" aria-hidden="true">
   <header class="jhead"><span class="jav"><svg class="javs" viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="jcl2"><circle cx="20" cy="20" r="20"/></clipPath></defs><g clip-path="url(#jcl2)"><circle cx="20" cy="16.5" r="6.4" fill="#fff"/><path d="M7 40c0-9 5.8-13.6 13-13.6S33 31 33 40z" fill="#fff" opacity=".95"/></g><path d="M12.4 17a7.6 7.6 0 0 1 15.2 0" fill="none" stroke="#ffd34d" stroke-width="2.1" stroke-linecap="round"/><rect x="10.6" y="15.2" width="3.4" height="5.6" rx="1.6" fill="#ffd34d"/><rect x="26" y="15.2" width="3.4" height="5.6" rx="1.6" fill="#ffd34d"/><path d="M27.7 20.6c0 3-2 4.6-5 4.8" fill="none" stroke="#ffd34d" stroke-width="1.8" stroke-linecap="round"/><circle cx="22.4" cy="25.4" r="1.4" fill="#ffd34d"/></svg><i class="jon" aria-hidden="true"></i></span><div class="jtit"><b>Júlia</b><small>Assistente de logística · vê a semana na tela</small></div>
@@ -1643,7 +1759,7 @@ async function saveOccurrence(item,f,existingId){
 /* ---------- render ---------- */
 function render(){
   if(S.dragging){S.needRender=true;return}
-  S.needRender=false;rebuild();
+  S.needRender=false;rebuild();if(typeof mpOnData==='function')mpOnData();
   document.querySelectorAll(".bar .seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.view===S.view)));
   $("#btnNew").disabled=S.readOnly;
   const wd=weekDays();
@@ -2117,7 +2233,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("#scrim"
 
 /* ---------- janelas auxiliares ---------- */
 function openModal(id){const m=$("#"+id);m.classList.add("open");m.setAttribute("aria-hidden","false")}
-function closeModal(id){const m=$("#"+id);m.classList.remove("open");m.setAttribute("aria-hidden","true");if(id==="scrimCad")CAD.open=false;if(id==="scrimHelp"){const v=$("#hVid");v&&v.pause()}}
+function closeModal(id){const m=$("#"+id);m.classList.remove("open");m.setAttribute("aria-hidden","true");if(id==="scrimCad")CAD.open=false;if(id==="scrimHelp"){const v=$("#hVid");v&&v.pause()}if(id==="scrimFech"&&typeof FH!=="undefined"&&FH.pt){clearTimeout(FH.pt);FH.pt=null;fhSavePag()}}
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 const AUX=["scrimSearch","scrimExport","scrimRoute","scrimCad","scrimWA","scrimFech","scrimHelp"];
 AUX.forEach(id=>{$("#"+id).addEventListener("pointerdown",e=>{if(e.target.id===id)closeModal(id)})});
@@ -2630,6 +2746,13 @@ function fhExRow(x){const d=document.createElement("div");d.className="resrow";
   d.querySelector(".rtipo").value=x.desc||"";d.querySelector(".rqtd").value=x.valor||"";return d}
 const fhExtras=()=>[...document.querySelectorAll("#fhExtras .resrow")].map(r=>({desc:r.querySelector(".rtipo").value.trim(),valor:parseFloat(r.querySelector(".rqtd").value)||0})).filter(x=>x.desc||x.valor);
 function fhMotObj(){const n=$("#fhMot").value;return[...S.motoristas].find(([,x])=>norm(x.nome)===norm(n))||null}
+/* o mesmo motorista pode estar escrito de jeitos diferentes nas rotas (Gilbert, Gilbert Gomes, Gilbet Gomes) */
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m||!n)return m||n;let p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function mesmaPessoa(a,b){const A=norm(a).split(/\s+/).filter(Boolean),B=norm(b).split(/\s+/).filter(Boolean);if(!A.length||!B.length)return false;
+  const tol=x=>x.length>=5?1:0;if(lev(A[0],B[0])>tol(A[0]))return false;if(A[1]&&B[1]&&lev(A[1],B[1])>tol(A[1]))return false;return true}
+function fhMotIrmaos(){const n=$("#fhMot").value.trim();if(!n)return[];return[...S.motoristas].filter(([,x])=>mesmaPessoa(x.nome,n))}
+function fhPagGuardado(){const mo=fhMotObj();if(mo&&mo[1].pagamento)return mo[1].pagamento;const i=fhMotIrmaos().find(([,x])=>x.pagamento);return i?i[1].pagamento:""}
 async function fhLoad(){
   const m=monday(parseIso($("#fhData").value||iso(new Date())));const de=iso(m),ate=iso(addDays(m,6));
   $("#fhSem").textContent=ddmm(m)+" a "+ddmm(addDays(m,6));$("#fhInfo").textContent="Carregando…";
@@ -2647,7 +2770,7 @@ function fhRoutes(){const tk=picked("#fhTruck"),mot=$("#fhMot").value;
   return FH.rotas.filter(r=>active(r)&&r.caminhao===tk&&(!mot||!r.motorista||norm(r.motorista)===norm(mot)))}
 function fhBuild(reset){
   const rs=fhRoutes();const dias=[...new Set(rs.map(r=>r.data))].sort();
-  if(reset){$("#fhDias").value=dias.length;const mo=fhMotObj();$("#fhPag").value=mo&&mo[1].pagamento||(mo?"CPF: \nNome do Banco: \nNome Completo: "+mo[1].nome+"\nDados para o pix: ":"")}
+  if(reset){$("#fhDias").value=dias.length;const mot0=$("#fhMot").value.trim();FH.tpl=mot0?"CPF: \nNome do Banco: \nNome Completo: "+mot0+"\nDados para o pix: ":"";const g=fhPagGuardado();$("#fhPag").value=g||FH.tpl;$("#fhPagSt").textContent=g?"✓ Dados guardados no cadastro de "+mot0:(mot0?"Preencha uma vez: ficam guardados para as próximas semanas.":"")}
   $("#fhDiasHint").textContent=dias.length+" dia(s) com rota nesta semana";
   const nd=Math.max(0,parseInt($("#fhDias").value,10)||0),val=parseFloat($("#fhValor").value)||0,ex=fhExtras();
   const tot=nd*val+ex.reduce((a,x)=>a+x.valor,0);$("#fhTot").innerHTML="Total: <b>"+brl(tot)+"</b>";
@@ -2671,14 +2794,22 @@ $("#btnFech").addEventListener("click",()=>{const t=new Date();const ref=t.getDa
   $("#fhExtras").innerHTML="";openModal("scrimFech");fhLoad()});
 $("#fhData").addEventListener("change",fhLoad);
 $("#fhTruck").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;pick("#fhTruck",b.dataset.v);fhMotList();fhBuild(true)});
-$("#fhMot").addEventListener("change",()=>fhBuild(true));
+$("#fhMot").addEventListener("change",()=>{if(FH.pt){clearTimeout(FH.pt);FH.pt=null}fhBuild(true)});
 ["#fhDias","#fhValor","#fhPag"].forEach(x=>$(x).addEventListener("input",()=>{if(x==="#fhValor")try{localStorage.setItem("agenda.diaria",$("#fhValor").value)}catch(e){}fhBuild(false)}));
+$("#fhPag").addEventListener("input",()=>{clearTimeout(FH.pt);if($("#fhPagSave").checked&&$("#fhMot").value.trim())$("#fhPagSt").textContent="Guardando…";FH.pt=setTimeout(()=>{FH.pt=null;fhSavePag()},900)});
+$("#fhPag").addEventListener("blur",()=>{if(FH.pt){clearTimeout(FH.pt);FH.pt=null;fhSavePag()}});
+$("#fhPagSave").addEventListener("change",()=>{if($("#fhPagSave").checked)fhSavePag();else $("#fhPagSt").textContent="Não será guardado."});
 $("#fhExtras").addEventListener("input",()=>fhBuild(false));
 $("#fhExtras").addEventListener("click",e=>{if(e.target.closest(".rm")){e.target.closest(".resrow").remove();fhBuild(false)}});
 $("#fhAddEx").addEventListener("click",()=>{const r=fhExRow({});$("#fhExtras").appendChild(r);r.querySelector(".rtipo").focus()});
 $("#fhTxt").addEventListener("input",fhLinks);$("#fhAssunto").addEventListener("input",fhLinks);
-async function fhSavePag(){const mo=fhMotObj();const v=$("#fhPag").value.trim();
-  if(mo&&$("#fhPagSave").checked&&v!==(mo[1].pagamento||""))await cadSet("motoristas",mo[0],Object.assign({},mo[1],{pagamento:v}))}
+async function fhSavePag(){const st=$("#fhPagSt");const n=$("#fhMot").value.trim();const v=$("#fhPag").value.trim();
+  if(!n||!$("#fhPagSave").checked||S.readOnly)return;if(!v||v===String(FH.tpl||"").trim())return;
+  let alvos=fhMotIrmaos();const mo=fhMotObj();if(mo&&!alvos.some(([id])=>id===mo[0]))alvos.push(mo);
+  alvos=alvos.filter(([,x])=>(x.pagamento||"")!==v);let ok=true;
+  if(!fhMotIrmaos().length&&!mo)ok=await cadSet("motoristas",null,{nome:n,caminhao:picked("#fhTruck")||"",telefone:"",pagamento:v})!==false;
+  for(const[id,x]of alvos)if(await cadSet("motoristas",id,Object.assign({},x,{pagamento:v}))===false)ok=false;
+  st.textContent=ok?"✓ Guardado no cadastro de "+n+". Na próxima semana já vem preenchido.":"⚠ Não foi possível guardar agora. Tente de novo."}
 $("#fhCopy").addEventListener("click",async()=>{
   const txt=$("#fhTxt").value;const plain=txt.replace(/\*\*/g,"");
   const html='<div style="font-family:Calibri,Arial,sans-serif;font-size:12pt">'+esc(txt).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>")+'</div>';
@@ -2782,6 +2913,160 @@ $("#audBody").addEventListener("click",async e=>{
   const tb=e.target.closest("[data-tjb]");if(tb){e.stopPropagation();const x=S.audL[tb.dataset.tjb];const box=$('#audBody [data-tj="'+tb.dataset.tjb+'"]');tb.disabled=true;box.textContent="Consultando o Google Maps…";
     try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);box.textContent="Google Maps: "+String(r.km).replace(".",",")+" km, "+r.min+" min de carro."}catch(err){box.textContent=/apiTrajeto/.test(err&&err.message||"")?"Publique o Code.gs 9 para consultar o tempo real.":(err&&err.message||"Não foi possível consultar agora.")}tb.disabled=false;return}
   const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
+/* ---------- mapa interativo (Leaflet + OpenStreetMap/CARTO, carregado só quando abre) ---------- */
+var MP={open:false,map:null,mk:new Map(),filtro:"todos",q:"",nomes:true,edit:null,rotas:null,sel:null};
+const MP_COR={galpao:"#188038",destino:"#8e3fc4",cliente:"#d93025"},MP_TN={galpao:"Galpão",destino:"Destino",cliente:"Cliente"},MP_CAM={"Baú":"#2e8b3e","Poliguindaste":"#1f6fc5"};
+const MP_LF=[["https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/"],["https://unpkg.com/leaflet@1.9.4/dist/"]];
+let MP_LP=null;
+function mpCarregaLeaflet(){if(window.L&&window.L.map)return Promise.resolve();if(MP_LP)return MP_LP;
+  const um=(base)=>new Promise((ok,ko)=>{const c=document.createElement("link");c.rel="stylesheet";c.href=base+"leaflet.css";c.integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";c.crossOrigin="";document.head.appendChild(c);
+    const s=document.createElement("script");s.src=base+"leaflet.js";s.integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=";s.crossOrigin="";s.onload=()=>window.L&&window.L.map?ok():ko(new Error("x"));s.onerror=()=>{s.remove();c.remove();ko(new Error("x"))};document.head.appendChild(s)});
+  MP_LP=um(MP_LF[0][0]).catch(()=>um(MP_LF[1][0])).catch(()=>{MP_LP=null;throw new Error("Não foi possível carregar o mapa. Confira a internet e tente de novo.")});return MP_LP}
+const mpEhGalpao=l=>norm(l.nome).indexOf("galpao")>=0||(!!S.patio&&String(l.endereco||"").trim()===String(S.patio).trim());
+const mpTipo=l=>mpEhGalpao(l)?"galpao":(l.tipo==="destino"?"destino":"cliente");
+const mpAprox=l=>l.geoPrec==="aproximado";
+function mpPinHtml(t,aprox,sel){const g=t==="galpao";const ic=g?'<path d="M7.2 13.2 12 9.2l4.8 4V18H7.2z" fill="#fff"/><rect x="10.6" y="14.6" width="2.8" height="3.4" fill="'+MP_COR[t]+'"/>':t==="destino"?'<path d="M12 7.6l3.6 6.4H8.4z" fill="#fff"/><circle cx="12" cy="16.4" r="1.5" fill="#fff"/>':'<circle cx="12" cy="12" r="4.2" fill="#fff"/>';
+  return'<div class="mpin'+(g?" g":"")+(sel?" sel":"")+'"><svg viewBox="0 0 24 34" aria-hidden="true"><path d="M12 .8C5.8.8.8 5.8.8 12c0 8.3 10.2 20.1 10.6 20.6.3.3.9.3 1.2 0 .4-.5 10.6-12.3 10.6-20.6C23.2 5.8 18.2.8 12 .8z" fill="'+MP_COR[t]+'" stroke="#fff" stroke-width="1.4"/>'+ic+'</svg>'+(aprox?'<span class="mq" title="Posição aproximada">?</span>':'')+'</div>'}
+function mpIcon(l,sel,drag){const t=mpTipo(l),g=t==="galpao";const w=g?36:30,h=g?50:42;
+  return window.L.divIcon({className:"",html:mpPinHtml(t,mpAprox(l),sel).replace('class="mpin','class="mpin'+(drag?" drag":"")),iconSize:[w,h],iconAnchor:[w/2,h-1],popupAnchor:[0,-h+6],tooltipAnchor:[0,2]})}
+function mpUsoSemana(){const m=new Map();const add=(n,id,r)=>{const k=norm(n);if(!k)return;if(!m.has(k))m.set(k,new Map());m.get(k).set(id,r)};
+  for(const[id,r]of S.items){if(!active(r))continue;stopsOf(r).forEach(p=>add(p.local,id,r));partesDestino(r.destino).forEach(n=>add(n,id,r));add(r.cliente,id,r)}return m}
+function mpLista(){const q=norm(MP.q);return[...S.locais.values()].filter(l=>l.nome).filter(l=>MP.filtro==="todos"||mpTipo(l)===MP.filtro)
+  .filter(l=>!q||norm(l.nome+" "+l.endereco+" "+(l.obs||"")).indexOf(q)>=0)
+  .sort((a,b)=>({galpao:0,destino:1,cliente:2}[mpTipo(a)]-{galpao:0,destino:1,cliente:2}[mpTipo(b)])||a.nome.localeCompare(b.nome,"pt-BR"))}
+const mpFmt=n=>String(n).replace(".",",");
+function mpGmaps(l){return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(l.endereco?l.endereco:(l.lat+","+l.lng))}
+function mpPopup(l){const t=mpTipo(l);const uso=(MP.uso.get(norm(l.nome))||new Map());
+  const rs=[...uso].sort((a,b)=>(a[1].data+a[1].ini).localeCompare(b[1].data+b[1].ini));
+  let h='<div class="mpop"><b class="mpn">'+esc(l.nome)+'</b><span class="mpt" style="background:'+MP_COR[t]+'">'+MP_TN[t]+'</span>'+(l.geoPrec==="manual"?' <small style="color:#5f6368">posição ajustada à mão</small>':'')+
+    '<div class="mpe">'+esc(l.endereco||"Sem endereço cadastrado")+'</div>';
+  if(mpAprox(l))h+='<div class="mpa">⚠ O Google achou só a região deste endereço. Se o pino estiver no lugar errado, use <b>Corrigir posição</b>.</div>';
+  if(l.obs)h+='<div class="mpe" style="font-size:12.5px">'+esc(l.obs)+'</div>';
+  h+='<div class="mpb"><a class="pri" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+l.lat+','+l.lng+'">Como chegar</a><a target="_blank" rel="noopener" href="'+esc(mpGmaps(l))+'">Abrir no Google Maps</a><button type="button" data-mp="corrigir" data-id="'+esc(l._id)+'">Corrigir posição</button></div>';
+  if(rs.length)h+='<div class="mps"><b>Nesta semana ('+rs.length+')</b>'+rs.slice(0,6).map(([id,r])=>'<button type="button" data-mp="rota" data-id="'+esc(id)+'"><i style="background:'+(MP_CAM[r.caminhao]||"#777")+'"></i>'+DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmm(parseIso(r.data))+' · '+esc(r.ini)+' · '+esc(r.cliente||r.servico||"Rota")+'</button>').join("")+(rs.length>6?'<small>… e mais '+(rs.length-6)+'</small>':'')+'</div>';
+  const v=vizinhos(l,3);if(v.length)h+='<div class="mpv">Mais perto: '+v.map(x=>esc(x.l.nome)+' '+mpFmt(x.km)+' km').join(" · ")+'</div>';
+  return h+'</div>'}
+function mpChips(){const all=[...S.locais.values()].filter(l=>l.nome);const n=t=>all.filter(l=>t==="todos"||mpTipo(l)===t).length;
+  $("#mpChips").innerHTML=[["todos","Todos",""],["cliente","Clientes",MP_COR.cliente],["destino","Destinos",MP_COR.destino],["galpao","Galpão",MP_COR.galpao]].filter(([k])=>k!=="galpao"||n("galpao"))
+    .map(([k,nm,c])=>'<button type="button" class="mchip" data-mpf="'+k+'" aria-pressed="'+(MP.filtro===k)+'">'+(c?'<i style="background:'+c+'"></i>':'')+nm+' <small>'+n(k)+'</small></button>').join("")}
+function mpRenderLista(){const L0=mpLista();const com=L0.filter(temCoord),sem=L0.filter(l=>!temCoord(l));
+  const item=l=>{const t=mpTipo(l),u=MP.uso.get(norm(l.nome));const ok=temCoord(l);
+    return'<button type="button" class="mitem'+(MP.sel===l._id?" sel":"")+'" data-mpi="'+esc(l._id)+'"><span class="mdot" style="background:'+MP_COR[t]+'"></span><span class="mtx"><b>'+esc(l.nome)+'</b><small>'+esc(l.endereco||"sem endereço")+'</small></span>'+
+      (ok?(mpAprox(l)?'<span class="mbadge" title="O Google achou só a região">aproximado</span>':(u&&u.size?'<span class="mbadge rot" title="Rotas nesta semana">'+u.size+' rota'+(u.size>1?"s":"")+'</span>':'')):'<span class="btn sm" data-mpcol="'+esc(l._id)+'">Marcar no mapa</span>')+'</button>'};
+  let h="";if(!L0.length)h='<div class="mvazio">Nenhum local encontrado'+(MP.q?' para “'+esc(MP.q)+'”':'')+'.</div>';
+  else{h+='<div class="msec">No mapa ('+com.length+')</div>'+com.map(item).join("");
+    if(sem.length)h+='<div class="msem"><span>📍 <b>'+sem.length+' sem posição no mapa.</b> Calcule pelo endereço ou clique em <b>Marcar no mapa</b> e aponte o lugar.</span><span><button type="button" class="btn sm" id="mpGeo">Calcular pelo endereço</button></span></div>'+sem.map(item).join("")}
+  $("#mpList").innerHTML=h}
+function mpMarcadores(){const LL=window.L;const vis=new Set(mpLista().filter(temCoord).map(l=>l._id));
+  for(const l of S.locais.values()){if(!l.nome||!temCoord(l))continue;let m=MP.mk.get(l._id);
+    if(!m){m=LL.marker([l.lat,l.lng],{icon:mpIcon(l,false),riseOnHover:true,keyboard:true,title:l.nome,zIndexOffset:mpTipo(l)==="galpao"?600:mpTipo(l)==="destino"?300:0});
+      m.bindTooltip(esc(l.nome),{permanent:true,direction:"bottom",className:"mlbl",offset:[0,0]});m.bindPopup(()=>mpPopup(S.locais.get(locKey(l.nome))||l),{maxWidth:300,autoPanPaddingTopLeft:[20,70],autoPanPaddingBottomRight:mpPadBR()});
+      m.on("popupopen",()=>{MP.sel=l._id;if(innerWidth<=760)$("#mpSide").classList.add("mini");mpRenderLista()});m.on("popupclose",()=>{if(MP.sel===l._id){MP.sel=null;mpRenderLista()}});m._mpId=l._id;MP.mk.set(l._id,m)}
+    else{m.setLatLng([l.lat,l.lng]);m.setIcon(mpIcon(l,false))}
+    if(vis.has(l._id))m.addTo(MP.map);else m.remove()}
+  for(const[id,m]of MP.mk)if(![...S.locais.values()].some(l=>l._id===id&&temCoord(l))){m.remove();MP.mk.delete(id)}}
+function mpPadBR(){return innerWidth<=760?[20,160]:[20,20]}
+function mpAjustar(){const LL=window.L;const pts=[...MP.mk.values()].filter(m=>MP.map.hasLayer(m)).map(m=>m.getLatLng());
+  if(MP.rotas)MP.rotas.eachLayer(x=>{if(x.getLatLngs)pts.push(...x.getLatLngs())});
+  if(!pts.length){MP.map.setView([-19.92,-43.94],11);return}
+  const pb=innerWidth<=760?{paddingTopLeft:[30,60],paddingBottomRight:[30,Math.round(innerHeight*(($("#mpSide").classList.contains("mini"))?.2:.5))+20]}:{padding:[40,40]};
+  if(pts.length===1)MP.map.setView(pts[0],15);else MP.map.fitBounds(LL.latLngBounds(pts),Object.assign({maxZoom:15},pb))}
+function mpNomesUpd(){const z=MP.map?MP.map.getZoom():12;$("#mpCanvas").classList.toggle("semnomes",!MP.nomes);$("#mpCanvas").classList.toggle("longe",z<11);$("#mpNomes").setAttribute("aria-pressed",String(MP.nomes))}
+function mpRender(){if(!MP.open)return;MP.uso=mpUsoSemana();mpChips();mpRenderLista();if(MP.map)mpMarcadores()}
+function mpOnData(){if(MP&&MP.open&&!MP.edit){clearTimeout(MP.tm);MP.tm=setTimeout(()=>{mpRender();if(MP.rotasOn)mpRotas(true)},250)}}
+async function abrirMapa(focoNome){const w=$("#mapaWrap");MP.open=true;w.classList.add("open");w.setAttribute("aria-hidden","false");document.body.classList.add("mapopen");
+  if(!$("#mpDia").value){const wd=weekDays(),hj=iso(new Date());$("#mpDia").value=S.view==="dia"?iso(S.anchor):(hj>=iso(wd[0])&&hj<=iso(wd[6])?hj:iso(wd[0]))}
+  MP.uso=mpUsoSemana();mpChips();mpRenderLista();
+  if(!MP.map){$("#mpCarrega").hidden=false;$("#mpCarrega").textContent="Carregando o mapa…";
+    try{await mpCarregaLeaflet()}catch(e){$("#mpCarrega").innerHTML=esc(e.message)+'<br><br><button type="button" class="btn" id="mpTenta">Tentar de novo</button>';return}
+    if(!MP.open)return;$("#mpCarrega").hidden=true;const LL=window.L;
+    MP.map=LL.map("mpMapa",{zoomControl:false,attributionControl:true,tap:true}).setView([-19.92,-43.94],11);
+    LL.control.zoom({position:"topright"}).addTo(MP.map);
+    LL.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:20,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'}).addTo(MP.map);
+    MP.map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+    MP.rotas=LL.layerGroup().addTo(MP.map);
+    MP.map.on("zoomend",mpNomesUpd);MP.map.on("click",e=>{if(MP.edit&&MP.edit.novo)mpColocaEm(e.latlng)});
+    mpMarcadores();mpNomesUpd();mpAjustar()}
+  else{setTimeout(()=>MP.map.invalidateSize(),30);mpMarcadores()}
+  if(MP.rotasOn)mpRotas();
+  if(focoNome){const l=S.locais.get(locKey(focoNome));if(l)mpFoco(l._id)}}
+function fecharMapa(){if(MP.edit)mpEditFim(false);MP.open=false;const w=$("#mapaWrap");w.classList.remove("open");w.setAttribute("aria-hidden","true");document.body.classList.remove("mapopen");if(MP.map)MP.map.closePopup()}
+function mpLocal(id){return[...S.locais.values()].find(l=>l._id===id)}
+function mpFoco(id){const l=mpLocal(id);if(!l)return;const m=MP.mk.get(id);if(!m||!MP.map)return;
+  if(!MP.map.hasLayer(m))m.addTo(MP.map);if(innerWidth<=760)$("#mpSide").classList.add("mini");
+  MP.map.setView(m.getLatLng(),Math.max(MP.map.getZoom(),15),{animate:true});setTimeout(()=>m.openPopup(),innerWidth<=760?250:120)}
+/* corrigir posição (arrastar) ou marcar um local sem coordenada (clicar no mapa) */
+function mpEditIni(l,novo){if(!guard())return;if(MP.edit)mpEditFim(false);MP.map.closePopup();const LL=window.L;
+  MP.edit={id:l._id,novo:!!novo,pos:null,m:null};
+  if(!novo){const m=MP.mk.get(l._id);MP.edit.m=m;MP.edit.orig=m.getLatLng();MP.edit.z=m.options.zIndexOffset||0;m.setZIndexOffset(2000);m.setIcon(mpIcon(l,true,true));m.dragging.enable();m.on("dragend",mpArrastou)}
+  $("#mpBanTxt").innerHTML=novo?'Clique no mapa onde fica <b>'+esc(l.nome)+'</b>':'Arraste o pino de <b>'+esc(l.nome)+'</b> até o lugar certo';
+  $("#mpBanOk").disabled=true;$("#mpBanner").hidden=false;if(innerWidth<=760)$("#mpSide").classList.add("mini");}
+function mpArrastou(){if(!MP.edit)return;MP.edit.pos=MP.edit.m.getLatLng();$("#mpBanOk").disabled=false;$("#mpBanTxt").innerHTML='Nova posição de <b>'+esc((mpLocal(MP.edit.id)||{}).nome||"")+'</b>. Salvar?'}
+function mpColocaEm(ll){const LL=window.L;const l=mpLocal(MP.edit.id);if(!l)return;
+  if(!MP.edit.m){MP.edit.m=LL.marker(ll,{icon:mpIcon(l,true,true),draggable:true,zIndexOffset:900}).addTo(MP.map);MP.edit.m.on("dragend",mpArrastou)}else MP.edit.m.setLatLng(ll);
+  MP.edit.pos=ll;$("#mpBanOk").disabled=false;$("#mpBanTxt").innerHTML='Posição de <b>'+esc(l.nome)+'</b> marcada. Pode arrastar para ajustar. Salvar?'}
+function mpEditFim(salvou){const E=MP.edit;if(!E)return;MP.edit=null;$("#mpBanner").hidden=true;
+  if(E.m){E.m.off("dragend",mpArrastou);if(E.novo)E.m.remove();else{E.m.dragging.disable();E.m.setZIndexOffset(E.z||0);if(!salvou&&E.orig)E.m.setLatLng(E.orig);const l=mpLocal(E.id);if(l)E.m.setIcon(mpIcon(l,false))}}
+  mpRender()}
+async function mpSalvarPos(){const E=MP.edit;if(!E||!E.pos)return;const l=mpLocal(E.id);if(!l){mpEditFim(false);return}
+  const body={nome:l.nome,endereco:l.endereco,obs:l.obs||"",tipo:l.tipo||"",lat:Math.round(E.pos.lat*1e6)/1e6,lng:Math.round(E.pos.lng*1e6)/1e6,geoEnd:String(l.endereco||"").trim(),geoPrec:"manual"};
+  $("#mpBanOk").disabled=true;Object.assign(l,{lat:body.lat,lng:body.lng,geoEnd:body.geoEnd,geoPrec:"manual"});
+  const novo=E.novo;mpEditFim(true);
+  try{await S.locCol.doc(l._id).set(body);toast("Posição de "+l.nome+" salva");if(novo)setTimeout(()=>mpFoco(l._id),60)}catch(e){writeErr(e)}}
+/* rotas do dia desenhadas por caminhão (linhas retas na ordem das paradas) */
+async function mpRotas(semAjuste){if(!MP.map)return;const LL=window.L;MP.rotas.clearLayers();const ds=$("#mpDia").value;
+  const cams=[...$$m('[data-mpt][aria-pressed="true"]')].map(b=>b.dataset.mpt);MP.rotasOn=cams.length>0;const res=$("#mpRotaRes");
+  if(!cams.length||!ds){res.innerHTML="";return}
+  const wd=weekDays();let fora=null;
+  if(!(ds>=iso(wd[0])&&ds<=iso(wd[6]))){res.innerHTML='<span class="mrm">Buscando as rotas de '+ddmmyy(ds)+'…</span>';
+    try{const g=await rotasPeriodo(ds,ds);fora=rotasComRepeticoes(g,ds,ds).map(([id,r])=>Object.assign({id},r))}catch(e){res.innerHTML='<span class="mrm">Não foi possível buscar as rotas desse dia agora.</span>';return}
+    if($("#mpDia").value!==ds)return}
+  let h="";const todos=[];
+  cams.forEach((t,ti)=>{const list=fora?fora.filter(r=>r.caminhao===t):routesOn(ds,t);const o=dayStops(ds,t,list);const cor=MP_CAM[t];
+    const pts=o.st.map((x,i)=>({x,i,c:locCoord(x.local,x.addr)}));const ok=pts.filter(p=>p.c);const sem=pts.filter(p=>!p.c);
+    let km=0;for(let i=1;i<ok.length;i++)km+=kmEst(ok[i-1].c,ok[i].c)||0;
+    if(ok.length>1)LL.polyline(ok.map(p=>[p.c.lat,p.c.lng]),{color:cor,weight:5,opacity:.85,lineJoin:"round"}).addTo(MP.rotas);
+    const grp=new Map();ok.forEach(p=>{const k=p.c.lat+","+p.c.lng;if(!grp.has(k))grp.set(k,{c:p.c,n:[],x:[]});grp.get(k).n.push(p.i+1);grp.get(k).x.push(p.x)});
+    for(const g of grp.values()){const txt=g.n.join("·");const w=txt.length>2?Math.max(20,txt.length*7+8):20;
+      LL.marker([g.c.lat,g.c.lng],{interactive:true,zIndexOffset:1000,icon:LL.divIcon({className:"",html:'<div class="mnum'+(txt.length>2?" w":"")+'" style="background:'+cor+'">'+txt+'</div>',iconSize:[w,20],iconAnchor:[ti?-8:w+8,46]})})
+        .bindTooltip(g.x.map((x,j)=>g.n[j]+". "+esc(x.tipo)+": "+esc(x.local||x.addr)+(x.hora?" ("+esc(x.hora)+")":"")).join("<br>"),{direction:"top"}).addTo(MP.rotas);todos.push([g.c.lat,g.c.lng])}
+    h+='<div class="mrt"><i style="background:'+cor+'"></i><b>'+esc(t==="Baú"?"Baú":"Poli")+'</b> '+o.n+' rota'+(o.n===1?"":"s")+' · '+o.st.length+' parada'+(o.st.length===1?"":"s")+(ok.length>1?' · ~'+mpFmt(Math.round(km*10)/10)+' km (estimado)':'')+
+      (o.st.length?' <button type="button" class="btn sm" data-mpday="'+esc(t)+'">Abrir no Google Maps</button>':'')+'</div>';
+    if(!o.n)h+='<div class="mrm">Nenhuma rota do '+esc(t)+' neste dia.</div>';
+    else if(!o.st.length)h+='<div class="mrm">As rotas do '+esc(t)+' deste dia não têm endereço nas paradas.</div>';
+    if(sem.length)h+='<div class="mrm">Fora do mapa (sem posição): '+sem.map(p=>esc(p.x.local||p.x.addr)).join(", ")+'</div>';
+    if(o.missing)h+='<div class="mrm">'+o.missing+' rota(s) sem endereço ficaram de fora.</div>'});
+  res.innerHTML=h+'<div class="mrm">Linhas retas na ordem das paradas; o caminho real e o tempo estão no Google Maps.</div>';
+  if(semAjuste)return;
+  if(todos.length>1)MP.map.fitBounds(LL.latLngBounds(todos),innerWidth<=760?{paddingTopLeft:[40,70],paddingBottomRight:[40,Math.round(innerHeight*.5)+30],maxZoom:15}:{padding:[60,60],maxZoom:15});
+  else if(todos.length===1)MP.map.setView(todos[0],14)}
+const $$m=s=>document.querySelectorAll("#mapaWrap "+s);
+$("#btnMapa").addEventListener("click",()=>abrirMapa());
+$("#mpFechar").addEventListener("click",fecharMapa);
+$("#mpHandle").addEventListener("click",()=>{$("#mpSide").classList.toggle("mini")});
+$("#mpQ").addEventListener("input",e=>{MP.q=e.target.value;mpRender()});
+$("#mpQ").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();const l=mpLista().find(temCoord);if(l)mpFoco(l._id)}});
+$("#mpQ").addEventListener("focus",()=>$("#mpSide").classList.remove("mini"));
+$("#mpChips").addEventListener("click",e=>{const b=e.target.closest("[data-mpf]");if(!b)return;MP.filtro=b.dataset.mpf;mpRender();if(MP.map)mpAjustar()});
+$("#mpDia").addEventListener("change",()=>{if(![...$$m('[data-mpt][aria-pressed="true"]')].length)$$m('[data-mpt]').forEach(b=>b.setAttribute("aria-pressed","true"));mpRotas()});
+$$m("[data-mpt]").forEach(b=>b.addEventListener("click",()=>{b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));mpRotas()}));
+$("#mpRotaRes").addEventListener("click",e=>{const b=e.target.closest("[data-mpday]");if(!b)return;const ds=$("#mpDia").value,t=b.dataset.mpday;fecharMapa();openDayRoute(ds,t)});
+$("#mpAjustar").addEventListener("click",()=>MP.map&&mpAjustar());
+$("#mpNomes").addEventListener("click",()=>{MP.nomes=!MP.nomes;mpNomesUpd()});
+$("#mpBanOk").addEventListener("click",mpSalvarPos);
+$("#mpBanNo").addEventListener("click",()=>mpEditFim(false));
+$("#mpList").addEventListener("click",async e=>{
+  const g=e.target.closest("#mpGeo");if(g){if(!guard())return;g.disabled=true;g.textContent="Calculando… (até 1 minuto)";
+    try{const r=await API.call("apiGeo",[false]);toast(r.feitos.length+" endereço(s) colocados no mapa"+(r.falhas.length?" · não achados: "+r.falhas.join(", ")+" (use Marcar no mapa)":""));API.refresh()}
+    catch(x){toast(x&&x.message||"Não foi possível agora")}finally{g.disabled=false;g.textContent="Calcular pelo endereço"}return}
+  const c=e.target.closest("[data-mpcol]");if(c){e.stopPropagation();const l=mpLocal(c.dataset.mpcol);if(l&&MP.map)mpEditIni(l,true);return}
+  const it=e.target.closest("[data-mpi]");if(!it)return;const l=mpLocal(it.dataset.mpi);if(!l)return;
+  if(!temCoord(l)){if(MP.map)mpEditIni(l,true);return}mpFoco(l._id)});
+$("#mpMapa").addEventListener("click",e=>{const b=e.target.closest("[data-mp]");if(!b)return;
+  if(b.dataset.mp==="corrigir"){const l=mpLocal(b.dataset.id);if(l)mpEditIni(l,false);return}
+  if(b.dataset.mp==="rota"){const id=b.dataset.id;fecharMapa();openForm(id)}});
+$("#mpCarrega").addEventListener("click",e=>{if(e.target.closest("#mpTenta"))abrirMapa()});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape"||!MP.open||document.querySelector(".scrim.open"))return;e.preventDefault();if(MP.edit)mpEditFim(false);else fecharMapa()});
 /* ---------- Assistente (IA): contexto compacto da semana na tela ---------- */
 async function carregarConh(force){if(!force&&S.conh instanceof Map&&Date.now()-(S.conhT||0)<60000)return S.conh;
   try{const g=await S.db.collection("conhecimento").get();S.conh=new Map(g.docs.filter(d=>d.exists).map(d=>[d.id,Object.assign({nome:"",texto:""},d.data()||{})]));S.conhT=Date.now()}
@@ -3459,7 +3744,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.1";
+const VERSAO_TELA="9.3";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
@@ -3479,7 +3764,7 @@ async function startData(){
   S.resCol=db.collection("residuos");S.motCol=db.collection("motoristas");S.cliCol=db.collection("clientes");
   [["cliCol","clientes","cliOk"]].forEach(([c,m,f])=>S[c].onSnapshot(snap=>{S[f]=true;S[m].clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S[m].set(d.id,{nome:String(x.nome),obs:String(x.obs||"")})}});fillLists();if(CAD.open)renderCad()},()=>{if(S[f]!==true){S[f]=false;if(CAD.open)renderCad()}}));
   subscribeWeek();subscribeSeries();
-  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||""),lat:Number(x.lat)||null,lng:Number(x.lng)||null,geoEnd:String(x.geoEnd||""),geoPrec:String(x.geoPrec||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
+  S.locCol.onSnapshot(snap=>{S.locais.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};S.locais.set(locKey(x.nome)||d.id,{_id:d.id,nome:String(x.nome||""),endereco:String(x.endereco||""),obs:String(x.obs||""),tipo:String(x.tipo||""),lat:Number(x.lat)||null,lng:Number(x.lng)||null,geoEnd:String(x.geoEnd||""),geoPrec:String(x.geoPrec||"")})}});fillLists();if(CAD.open)renderCad();mpOnData()},()=>{});
   S.resCol.onSnapshot(snap=>{S.residuos.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.residuos.set(d.id,{nome:String(x.nome),obs:String(x.obs||""),classe:String(x.classe||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.motCol.onSnapshot(snap=>{S.motoristas.clear();snap.docs.forEach(d=>{if(d.exists){const x=d.data()||{};if(x.nome)S.motoristas.set(d.id,{nome:String(x.nome),caminhao:String(x.caminhao||""),telefone:String(x.telefone||""),pagamento:String(x.pagamento||"")})}});fillLists();if(CAD.open)renderCad()},()=>{});
   S.cfgDoc.onSnapshot(d=>{S.cfg=d.exists?Object.assign({},d.data()||{}):{};S.patio=String(S.cfg.patio||"");render();if(CAD.open)renderCad();if(!S.cfgOk){S.cfgOk=true;seedV5()}},()=>{});
