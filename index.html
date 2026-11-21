@@ -2913,7 +2913,7 @@ $("#audBody").addEventListener("click",async e=>{
   const tb=e.target.closest("[data-tjb]");if(tb){e.stopPropagation();const x=S.audL[tb.dataset.tjb];const box=$('#audBody [data-tj="'+tb.dataset.tjb+'"]');tb.disabled=true;box.textContent="Consultando o Google Maps…";
     try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);box.textContent="Google Maps: "+String(r.km).replace(".",",")+" km, "+r.min+" min de carro."}catch(err){box.textContent=/apiTrajeto/.test(err&&err.message||"")?"Publique o Code.gs 9 para consultar o tempo real.":(err&&err.message||"Não foi possível consultar agora.")}tb.disabled=false;return}
   const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
-/* ---------- mapa interativo (Leaflet + OpenStreetMap/CARTO, carregado só quando abre) ---------- */
+/* ---------- mapa interativo (Leaflet + OpenStreetMap, grátis e sem chave, carregado só quando abre) ---------- */
 var MP={open:false,map:null,mk:new Map(),filtro:"todos",q:"",nomes:true,edit:null,rotas:null,sel:null};
 const MP_COR={galpao:"#188038",destino:"#8e3fc4",cliente:"#d93025"},MP_TN={galpao:"Galpão",destino:"Destino",cliente:"Cliente"},MP_CAM={"Baú":"#2e8b3e","Poliguindaste":"#1f6fc5"};
 const MP_LF=[["https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/"],["https://unpkg.com/leaflet@1.9.4/dist/"]];
@@ -2982,7 +2982,12 @@ async function abrirMapa(focoNome){const w=$("#mapaWrap");MP.open=true;w.classLi
     if(!MP.open)return;$("#mpCarrega").hidden=true;const LL=window.L;
     MP.map=LL.map("mpMapa",{zoomControl:false,attributionControl:true,tap:true}).setView([-19.92,-43.94],11);
     LL.control.zoom({position:"topright"}).addTo(MP.map);
-    LL.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:20,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'}).addTo(MP.map);
+    /* mapas gratuitos, sem chave: OpenStreetMap; se ele falhar, troca sozinho para o espelho OSM França (HOT) */
+    const OSMA='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+    const camadas=[["https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:OSMA}],
+      ["https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",{subdomains:"ab",maxZoom:19,attribution:OSMA+' · estilo <a href="https://www.hotosm.org/" target="_blank" rel="noopener">HOT</a> / <a href="https://openstreetmap.fr" target="_blank" rel="noopener">OSM France</a>'}]];
+    let ci=0,falhas=0;const poe=()=>{const t=LL.tileLayer(camadas[ci][0],camadas[ci][1]);
+      t.on("tileerror",()=>{if(++falhas>=4&&ci<camadas.length-1){MP.map.removeLayer(t);ci++;falhas=0;poe()}});t.on("tileload",()=>{falhas=0});t.addTo(MP.map);MP.tiles=t};poe();
     MP.map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
     MP.rotas=LL.layerGroup().addTo(MP.map);
     MP.map.on("zoomend",mpNomesUpd);MP.map.on("click",e=>{if(MP.edit&&MP.edit.novo)mpColocaEm(e.latlng)});
@@ -3744,7 +3749,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.3";
+const VERSAO_TELA="9.4";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
