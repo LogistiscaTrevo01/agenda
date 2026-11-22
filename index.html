@@ -836,6 +836,27 @@ body.mapopen .jbtn{display:none}
   .mbanner{top:max(10px,env(safe-area-inset-top));font-size:13px;flex-wrap:wrap;justify-content:center}
   .leaflet-top{top:env(safe-area-inset-top)}
 }
+/* ---------- lançar na planilha de Logística ---------- */
+.pltop{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:8px;font-size:13.5px}
+.pltop input[type=date]{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.plrota{border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}
+.plrota.lanc{opacity:.6}
+.plrota.ign{opacity:.5}
+.plh{display:flex;gap:8px;align-items:center;padding:8px 10px;background:color-mix(in srgb,var(--line) 22%,var(--surface));flex-wrap:wrap}
+.plh label{display:flex;gap:8px;align-items:center;font-weight:600;cursor:pointer;flex:1;min-width:200px}
+.plh input[type=checkbox]{width:18px;height:18px;flex:none}
+.plh .btn{padding:3px 9px;font-size:12px}
+.plwarn{font-size:11.5px;padding:1px 7px;border-radius:999px;background:#fff1c2;color:#6b4d00;white-space:nowrap}
+.plok{font-size:11.5px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,#2e8b3e 18%,var(--surface));white-space:nowrap}
+.pltab{width:100%;border-collapse:collapse;font-size:12.5px}
+.pltab th,.pltab td{padding:5px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+.pltab th{font-weight:600;color:var(--muted);font-size:11.5px;white-space:nowrap}
+.pltab td.vz{color:var(--muted)}
+.plwrap{overflow-x:auto}
+.plfoot{position:sticky;bottom:calc(-1*var(--scpad,16px));background:var(--surface);border-top:1px solid var(--line);padding:10px 0 4px;margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.plfoot .hint{flex-basis:100%}
+.pldica{background:color-mix(in srgb,var(--accent) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:10px;padding:10px 12px;font-size:13.5px;margin:6px 0}
+.pldica[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -871,7 +892,7 @@ body.mapopen .jbtn{display:none}
     <button class="btn" id="btnCopy" type="button" title="Monta a mensagem das rotas para o motorista no WhatsApp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg><span class="lbl"> WhatsApp</span></button>
     <button class="btn" id="btnSearch" type="button" title="Buscar rotas por cliente, resíduo, MTR, local, motorista…"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="lbl"> Buscar</span></button>
     <button class="btn" id="btnMapa" type="button" title="Mapa com todos os endereços: clientes, destinos e o galpão"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span class="lbl"> Mapa</span></button>
-    <button class="btn" id="btnSemMot" type="button" title="Rotas que ainda estão sem motorista: preencha direto na lista"><span data-ic="user"></span><span class="lbl"> Sem motorista</span><span class="nbad" id="nSemMot" hidden></span></button>
+    <button class="btn" id="btnPlan" type="button" title="Gera as linhas das rotas concluídas para colar na planilha de Logística"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span class="lbl"> Planilha</span><span class="nbad" id="nPlan" hidden></span></button>
     <button class="btn" id="btnAud" type="button" title="Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"><span data-ic="check2"></span><span class="lbl"> Auditoria</span><span class="nbad" id="nAud" hidden></span></button>
     <button class="btn" id="btnExport" type="button" title="Baixar planilha do Excel ou a agenda completa"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="lbl"> Exportar</span></button>
     <button class="btn" id="btnFech" type="button" title="E-mail de pagamento do motorista diarista da semana"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lbl"> Fechamento</span></button>
@@ -1059,6 +1080,12 @@ body.mapopen .jbtn{display:none}
       </div>
       <div id="sOut" class="sout"></div>
     </form>
+  </div>
+</div>
+<div class="scrim" id="scrimPlan" aria-hidden="true">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+    <header><h2 id="planTitle">Lançar na planilha de Logística</h2><button class="icon-btn" type="button" data-close="scrimPlan" aria-label="Fechar">✕</button></header>
+    <div class="mbody" id="planBody"></div>
   </div>
 </div>
 <div class="scrim" id="scrimAud" aria-hidden="true">
@@ -1760,7 +1787,7 @@ async function saveOccurrence(item,f,existingId){
 /* ---------- render ---------- */
 function render(){
   if(S.dragging){S.needRender=true;return}
-  S.needRender=false;rebuild();if(typeof mpOnData==='function')mpOnData();
+  S.needRender=false;rebuild();if(typeof mpOnData==='function')mpOnData();if(typeof planAgendar==='function')planAgendar();
   document.querySelectorAll(".bar .seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.view===S.view)));
   $("#btnNew").disabled=S.readOnly;
   const wd=weekDays();
@@ -2821,7 +2848,7 @@ $("#fhMail").addEventListener("click",()=>fhSavePag());
 
 /* ---------- rotas sem motorista: lista para preencher na hora ---------- */
 const semMot=r=>!String(r.motorista||"").trim()&&eff(r)!=="Cancelado";
-function semMotBadge(){const b=$("#nSemMot");if(!b)return;let n=0;const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);
+function semMotBadge(){const b=$("#nSemMot");if(!b||!$("#btnSemMot"))return;let n=0;const wd=weekDays();const a=iso(wd[0]),z=iso(wd[6]);
   for(const r of S.items.values())if(r.data>=a&&r.data<=z&&semMot(r))n++;b.hidden=!n;b.textContent=n;
   $("#btnSemMot").title=n?n+" rota(s) sem motorista na semana na tela. Clique para ver todas e preencher.":"Rotas que ainda estão sem motorista: preencha direto na lista"}
 async function abrirSemMot(jaAberta){if(!jaAberta){sReset(false);openModal("scrimSearch")}else sReset(false);S.sLast=null;sSeq++;
@@ -2850,7 +2877,7 @@ async function salvarMotRota(id,v){const cur=await S.col.doc(id).get();if(!cur.e
 async function salvarMotSerie(sid,v){const x=S.series.get(sid);if(!x)return false;if(!await put("series",sid,Object.assign({},x,{motorista:v})))return false;
   try{const g=await S.col.where("serie","==",sid).get();for(const d of g.docs){if(d.exists&&!String((d.data()||{}).motorista||"").trim())await salvarMotRota(d.id,v)}}catch(e){}return true}
 async function salvarMot(k,v){if(k.startsWith("s:"))return salvarMotSerie(k.slice(2),v);return salvarMotRota(k.slice(2),v)}
-$("#btnSemMot").addEventListener("click",()=>abrirSemMot(false));
+
 $("#sOut").addEventListener("click",async e=>{
   const f=e.target.closest("[data-smfill]");if(f){const inp=f.closest(".smin").querySelector("input");inp.value=f.dataset.smfill;inp.focus();return}
   const b=e.target.closest("[data-smsave]");if(!b)return;e.stopPropagation();const k=b.dataset.smsave;const inp=b.closest(".smin").querySelector("input");const v=inp.value.trim();
@@ -2889,7 +2916,7 @@ function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[
       else{ini=toMin(B.ini);if(S.patio)orig=audPt({local:"Galpão Trevo",endereco:S.patio});deQuando="de "+B.ini+", saindo do galpão"}
       const tr=audTrecho((orig?[orig]:[]).concat(st.map(audPt)));
       if(tr.falta.length){tr.falta.forEach(n=>semCoord.add(n));continue}
-      tr.aprox.forEach(n=>aprox.add(n));
+      tr.aprox.forEach(n=>aprox.add(n));if(tr.pular)continue;
       const nServ=st.filter(audServico).length,serv=nServ*AUD_SERV,need=tr.min+serv,avail=toMin(B.fim)-ini;
       if(need>avail+AUD_TOL)add("aviso","Tempo apertado",nomeR(B)+" ("+B.ini+"–"+B.fim+"): precisa de ~"+need+" min — "+tr.min+" min de estrada"+(tr.google?" (Google Maps, caminhão)":" (estimativa)")+
         ", "+String(tr.km).replace(".",",")+" km: "+tr.nomes.join(" → ")+(nServ?" + "+serv+" min "+(nServ>1?"nas "+nServ+" paradas":"na parada"):"")+
@@ -2905,7 +2932,8 @@ function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[
       if(!l||!l.endereco)add("info","Destino sem endereço cadastrado",nomeR(r)+" — destino "+n,id,r);
       else if(st.length&&!st.some(p=>norm(p.local)===norm(l.nome)))add("info","Destino fora do trajeto",nomeR(r)+" — destino "+l.nome+" não aparece nas paradas.",id,r)});
     if(r.data<hoje&&!r.auto&&r.status==="Agendado")add("info","Status não atualizado",nomeR(r)+" — já passou e continua Agendado.",id,r)}
-  if(aprox.size)add("info","Posição aproximada no mapa","O Google achou só a região destes endereços, então a distância pode estar errada: "+[...aprox].join(", ")+". Abra o Mapa e use “Corrigir posição”.",null,null,{mapa:[...aprox][0]});
+  if(PL&&PL.pend)add("aviso","Lançar na planilha de Logística",PL.pend+" rota(s) concluída(s) ainda não lançada(s) na planilha.",null,null,{plan:1});
+  if(aprox.size)add("info","Posição aproximada no mapa","O Google achou só a região destes endereços, então a auditoria não confere o tempo das rotas com eles: "+[...aprox].join(", ")+". Abra o Mapa e use “Corrigir posição”.",null,null,{mapa:[...aprox][0]});
   if(semCoord.size)add("info","Endereços sem coordenada","Calcule em Cadastros → Endereços para conferir deslocamentos: "+[...semCoord].slice(0,8).join(", ")+(semCoord.size>8?"…":""),null,null);
   const ord={erro:0,aviso:1,info:2};out.sort((x,y)=>ord[x.nivel]-ord[y.nivel]||(x.r&&y.r?(x.r.data+x.r.ini).localeCompare(y.r.data+y.r.ini):0));return out}
 /* ---------- tempo de estrada da auditoria: estimativa, trocada pelo Google Maps quando já conferido ---------- */
@@ -2913,14 +2941,19 @@ const AUD_SERV=10,AUD_TOL=5,AUD_CAM=1.2; /* 10 min por parada de coleta/descarte
 const audServico=p=>!/^(saida|retorno|deslocamento)/.test(norm(p.tipo));
 function audPt(p){const c=locCoord(p.local,p.endereco);return{nome:p.local||p.endereco,addr:String(p.endereco||"").trim(),c}}
 const audMesmo=(a,b)=>(a.addr&&a.addr===b.addr)||(a.nome&&norm(a.nome)===norm(b.nome))||(a.c&&b.c&&a.c.lat===b.c.lat&&a.c.lng===b.c.lng);
-function audTjLoad(){if(S.tj)return S.tj;S.tj={};try{const o=JSON.parse(localStorage.getItem("agendaTj")||"{}");const lim=Date.now()-14*864e5;for(const k in o)if(o[k].t>lim)S.tj[k]=o[k]}catch(e){}return S.tj}
+function audTjLoad(){if(S.tj)return S.tj;S.tj={};try{const o=JSON.parse(localStorage.getItem("agendaTj")||"{}");const lim=Date.now()-14*864e5;for(const k in o)if(k.startsWith("c2|")&&o[k].t>lim)S.tj[k]=o[k]}catch(e){}return S.tj}
 function audTjSave(){try{localStorage.setItem("agendaTj",JSON.stringify(S.tj))}catch(e){}}
 function audTrecho(pts){const P=pts.filter((p,i)=>i===0||!audMesmo(p,pts[i-1]));const falta=[],aprox=[];
   P.forEach(p=>{if(!p.c)falta.push(p.nome);else if(p.c.geoPrec==="aproximado")aprox.push(p.c.nome)});
-  const addrs=P.every(p=>p.addr)?P.map(p=>p.addr):null;const key=addrs&&addrs.length>1?addrs.join("|"):"";const g=key&&audTjLoad()[key];
-  if(g&&g.ok)return{min:Math.round(g.min*AUD_CAM),km:g.km,google:true,falta:[],aprox:[],addrs,key,nomes:P.map(p=>p.nome)};
-  if(falta.length)return{falta,aprox};let km=0,min=0;for(let i=1;i<P.length;i++){const k=kmEst(P[i-1].c,P[i].c)||0;km+=k;min+=minEst(k)}
-  return{min,km:Math.round(km*10)/10,google:false,falta:[],aprox,addrs,key,nomes:P.map(p=>p.nome)}}
+  if(falta.length)return{falta,aprox};
+  /* posição aproximada: a distância não é confiável (ex.: "BR-381 km 436" existe em MG e em SP) — não acusa, só pede para corrigir o pino */
+  if(aprox.length)return{falta:[],aprox,pular:true};
+  let km=0,min=0;for(let i=1;i<P.length;i++){const k=kmEst(P[i-1].c,P[i].c)||0;km+=k;min+=minEst(k)}km=Math.round(km*10)/10;
+  /* o Google recebe as coordenadas dos pinos (não o texto do endereço), para não confundir cidades */
+  const wps=P.map(p=>p.c.lat+","+p.c.lng);const key=wps.length>1?"c2|"+wps.join("|"):"";const g=key&&audTjLoad()[key];
+  const nomes=P.map(p=>p.nome);
+  if(g&&g.ok&&g.km<=km*2+15)return{min:Math.round(g.min*AUD_CAM),km:g.km,google:true,falta:[],aprox:[],addrs:wps,key,nomes};
+  return{min,km,google:false,falta:[],aprox:[],addrs:wps,key,nomes,suspeito:!!(g&&g.ok)}}
 /* confere no Google Maps (em segundo plano) só os trechos que a estimativa achou apertados */
 async function audConfirmar(){if(S.tjBusy)return;const tj=audTjLoad();S.tjTent=S.tjTent||new Set();
   const fila=auditar().filter(x=>x.extra&&x.extra.key&&!x.extra.google&&!tj[x.extra.key]&&!S.tjTent.has(x.extra.key)).slice(0,8);if(!fila.length)return;
@@ -2930,19 +2963,21 @@ async function audConfirmar(){if(S.tjBusy)return;const tj=audTjLoad();S.tjTent=S
   if(mudou){audTjSave();if($("#scrimAud").classList.contains("open"))renderAud();audBadge()}}
 function audBadge(){const b=$("#nAud");if(!b)return;const n=auditar().filter(x=>x.nivel!=="info").length;b.hidden=!n;b.textContent=n;$("#btnAud").title=n?n+" ponto(s) para conferir na semana na tela":"Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços";clearTimeout(S.tjT);S.tjT=setTimeout(audConfirmar,1500)}
 function audTjTxt(x){const e=x.extra;if(!e||!e.key)return"";const g=(S.tj||{})[e.key];
-  if(e.google&&g)return"Conferido no Google Maps: "+String(g.km).replace(".",",")+" km, "+g.min+" min de carro (~"+Math.round(g.min*AUD_CAM)+" de caminhão).";
+  if(g&&!e.google)return"O Google deu um caminho muito maior que o esperado ("+String(g.km).replace(".",",")+" km); valendo a estimativa.";if(e.google&&g)return"Conferido no Google Maps: "+String(g.km).replace(".",",")+" km, "+g.min+" min de carro (~"+Math.round(g.min*AUD_CAM)+" de caminhão).";
   if(S.tjTent&&S.tjTent.has(e.key))return"O Google Maps não achou este trajeto; valendo a estimativa.";return"Conferindo no Google Maps…"}
 function renderAud(){const L=auditar();S.audL=L;const wd=weekDays();
   const nm={erro:"Erros",aviso:"Atenção",info:"Para melhorar"};const ic2={erro:"⛔",aviso:"⚠️",info:"ℹ️"};
-  let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span><button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise à Júlia</button></div>';
+  let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span>'+(L.some(x=>x.titulo==="Sem motorista")?'<button type="button" class="btn sm" data-aud="semmot">'+ic("user")+' Preencher motoristas ('+L.filter(x=>x.titulo==="Sem motorista").length+')</button>':'')+'<button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise à Júlia</button></div>';
   if(!L.length)h+='<p class="audok">Nada para corrigir nesta semana. 👍</p>';
   ["erro","aviso","info"].forEach(nv=>{const X=L.map((x,i)=>[x,i]).filter(([x])=>x.nivel===nv);if(!X.length)return;h+='<div class="audsec">'+nm[nv]+' ('+X.length+')</div>';
-    h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj">'+audTjTxt(x)+'</small></span><span class="ab">'+(x.extra&&x.extra.mapa?'<button type="button" class="btn sm ghost" data-amapa="'+i+'">Abrir mapa</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
+    h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj">'+audTjTxt(x)+'</small></span><span class="ab">'+(x.extra&&x.extra.mapa?'<button type="button" class="btn sm ghost" data-amapa="'+i+'">Abrir mapa</button>':'')+(x.extra&&x.extra.plan?'<button type="button" class="btn sm ghost" data-aplan="1">Abrir</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
   h+='<p class="cnote">A auditoria olha a semana que está na tela. <b>Tempo apertado</b>: para cada rota, soma a estrada desde onde o caminhão estava (fim da rota anterior ou o galpão, na 1ª do dia), passando por todas as paradas do card, mais 10 min em cada coleta/descarte, e compara com o tempo até o fim da rota. A estimativa (cidade ~25 km/h, estrada ~50 km/h) é conferida sozinha no Google Maps, com 20% a mais por ser caminhão; o que o Google mostrar que dá tempo some da lista.</p>';
   $("#audBody").innerHTML=h}
 $("#btnAud").addEventListener("click",()=>{renderAud();openModal("scrimAud");audConfirmar()});
 $("#audBody").addEventListener("click",async e=>{
   const ia=e.target.closest('[data-aud="ia"]');if(ia){closeModal("scrimAud");abrirIA("Analise a auditoria automática desta semana: explique os problemas mais importantes e diga como resolver cada um, em ordem de prioridade.");return}
+  if(e.target.closest("[data-aplan]")){e.stopPropagation();closeModal("scrimAud");abrirPlan();return}
+  if(e.target.closest('[data-aud="semmot"]')){closeModal("scrimAud");abrirSemMot(false);return}
   const am=e.target.closest("[data-amapa]");if(am){e.stopPropagation();const x=S.audL[am.dataset.amapa];closeModal("scrimAud");abrirMapa(x.extra.mapa);return}
   const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
 /* ---------- mapa interativo (Leaflet + OpenStreetMap, grátis e sem chave, carregado só quando abre) ---------- */
@@ -3105,6 +3140,75 @@ $("#mpMapa").addEventListener("click",e=>{const b=e.target.closest("[data-mp]");
   if(b.dataset.mp==="rota"){const id=b.dataset.id;fecharMapa();openForm(id)}});
 $("#mpCarrega").addEventListener("click",e=>{if(e.target.closest("#mpTenta"))abrirMapa()});
 document.addEventListener("keydown",e=>{if(e.key!=="Escape"||!MP.open||document.querySelector(".scrim.open"))return;e.preventDefault();if(MP.edit)mpEditFim(false);else fecharMapa()});
+/* ---------- Lançar na planilha de Logística: rotas concluídas → linhas no formato da aba "Logística" ---------- */
+const PLAN_PARC={"Baú":"Trevo 3/4","Poliguindaste":"Trevo"};
+const PLAN_COLS=["Contrato (Cliente)","Parceiro","Serviço","Tipo","Tamanho","Quantidade","Unidade de medida","Custo Realizado","Data Chegada","Data Saída","MTR","OBSERVAÇÃO"];
+var PL={map:null,t:0,pend:0,mostrar:false,sel:new Set(),copiados:null,erro:""};
+function planDesde(){try{return localStorage.getItem("planDesde")||"2026-11-16"}catch(e){return"2026-11-16"}}
+async function planCarregar(force){if(!force&&PL.map&&Date.now()-PL.t<60000)return PL.map;
+  try{const g=await S.db.collection("planilha").get();PL.map=new Map(g.docs.filter(d=>d.exists).map(d=>[d.id,d.data()||{}]));PL.t=Date.now();PL.erro=""}
+  catch(e){PL.erro=/planilha/i.test(e&&e.message||"")||/cole/i.test(e&&e.message||"")?"Para guardar o que já foi lançado, publique o Code.gs 9.6 (Implantar → Gerenciar implantações → ✏️ → Nova versão).":"Não foi possível carregar o que já foi lançado agora.";if(!PL.map)PL.map=new Map()}
+  return PL.map}
+/* a mesma ocorrência de repetição pode ter id "v:serie:data" (virtual) ou o id da rota gravada */
+function planChave(id,r){return r.serie&&r.serieData?"v:"+r.serie+":"+r.serieData:id}
+function planMarca(id,r){const m=PL.map||new Map();return m.get(id)||m.get(planChave(id,r))||null}
+function planServico(r){const s=norm(r.servico);if(/mobiliza/.test(s))return"Mobilização";if(/aluguel/.test(s))return"Aluguel";if(/troca.*compact/.test(s))return"Troca Compactadora";
+  const desc=stopsOf(r).some(p=>/^descarte/.test(norm(p.tipo)));return(String(r.destino||"").trim()||desc)?"Transporte/Destinação":"Transporte"}
+const planData=ds=>{const d=parseIso(ds);return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()};
+function planLinhas(r){const res=(r.residuos||[]).length?r.residuos:[{tipo:"",qtd:""}];const mt=mtrSplit(r.mtr);const dt=planData(r.data);
+  const obs=String(r.obs||"").split("\n")[0].trim().slice(0,140);
+  return res.map((x,i)=>[r.cliente||"",PLAN_PARC[r.caminhao]||"Trevo",planServico(r),x.tipo||"","",x.qtd||"","","",dt,dt,mt.length===res.length?mt[i]:mt.join(" / "),obs])}
+async function planListar(){const desde=planDesde(),hoje=iso(new Date());if(desde>hoje)return[];
+  const g=await rotasPeriodo(desde,hoje);await planCarregar();
+  return rotasComRepeticoes(g,desde,hoje).filter(([,r])=>eff(r)==="Concluído").map(([id,r])=>({id,r,k:planChave(id,r),m:planMarca(id,r)}))}
+async function planContar(){try{if(!S.db)return;const L=await planListar();PL.pend=L.filter(x=>!x.m).length}catch(e){return}
+  const b=$("#nPlan");if(b){b.hidden=!PL.pend;b.textContent=PL.pend}
+  $("#btnPlan").title=PL.pend?PL.pend+" rota(s) concluída(s) ainda não lançadas na planilha de Logística":"Gera as linhas das rotas concluídas para colar na planilha de Logística";if(typeof audBadge==="function")audBadge()}
+function planAgendar(){clearTimeout(PL.tc);PL.tc=setTimeout(planContar,20000)}
+async function abrirPlan(){openModal("scrimPlan");$("#planBody").innerHTML='<p class="sempty">Carregando as rotas concluídas…</p>';PL.copiados=null;PL.sel=new Set();
+  try{await planCarregar(true);PL.L=await planListar()}catch(e){$("#planBody").innerHTML='<p class="sempty">Não foi possível carregar agora. Tente de novo.</p>';return}
+  PL.L.forEach(x=>{if(!x.m)PL.sel.add(x.k)});planRender()}
+function planRender(){const L=(PL.L||[]).filter(x=>PL.mostrar||!x.m).sort((a,b)=>(a.r.data+a.r.caminhao+a.r.ini).localeCompare(b.r.data+b.r.caminhao+b.r.ini));
+  const pend=(PL.L||[]).filter(x=>!x.m).length,lanc=(PL.L||[]).filter(x=>x.m&&!x.m.ign).length;
+  let h='<div class="pltop"><span>Rotas concluídas desde <input type="date" id="plDesde" value="'+planDesde()+'" aria-label="Desde"></span><b>'+pend+' a lançar</b><span class="hint">'+lanc+' já lançada(s)</span><span class="spacer"></span><label class="autochk"><input type="checkbox" id="plMostrar"'+(PL.mostrar?" checked":"")+'> <span>Mostrar as já lançadas</span></label></div>';
+  if(PL.erro)h+='<div class="pldica">⚠ '+esc(PL.erro)+'</div>';
+  if(!L.length)h+='<p class="audok">'+(pend?'':'Tudo lançado. 👍 ')+'Nenhuma rota concluída '+(PL.mostrar?'':'pendente ')+'neste período.</p>';
+  L.forEach(x=>{const r=x.r,ln=planLinhas(r);const sem=!(r.residuos||[]).length,semM=!String(r.mtr||"").trim(),semC=!String(r.cliente||"").trim();
+    const est=x.m?(x.m.ign?'<span class="plok">não vai para a planilha</span>':'<span class="plok">✓ lançada '+esc(ddmm(new Date(x.m.em)))+'</span>'):'';
+    h+='<div class="plrota'+(x.m?(x.m.ign?" ign":" lanc"):"")+'"><div class="plh"><label><input type="checkbox" data-plk="'+esc(x.k)+'"'+(PL.sel.has(x.k)?" checked":"")+'> '+DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmm(parseIso(r.data))+' · <span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span> '+esc(r.ini)+' · '+esc(r.cliente||r.servico||"Rota")+'</label>'+
+      (semC?'<span class="plwarn">sem cliente</span>':'')+(sem?'<span class="plwarn">sem resíduo</span>':'')+(semM?'<span class="plwarn">sem MTR</span>':'')+est+
+      '<button type="button" class="btn sm ghost" data-plopen="'+esc(x.id)+'">Abrir rota</button>'+
+      (x.m?'<button type="button" class="btn sm ghost" data-plvolta="'+esc(x.k)+'">Voltar para pendente</button>':'<button type="button" class="btn sm ghost" data-plign="'+esc(x.k)+'" title="Ex.: borracharia, oficina, serviço interno">Não vai para a planilha</button>')+'</div>'+
+      '<div class="plwrap"><table class="pltab"><thead><tr>'+["Contrato","Parceiro","Serviço","Tipo","Qtd","Data","MTR","Observação"].map(c=>'<th>'+c+'</th>').join("")+'</tr></thead><tbody>'+
+      ln.map(l=>'<tr>'+[l[0],l[1],l[2],l[3],l[5],l[8],l[10],l[11]].map(v=>'<td'+(v?'':' class="vz"')+'>'+(v?esc(v):'—')+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></div>'});
+  const nsel=L.filter(x=>PL.sel.has(x.k)).length,nlin=L.filter(x=>PL.sel.has(x.k)).reduce((n,x)=>n+planLinhas(x.r).length,0);
+  h+='<div class="pldica" id="plDica"'+(PL.copiados?'':' hidden')+'><b>Copiado!</b> No Excel, aba <b>Logística</b>: clique na coluna <b>B (Contrato)</b> da primeira linha vazia e aperte <b>Ctrl + V</b>. Conferiu que colou? Clique em <b>Marcar como lançadas</b>.</div>';
+  h+='<div class="plfoot"><button type="button" class="btn primary" id="plCopiar"'+(nsel?'':' disabled')+'>'+ic("copy")+' Copiar '+nlin+' linha'+(nlin===1?'':'s')+' ('+nsel+' rota'+(nsel===1?'':'s')+')</button>'+
+    '<button type="button" class="btn" id="plMarcar"'+(PL.copiados&&PL.copiados.length?'':' disabled')+'>✓ Marcar como lançadas</button>'+
+    '<span class="hint">Parceiro: Baú = “Trevo 3/4”, Poli = “Trevo”. Uma linha por resíduo; Tamanho, Unidade e Custo ficam em branco, como na planilha. Corrija resíduo/MTR na própria rota antes de copiar.</span></div>';
+  $("#planBody").innerHTML=h}
+async function planGravar(k,r,obj){const body=Object.assign({data:r.data,contrato:r.cliente||"",caminhao:r.caminhao||"",em:new Date().toISOString(),ign:false},obj||{});
+  await S.db.collection("planilha").doc(k).set(body);PL.map.set(k,body)}
+$("#btnPlan").addEventListener("click",abrirPlan);
+$("#planBody").addEventListener("change",e=>{
+  if(e.target.id==="plDesde"){const v=e.target.value;if(!v)return;try{localStorage.setItem("planDesde",v)}catch(x){}abrirPlan();return}
+  if(e.target.id==="plMostrar"){PL.mostrar=e.target.checked;planRender();return}
+  const k=e.target.dataset.plk;if(k){if(e.target.checked)PL.sel.add(k);else PL.sel.delete(k);PL.copiados=null;planRender()}});
+$("#planBody").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.id==="plCopiar"){const L=(PL.L||[]).filter(x=>PL.sel.has(x.k)&&(PL.mostrar||!x.m)).sort((a,c)=>(a.r.data+a.r.caminhao+a.r.ini).localeCompare(c.r.data+c.r.caminhao+c.r.ini));
+    const tsv=L.flatMap(x=>planLinhas(x.r)).map(l=>l.map(v=>String(v).replace(/[\t\r\n]+/g," ")).join("\t")).join("\r\n");
+    try{await navigator.clipboard.writeText(tsv)}catch(x){const t=document.createElement("textarea");t.value=tsv;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
+    PL.copiados=L.map(x=>x.k);planRender();toast(L.flatMap(x=>planLinhas(x.r)).length+" linha(s) copiada(s)");return}
+  if(b.id==="plMarcar"){if(!guard()||!PL.copiados)return;b.disabled=true;b.textContent="Marcando…";let n=0;
+    try{for(const k of PL.copiados){const x=PL.L.find(y=>y.k===k);if(!x)continue;await planGravar(k,x.r);x.m=PL.map.get(k);PL.sel.delete(k);n++}toast(n+" rota(s) marcada(s) como lançada(s)")}
+    catch(x){toast(/planilha|cole/i.test(x&&x.message||"")?"Publique o Code.gs 9.6 para guardar o que foi lançado":"Não foi possível marcar agora")}
+    PL.copiados=null;planRender();planContar();return}
+  if(b.dataset.plign||b.dataset.plvolta){if(!guard())return;const k=b.dataset.plign||b.dataset.plvolta;const x=PL.L.find(y=>y.k===k);if(!x)return;
+    try{if(b.dataset.plign){await planGravar(k,x.r,{ign:true});x.m=PL.map.get(k);PL.sel.delete(k)}
+      else{await S.db.collection("planilha").doc(k).delete();PL.map.delete(k);x.m=planMarca(x.id,x.r);if(!x.m)PL.sel.add(k)}}
+    catch(y){toast(/planilha|cole/i.test(y&&y.message||"")?"Publique o Code.gs 9.6 para guardar isso":"Não foi possível agora");return}
+    PL.copiados=null;planRender();planContar();return}
+  if(b.dataset.plopen){const x=PL.L.find(y=>y.id===b.dataset.plopen);closeModal("scrimPlan");const id=b.dataset.plopen;if(S.items.has(id)){openForm(id);return}if(!x)return;goTo(x.r.data,id);let n=0;const t=setInterval(()=>{if(S.items.has(id)){clearInterval(t);openForm(id)}else if(++n>25)clearInterval(t)},300)}});
 /* ---------- Assistente (IA): contexto compacto da semana na tela ---------- */
 async function carregarConh(force){if(!force&&S.conh instanceof Map&&Date.now()-(S.conhT||0)<60000)return S.conh;
   try{const g=await S.db.collection("conhecimento").get();S.conh=new Map(g.docs.filter(d=>d.exists).map(d=>[d.id,Object.assign({nome:"",texto:""},d.data()||{})]));S.conhT=Date.now()}
@@ -3790,7 +3894,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.6";
+const VERSAO_TELA="9.8";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
