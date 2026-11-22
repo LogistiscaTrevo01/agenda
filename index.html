@@ -754,7 +754,7 @@ body.mapopen .jbtn{display:none}
 .msearch{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px;height:46px;box-shadow:0 1px 5px rgba(0,0,0,.14);min-width:0}
 .msearch svg{flex:none;opacity:.6}
 .msearch input{border:0;outline:0;background:transparent;flex:1;font-size:15px;color:var(--ink);min-width:0;height:100%}
-.mchips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 12px 10px}.mchips::-webkit-scrollbar{display:none}
+.mchips{display:flex;gap:6px;flex-wrap:wrap;padding:2px 12px 10px}
 .mchip{flex:none;white-space:nowrap;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-family:inherit}
 .mchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,var(--surface));border-color:color-mix(in srgb,var(--accent) 70%,var(--line));font-weight:600}
 .mchip i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
@@ -3922,7 +3922,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.9";
+const VERSAO_TELA="9.10";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
