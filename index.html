@@ -1668,7 +1668,7 @@ function subscribeWeek(){
   const m=monday(S.anchor);const key=iso(m);
   if(!S.col||S.subWeek===key)return;
   if(S.unsub){S.unsub();S.unsub=null}
-  S.subWeek=key;
+  S.subWeek=key; S.iaSemanaCarregada="";
   const from=iso(addDays(m,-1)),to=iso(addDays(m,7));
   clearTimeout(loadTimer);
   loadTimer=setTimeout(()=>banner("A conexão está lenta: as rotas ainda estão carregando…","info"),20000);
@@ -1676,7 +1676,7 @@ function subscribeWeek(){
     const t0=snap.t0||0;
     for(const[id,r]of S.rotas){if(r.data>=from&&r.data<=to&&!protegido("rotas:"+id,t0))S.rotas.delete(id)}
     snap.docs.forEach(d=>{if(d.exists&&!protegido("rotas:"+d.id,t0,d.data())){const x=d.data();S.rotas.set(d.id,clean(x));S.ver.set("rotas:"+d.id,x.atualizado||"")}});
-    if(!snap.metadata.fromCache){clearTimeout(loadTimer);if(!S.readOnly&&!S.conflito)banner("")}
+    if(!snap.metadata.fromCache){if(S.subWeek===key)S.iaSemanaCarregada=key;clearTimeout(loadTimer);if(!S.readOnly&&!S.conflito)banner("")}
     render();
   },err=>{clearTimeout(loadTimer);banner(err&&err.message||"Não foi possível falar com a planilha do Google. Confira a internet e recarregue a página.","warn")});
 }
@@ -3225,10 +3225,28 @@ const IA_APRENDER=["COMO APRENDER (instrução da agenda):",
  "- O nome do tópico deve ser o nome do cliente como está na BASE DE CONHECIMENTO, ou 'Regras gerais da operação' para regras que valem para tudo.",
  "- No máximo 3 por resposta. Só o que a pessoa disse ou confirmou: nunca invente, nunca repita algo que já está na base, e nunca inclua telefone, senha ou CPF.",
  "- A pessoa decide se guarda. Não diga que já guardou."].join("\n");
-async function ctxIA(){const L=[IA_APRENDER,"",ctxSemana()];const hoje=new Date();const hj=iso(hoje);const wd=weekDays();const wa=iso(wd[0]),wz=iso(wd[6]);
+async function ctxIA(pergunta,historico){
+  const pedido=norm(pergunta);
+  if(/^(oi|ola|bom dia|boa tarde|boa noite|obrigad[oa])[!.\s]*$/.test(pedido))return "";
+  const dias=[...pedido.matchAll(/\b(hoje|amanha|ontem)\b/g)];
+  // Use o resumo curto apenas para consultas simples de escala em uma única data.
+  const consultaSimples=dias.length===1 && /\b(caminh\w*|rotas?|coletas?|viagens|saidas?)\b/.test(pedido)
+    && pedido.replace(/[?!.:,]/g," ").split(/\s+/).every(p=>!p||/^(quais|qual|quant[oa]s?|que|os?|as?|de|do|da|dos|das|para|pra|em|no|na|tem|ha|sao|estao|vao|sai|saem|sair|rodam|rodar|previst[oa]s?|agendad[oa]s?|caminhao|caminhoes|rotas?|coletas?|viagens|saidas?|hoje|amanha|ontem)$/.test(p));
+  if(consultaSimples){
+    const dia=iso(addDays(new Date(),{hoje:0,amanha:1,ontem:-1}[dias[0][1]]));
+    const semana=weekDays().map(iso);
+    const rotas=semana.includes(dia)&&S.iaSemanaCarregada===semana[0]
+      ? routesOn(dia).filter(r=>eff(r)!=="Cancelado")
+      : rotasComRepeticoes(await rotasPeriodo(dia,dia),dia,dia).map(([,r])=>r);
+    return ["Data consultada: "+dia+" · "+rotas.length+" rota(s) ativa(s).",
+      ...rotas.map(r=>[r.ini,r.fim,r.caminhao,r.cliente,r.servico,r.destino,eff(r)].join(" | "))].join("\n");
+  }
+  const L=[IA_APRENDER,"",ctxSemana()];const hoje=new Date();const hj=iso(hoje);const wd=weekDays();const wa=iso(wd[0]),wz=iso(wd[6]);
   const conh=await carregarConh();
   if(conh instanceof Map&&conh.size){L.push("","BASE DE CONHECIMENTO DA TREVO (regras por cliente e gerais):");
     [...conh.values()].sort((a,b)=>(/geral|pop|regra|caminh/i.test(b.nome)?1:0)-(/geral|pop|regra|caminh/i.test(a.nome)?1:0)||a.nome.localeCompare(b.nome,"pt")).forEach(t=>{L.push("### "+t.nome);L.push(String(t.texto||"").trim())})}
+  const assunto=[...historico.filter(m=>m.role==="user").slice(-1).map(m=>norm(m.texto)),pedido].join(" ");
+  if(!/histor|ultim|costum|frequen|passad|anterio|recorr|quantas vezes|proxim|amanha|ontem|semana que vem|fora da semana|segunda|terca|quarta|quinta|sexta|sabado|domingo|\bdia \d|mes que vem|sem coleta|atrasad|\d{1,2}[/.-]\d/.test(assunto))return L.join("\n");
   try{const a=iso(addDays(hoje,-60)),z=iso(addDays(hoje,14));const per=rotasComRepeticoes(await rotasPeriodo(a,z),a,z);
     const prox=per.filter(([,r])=>r.data>=hj&&(r.data<wa||r.data>wz));
     if(prox.length){L.push("","PRÓXIMAS 2 SEMANAS (fora da semana na tela, "+prox.length+" rotas):");
@@ -3267,7 +3285,7 @@ function mdHtml(t){const lin=String(t||"").split(/\r?\n/);let h="",ul=false,tb=[
     const hd=l.match(/^\s*#{1,6}\s+(.*)$/);if(hd){h+='<div class="ihd">'+inl(hd[1])+'</div>';return}if(l.trim())h+="<p>"+inl(l)+"</p>"});
   fechaUl();fechaTb();return h}
 S.iaHist=[];
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const IA_PRAZO_MS=65000;
 function apHtml(m,i){if(!m.aprender||!m.aprender.length)return"";
   return m.aprender.map((a,j)=>'<div class="japr'+(a.estado?" "+a.estado:"")+'"><div class="japt">📚 '+(a.estado==="salvo"?"Guardado em":a.estado==="ignorado"?"Ignorado":"Aprendizado sugerido")+' · <b>'+esc(a.topico)+'</b></div><div class="japx">'+esc(a.texto)+'</div>'+
     (a.estado?'':'<div class="japb"><button type="button" class="btn sm ghost" data-apr="ignorar" data-i="'+i+'" data-j="'+j+'">Ignorar</button><button type="button" class="btn sm primary" data-apr="guardar" data-i="'+i+'" data-j="'+j+'">Guardar no conhecimento</button></div>')+'</div>').join("")}
@@ -3280,23 +3298,33 @@ async function guardarAprendizado(a){const L=await carregarConh(true);if(!(L ins
   const body={nome:alvo?alvo[1].nome:a.topico,texto:(atual?atual+"\n":"")+linha,atualizado:new Date().toISOString()};
   if(body.texto.length>JLIM)throw new Error("O tópico "+body.nome+" ficou grande demais. Resuma ele em Cadastros → Júlia.");
   await S.db.collection("conhecimento").doc(id).set(body);L.set(id,body);S.conhT=Date.now();return body.nome}
-function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+(m.retry&&m===S.iaHist[S.iaHist.length-1]?'<p><button type="button" class="btn sm" data-iaretry>↻ Tentar de novo</button></p>':'')+apHtml(m,S.iaHist.indexOf(m))+(m.role==="model"&&!m.erro?'<div class="jfb"><button type="button" data-fb="bom" data-i="'+S.iaHist.indexOf(m)+'" title="Resposta boa" aria-label="Resposta boa"'+(m.fb==="bom"?' class="on"':'')+'>👍</button><button type="button" data-fb="ruim" data-i="'+S.iaHist.indexOf(m)+'" title="Errou? Clique e ensine o certo" aria-label="Resposta ruim"'+(m.fb==="ruim"?' class="on"':'')+'>👎</button></div>':'')+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+($("#iaPensar")&&$("#iaPensar").checked?' Júlia está pensando com calma… <span id="iaSeg">0</span> s (pode levar até 1 min)':' Júlia está pensando… <span id="iaSeg">0</span> s')+'</div>':"");box.scrollTop=box.scrollHeight;
+function iaRender(pensando){const box=$("#iaMsgs");box.innerHTML=(S.iaHist.length?"":'<div class="iamsg ia"><p>Oi! Eu sou a <b>Júlia</b>. Enxergo a semana que está na tela: rotas, repetições, endereços, distâncias e a auditoria.</p><p>Posso montar rotas, achar clientes próximos e apontar o que está errado. Pergunte ou use um atalho abaixo.</p></div>')+S.iaHist.map(m=>'<div class="iamsg '+(m.role==="user"?"eu":"ia")+(m.erro?" erro":"")+'">'+(m.role==="user"?esc(m.texto).replace(/\n/g,"<br>"):mdHtml(m.texto))+(m.retry&&m===S.iaHist[S.iaHist.length-1]?'<p><button type="button" class="btn sm" data-iaretry>↻ Tentar de novo</button></p>':'')+apHtml(m,S.iaHist.indexOf(m))+(m.role==="model"&&!m.erro?'<div class="jfb"><button type="button" data-fb="bom" data-i="'+S.iaHist.indexOf(m)+'" title="Resposta boa" aria-label="Resposta boa"'+(m.fb==="bom"?' class="on"':'')+'>👍</button><button type="button" data-fb="ruim" data-i="'+S.iaHist.indexOf(m)+'" title="Errou? Clique e ensine o certo" aria-label="Resposta ruim"'+(m.fb==="ruim"?' class="on"':'')+'>👎</button></div>':'')+'</div>').join("")+(pensando?'<div class="iathink">'+ic("sparkle")+($("#iaPensar")&&$("#iaPensar").checked?' Júlia está pensando com calma… <span id="iaSeg">0</span> s (prazo de 65 s)':' Júlia está pensando… <span id="iaSeg">0</span> s')+'</div>':"");box.scrollTop=box.scrollHeight;
   clearInterval(S.iaTimer);if(pensando){const t0=Date.now();S.iaTimer=setInterval(()=>{const e=$("#iaSeg");if(e)e.textContent=Math.round((Date.now()-t0)/1000);else clearInterval(S.iaTimer)},1000)}}
 async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return;if(!guard())return;S.iaBusy=true;$("#iaGo").disabled=true;
   const hist=S.iaHist.filter(m=>!m.erro).slice(-8).map(m=>({role:m.role,texto:m.texto}));S.iaHist.push({role:"user",texto:txt});$("#iaTxt").value="";iaRender(true);
-  S.iaUlt=txt;const t0=Date.now();let ctx="";try{ctx=await ctxIA()}catch(x){ctx=""}const args=[{pergunta:txt,contexto:ctx,historico:hist,modo:$("#iaPensar").checked?"pensar":"rapido"}];
-  try{let r;
-    // a conexão do celular às vezes cai em pedidos longos: tenta mais uma vez sozinha
-    try{r=await API.call("apiIA",args)}catch(e1){if(e1&&e1.code==="unavailable"&&!/INVALIDO/.test(e1.message||"")){const t=$("#iaMsgs .iathink");if(t)t.insertAdjacentHTML("beforeend"," · a conexão caiu, tentando de novo…");await sleep(2000);r=await API.call("apiIA",args)}else throw e1}
+  S.iaUlt=txt;
+  const t0=Date.now(), id=newId(), modo=$("#iaPensar").checked?"pensar":"rapido";
+  let etapa="preparar os dados da agenda", timer, expirou=false;
+  const prazo=new Promise((_,reject)=>{
+    timer=setTimeout(()=>{expirou=true;reject(new Error("O prazo terminou ao "+etapa+". Tente de novo."))},IA_PRAZO_MS);
+  });
+  try{
+    const ctx=await Promise.race([ctxIA(txt,hist),prazo]);
+    const contextoMs=Date.now()-t0;
+    if(contextoMs>=IA_PRAZO_MS)throw new Error("O prazo terminou ao preparar os dados da agenda.");
+    console.info("Júlia",{id,etapa:"contexto",ms:contextoMs});
+    etapa="aguardar a resposta do servidor";
+    const args=[{pergunta:txt,contexto:ctx,historico:hist,modo,id,contextoMs,restanteMs:IA_PRAZO_MS-contextoMs}];
+    const r=await Promise.race([API.call("apiIA",args),prazo]);
     const ap=[];const limpo=String(r.texto||"").replace(/\[\[\s*APRENDER\s*:\s*([^|\]]+?)\s*\|\s*([^\]]+?)\s*\]\]/gi,(m,t,x)=>{if(ap.length<3)ap.push({topico:t.trim(),texto:x.trim(),estado:""});return""}).replace(/\n{3,}/g,"\n\n").trim();
-    S.iaHist.push({role:"model",texto:limpo||"Anotado.",aprender:ap});$("#iaInfo").textContent=(r.modo==="pensar"?"🧠 ":"")+"Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
-  catch(e){const m=e&&e.message||"";let msg;
+    console.info("Júlia",{id,etapa:"resposta",ms:Date.now()-t0,modelo:r.modelo});S.iaHist.push({role:"model",texto:limpo||"Anotado.",aprender:ap});$("#iaInfo").textContent=(r.modo==="pensar"?"🧠 ":"")+"Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
+  catch(e){console.info("Júlia",{id,etapa,expirou,ms:Date.now()-t0});const m=e&&e.message||"";let msg;
     if(/INVALIDO: apiIA/.test(m))msg="O Google ainda está com o Code.gs antigo. Publique o Code.gs novo (Implantar → Gerenciar implantações → ✏️ → Nova versão).";
     else if(/LOTADO/.test(m))msg="O serviço gratuito de IA do Google está **lotado agora** (acontece em horários de pico). Nada errado com a agenda: tente de novo em 1 ou 2 minutos.";
-    else if(e&&e.code==="unavailable")msg="A conexão caiu antes da resposta chegar. Confira a internet e tente de novo.";
+    else if(e&&e.code==="unavailable")msg="Não foi possível "+etapa+". Tente de novo.";
     else msg=m.replace(/^INVALIDO:\s*/,"")||"Não foi possível falar com a IA agora.";
     S.iaHist.push({role:"model",erro:true,retry:true,texto:msg})}
-  finally{S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
+  finally{clearTimeout(timer);S.iaBusy=false;$("#iaGo").disabled=false;iaRender(false)}}
 $("#iaMsgs").addEventListener("click",async e=>{
   const ap=e.target.closest("[data-apr]");if(ap){const m=S.iaHist[+ap.dataset.i];const a=m&&m.aprender&&m.aprender[+ap.dataset.j];if(!a)return;
     if(ap.dataset.apr==="ignorar"){a.estado="ignorado";iaRender(S.iaBusy);return}
@@ -3894,7 +3922,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.8";
+const VERSAO_TELA="9.9";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
