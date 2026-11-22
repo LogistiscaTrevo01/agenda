@@ -1550,6 +1550,7 @@ async function rememberAddr(nome,endereco){
   if(cur&&cur.lat&&cur.geoEnd===String(endereco).trim())Object.assign(body,{lat:cur.lat,lng:cur.lng,geoEnd:cur.geoEnd,geoPrec:cur.geoPrec||""});
   const id=cur&&cur._id||k;S.locais.set(k,Object.assign({_id:id},body));
   if(S.locCol){try{await S.locCol.doc(id).set(body)}catch(e){return writeErr(e)}}
+  if(!body.lat)geoAuto();
   return true;
 }
 
@@ -2867,7 +2868,8 @@ const temCoord=l=>!!(l&&l.lat&&l.lng&&String(l.geoEnd||"")===String(l.endereco||
 function locCoord(nome,end){const l=S.locais.get(locKey(nome));if(temCoord(l))return l;if(end){const e=String(end).trim();for(const x of S.locais.values())if(temCoord(x)&&x.endereco.trim()===e)return x}return null}
 function kmEst(a,b){if(!a||!b)return null;const R=6371,r=x=>x*Math.PI/180;const dLa=r(b.lat-a.lat),dLo=r(b.lng-a.lng);
   const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2;return Math.round(2*R*Math.asin(Math.sqrt(h))*GEO_F*10)/10}
-const minEst=km=>Math.round(km/GEO_V*60);
+/* caminhão: até 10 km de estrada na cidade a ~25 km/h; o que passar disso (anel, BR, MG) a ~50 km/h */
+const minEst=km=>Math.round(km<=10?km/25*60:24+(km-10)/50*60);
 function vizinhos(l,n){return[...S.locais.values()].filter(x=>x!==l&&temCoord(x)).map(x=>({l:x,km:kmEst(l,x)})).sort((a,b)=>a.km-b.km).slice(0,n||6)}
 function vizHtml(l){const v=vizinhos(l,6);return'<div class="vizl">Mais perto (estimativa): '+(v.length?v.map(x=>'<b>'+esc(x.l.nome)+'</b> '+String(x.km).replace(".",",")+' km (~'+minEst(x.km)+' min)').join(" · "):"nenhum outro com coordenada")+'</div>'}
 /* ---------- auditoria por regras da semana na tela ---------- */
@@ -2875,16 +2877,23 @@ function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[
   const its=[...S.items].filter(([,r])=>r.data>=a&&r.data<=z&&eff(r)!=="Cancelado");
   const add=(nivel,titulo,det,id,r,extra)=>out.push({nivel,titulo,det,id,r,extra:extra||null});
   const nomeR=r=>DAYN[parseIso(r.data).getDay()].slice(0,3)+" "+ddmm(parseIso(r.data))+" · "+(r.caminhao==="Baú"?"Baú":"Poli")+" "+r.ini+" · "+(r.cliente||r.servico||"Rota");
-  const semCoord=new Set();
+  const semCoord=new Set(),aprox=new Set();
   ["Baú","Poliguindaste"].forEach(t=>wd.forEach(d=>{const ds=iso(d);
     const L=its.filter(([,r])=>r.data===ds&&r.caminhao===t).sort((x,y)=>toMin(x[1].ini)-toMin(y[1].ini));
-    for(let i=1;i<L.length;i++){const[pa,A]=L[i-1],[pb,B]=L[i];const gap=toMin(B.ini)-toMin(A.fim);
-      if(gap<0)add("erro","Horários se cruzam",nomeR(A)+" (até "+A.fim+") e "+nomeR(B)+" (começa "+B.ini+")",pb,B);
-      else{const sa=stopsOf(A),sb=stopsOf(B);const pA=sa[sa.length-1],pB=sb[0];if(!pA||!pB)continue;
-        const cA=locCoord(pA.local,pA.endereco),cB=locCoord(pB.local,pB.endereco);
-        if(!cA||!cB){[[pA,cA],[pB,cB]].forEach(([p,c])=>{if(!c&&(p.local||p.endereco))semCoord.add(p.local||p.endereco)});continue}
-        const km=kmEst(cA,cB),mn=minEst(km);
-        if(mn>gap+5)add("aviso","Deslocamento apertado","De "+(pA.local||"última parada")+" ("+nomeR(A)+") até "+(pB.local||"1ª parada")+" ("+nomeR(B)+"): ~"+String(km).replace(".",",")+" km, ~"+mn+" min estimados, mas só há "+gap+" min entre as rotas.",pb,B,{trajeto:[pA.endereco||cA.endereco,pB.endereco||cB.endereco]})}}
+    for(let i=0;i<L.length;i++){const[pb,B]=L[i];const A=i?L[i-1][1]:null;
+      if(A&&toMin(B.ini)<toMin(A.fim)){add("erro","Horários se cruzam",nomeR(A)+" (até "+A.fim+") e "+nomeR(B)+" (começa "+B.ini+")",pb,B);continue}
+      const st=stopsOf(B).filter(p=>p.local||p.endereco);if(!st.length)continue;
+      /* de onde o caminhão sai: do fim da rota anterior (última parada) ou, na 1ª rota do dia, do galpão */
+      let ini,orig=null,deQuando;
+      if(A){ini=toMin(A.fim);const sa=stopsOf(A).filter(p=>p.local||p.endereco);if(sa.length)orig=audPt(sa[sa.length-1]);deQuando="de "+A.fim+", quando termina "+(A.cliente||A.servico||"a rota anterior")}
+      else{ini=toMin(B.ini);if(S.patio)orig=audPt({local:"Galpão Trevo",endereco:S.patio});deQuando="de "+B.ini+", saindo do galpão"}
+      const tr=audTrecho((orig?[orig]:[]).concat(st.map(audPt)));
+      if(tr.falta.length){tr.falta.forEach(n=>semCoord.add(n));continue}
+      tr.aprox.forEach(n=>aprox.add(n));
+      const nServ=st.filter(audServico).length,serv=nServ*AUD_SERV,need=tr.min+serv,avail=toMin(B.fim)-ini;
+      if(need>avail+AUD_TOL)add("aviso","Tempo apertado",nomeR(B)+" ("+B.ini+"–"+B.fim+"): precisa de ~"+need+" min — "+tr.min+" min de estrada"+(tr.google?" (Google Maps, caminhão)":" (estimativa)")+
+        ", "+String(tr.km).replace(".",",")+" km: "+tr.nomes.join(" → ")+(nServ?" + "+serv+" min "+(nServ>1?"nas "+nServ+" paradas":"na parada"):"")+
+        " — mas só há "+avail+" min ("+deQuando+", até "+B.fim+").",pb,B,{trajeto:tr.addrs,key:tr.key,google:tr.google})}
     if(L.length&&d.getDay()>=1&&d.getDay()<=5){const[p0,F]=L[0];if(toMin(F.ini)>toMin("07:20"))add("info","Saída depois das 07:20","1ª rota do "+t+" em "+DAYN[d.getDay()].slice(0,3)+" "+ddmm(d)+" começa às "+F.ini+". Regra: sair do galpão até 07:20.",p0,F)}}));
   for(const[id,r]of its){const st=stopsOf(r);
     if(r.data>=hoje&&!String(r.motorista||"").trim())add("aviso","Sem motorista",nomeR(r),id,r);
@@ -2896,22 +2905,45 @@ function auditar(){const out=[];const wd=weekDays();const a=iso(wd[0]),z=iso(wd[
       if(!l||!l.endereco)add("info","Destino sem endereço cadastrado",nomeR(r)+" — destino "+n,id,r);
       else if(st.length&&!st.some(p=>norm(p.local)===norm(l.nome)))add("info","Destino fora do trajeto",nomeR(r)+" — destino "+l.nome+" não aparece nas paradas.",id,r)});
     if(r.data<hoje&&!r.auto&&r.status==="Agendado")add("info","Status não atualizado",nomeR(r)+" — já passou e continua Agendado.",id,r)}
+  if(aprox.size)add("info","Posição aproximada no mapa","O Google achou só a região destes endereços, então a distância pode estar errada: "+[...aprox].join(", ")+". Abra o Mapa e use “Corrigir posição”.",null,null,{mapa:[...aprox][0]});
   if(semCoord.size)add("info","Endereços sem coordenada","Calcule em Cadastros → Endereços para conferir deslocamentos: "+[...semCoord].slice(0,8).join(", ")+(semCoord.size>8?"…":""),null,null);
   const ord={erro:0,aviso:1,info:2};out.sort((x,y)=>ord[x.nivel]-ord[y.nivel]||(x.r&&y.r?(x.r.data+x.r.ini).localeCompare(y.r.data+y.r.ini):0));return out}
-function audBadge(){const b=$("#nAud");if(!b)return;const n=auditar().filter(x=>x.nivel!=="info").length;b.hidden=!n;b.textContent=n;$("#btnAud").title=n?n+" ponto(s) para conferir na semana na tela":"Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços"}
+/* ---------- tempo de estrada da auditoria: estimativa, trocada pelo Google Maps quando já conferido ---------- */
+const AUD_SERV=10,AUD_TOL=5,AUD_CAM=1.2; /* 10 min por parada de coleta/descarte; 5 min de folga; caminhão ~20% mais lento que carro */
+const audServico=p=>!/^(saida|retorno|deslocamento)/.test(norm(p.tipo));
+function audPt(p){const c=locCoord(p.local,p.endereco);return{nome:p.local||p.endereco,addr:String(p.endereco||"").trim(),c}}
+const audMesmo=(a,b)=>(a.addr&&a.addr===b.addr)||(a.nome&&norm(a.nome)===norm(b.nome))||(a.c&&b.c&&a.c.lat===b.c.lat&&a.c.lng===b.c.lng);
+function audTjLoad(){if(S.tj)return S.tj;S.tj={};try{const o=JSON.parse(localStorage.getItem("agendaTj")||"{}");const lim=Date.now()-14*864e5;for(const k in o)if(o[k].t>lim)S.tj[k]=o[k]}catch(e){}return S.tj}
+function audTjSave(){try{localStorage.setItem("agendaTj",JSON.stringify(S.tj))}catch(e){}}
+function audTrecho(pts){const P=pts.filter((p,i)=>i===0||!audMesmo(p,pts[i-1]));const falta=[],aprox=[];
+  P.forEach(p=>{if(!p.c)falta.push(p.nome);else if(p.c.geoPrec==="aproximado")aprox.push(p.c.nome)});
+  const addrs=P.every(p=>p.addr)?P.map(p=>p.addr):null;const key=addrs&&addrs.length>1?addrs.join("|"):"";const g=key&&audTjLoad()[key];
+  if(g&&g.ok)return{min:Math.round(g.min*AUD_CAM),km:g.km,google:true,falta:[],aprox:[],addrs,key,nomes:P.map(p=>p.nome)};
+  if(falta.length)return{falta,aprox};let km=0,min=0;for(let i=1;i<P.length;i++){const k=kmEst(P[i-1].c,P[i].c)||0;km+=k;min+=minEst(k)}
+  return{min,km:Math.round(km*10)/10,google:false,falta:[],aprox,addrs,key,nomes:P.map(p=>p.nome)}}
+/* confere no Google Maps (em segundo plano) só os trechos que a estimativa achou apertados */
+async function audConfirmar(){if(S.tjBusy)return;const tj=audTjLoad();S.tjTent=S.tjTent||new Set();
+  const fila=auditar().filter(x=>x.extra&&x.extra.key&&!x.extra.google&&!tj[x.extra.key]&&!S.tjTent.has(x.extra.key)).slice(0,8);if(!fila.length)return;
+  S.tjBusy=true;let mudou=false;
+  try{for(const x of fila){S.tjTent.add(x.extra.key);try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);tj[x.extra.key]={ok:true,km:r.km,min:r.min,t:Date.now()};mudou=true}catch(e){if(/apiTrajeto/.test(e&&e.message||""))break}}}
+  finally{S.tjBusy=false}
+  if(mudou){audTjSave();if($("#scrimAud").classList.contains("open"))renderAud();audBadge()}}
+function audBadge(){const b=$("#nAud");if(!b)return;const n=auditar().filter(x=>x.nivel!=="info").length;b.hidden=!n;b.textContent=n;$("#btnAud").title=n?n+" ponto(s) para conferir na semana na tela":"Confere a semana na tela: horários, deslocamentos, motorista, MTR, endereços";clearTimeout(S.tjT);S.tjT=setTimeout(audConfirmar,1500)}
+function audTjTxt(x){const e=x.extra;if(!e||!e.key)return"";const g=(S.tj||{})[e.key];
+  if(e.google&&g)return"Conferido no Google Maps: "+String(g.km).replace(".",",")+" km, "+g.min+" min de carro (~"+Math.round(g.min*AUD_CAM)+" de caminhão).";
+  if(S.tjTent&&S.tjTent.has(e.key))return"O Google Maps não achou este trajeto; valendo a estimativa.";return"Conferindo no Google Maps…"}
 function renderAud(){const L=auditar();S.audL=L;const wd=weekDays();
   const nm={erro:"Erros",aviso:"Atenção",info:"Para melhorar"};const ic2={erro:"⛔",aviso:"⚠️",info:"ℹ️"};
   let h='<div class="audtop"><b>Semana '+ddmm(wd[0])+' a '+ddmm(wd[6])+'</b><span class="uso">'+L.filter(x=>x.nivel==="erro").length+' erro(s) · '+L.filter(x=>x.nivel==="aviso").length+' atenção · '+L.filter(x=>x.nivel==="info").length+' melhoria(s)</span><span class="spacer"></span><button type="button" class="btn sm ia" data-aud="ia">'+ic("sparkle")+' Pedir análise à Júlia</button></div>';
   if(!L.length)h+='<p class="audok">Nada para corrigir nesta semana. 👍</p>';
   ["erro","aviso","info"].forEach(nv=>{const X=L.map((x,i)=>[x,i]).filter(([x])=>x.nivel===nv);if(!X.length)return;h+='<div class="audsec">'+nm[nv]+' ('+X.length+')</div>';
-    h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj" data-tj="'+i+'"></small></span><span class="ab">'+(x.extra&&x.extra.trajeto?'<button type="button" class="btn sm ghost" data-tjb="'+i+'" title="Consulta o Google Maps">Tempo real</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
-  h+='<p class="cnote">A auditoria olha a semana que está na tela. As distâncias são estimativas (linha reta × 1,35, 30 km/h); “Tempo real” consulta o Google Maps.</p>';
+    h+=X.map(([x,i])=>'<div class="auditem '+nv+'" data-ai="'+i+'"><span>'+ic2[nv]+'</span><span><span class="at">'+esc(x.titulo)+'</span><small>'+esc(x.det)+'</small><small class="tj">'+audTjTxt(x)+'</small></span><span class="ab">'+(x.extra&&x.extra.mapa?'<button type="button" class="btn sm ghost" data-amapa="'+i+'">Abrir mapa</button>':'')+(x.id?'<button type="button" class="btn sm" data-abrir="'+i+'">Abrir</button>':'')+'</span></div>').join("")});
+  h+='<p class="cnote">A auditoria olha a semana que está na tela. <b>Tempo apertado</b>: para cada rota, soma a estrada desde onde o caminhão estava (fim da rota anterior ou o galpão, na 1ª do dia), passando por todas as paradas do card, mais 10 min em cada coleta/descarte, e compara com o tempo até o fim da rota. A estimativa (cidade ~25 km/h, estrada ~50 km/h) é conferida sozinha no Google Maps, com 20% a mais por ser caminhão; o que o Google mostrar que dá tempo some da lista.</p>';
   $("#audBody").innerHTML=h}
-$("#btnAud").addEventListener("click",()=>{renderAud();openModal("scrimAud")});
+$("#btnAud").addEventListener("click",()=>{renderAud();openModal("scrimAud");audConfirmar()});
 $("#audBody").addEventListener("click",async e=>{
   const ia=e.target.closest('[data-aud="ia"]');if(ia){closeModal("scrimAud");abrirIA("Analise a auditoria automática desta semana: explique os problemas mais importantes e diga como resolver cada um, em ordem de prioridade.");return}
-  const tb=e.target.closest("[data-tjb]");if(tb){e.stopPropagation();const x=S.audL[tb.dataset.tjb];const box=$('#audBody [data-tj="'+tb.dataset.tjb+'"]');tb.disabled=true;box.textContent="Consultando o Google Maps…";
-    try{const r=await API.call("apiTrajeto",[x.extra.trajeto]);box.textContent="Google Maps: "+String(r.km).replace(".",",")+" km, "+r.min+" min de carro."}catch(err){box.textContent=/apiTrajeto/.test(err&&err.message||"")?"Publique o Code.gs 9 para consultar o tempo real.":(err&&err.message||"Não foi possível consultar agora.")}tb.disabled=false;return}
+  const am=e.target.closest("[data-amapa]");if(am){e.stopPropagation();const x=S.audL[am.dataset.amapa];closeModal("scrimAud");abrirMapa(x.extra.mapa);return}
   const it=e.target.closest("[data-abrir],[data-ai]");if(!it)return;const x=S.audL[it.dataset.abrir||it.dataset.ai];if(!x||!x.id)return;closeModal("scrimAud");openForm(x.id)});
 /* ---------- mapa interativo (Leaflet + OpenStreetMap, grátis e sem chave, carregado só quando abre) ---------- */
 var MP={open:false,map:null,mk:new Map(),filtro:"todos",q:"",nomes:true,edit:null,rotas:null,sel:null};
@@ -2994,6 +3026,7 @@ async function abrirMapa(focoNome){const w=$("#mapaWrap");MP.open=true;w.classLi
     mpMarcadores();mpNomesUpd();mpAjustar()}
   else{setTimeout(()=>MP.map.invalidateSize(),30);mpMarcadores()}
   if(MP.rotasOn)mpRotas();
+  if(geoFaltando().length)geoAuto();
   if(focoNome){const l=S.locais.get(locKey(focoNome));if(l)mpFoco(l._id)}}
 function fecharMapa(){if(MP.edit)mpEditFim(false);MP.open=false;const w=$("#mapaWrap");w.classList.remove("open");w.setAttribute("aria-hidden","true");document.body.classList.remove("mapopen");if(MP.map)MP.map.closePopup()}
 function mpLocal(id){return[...S.locais.values()].find(l=>l._id===id)}
@@ -3396,8 +3429,16 @@ async function saveLocal(oldId,nome,endereco,obs,tipo){
   if(old&&old[1].lat&&String(old[1].geoEnd||"")===String(endereco||"").trim())Object.assign(body,{lat:old[1].lat,lng:old[1].lng,geoEnd:old[1].geoEnd,geoPrec:old[1].geoPrec||""});
   const sameKey=old&&old[0]===k;const id=sameKey?oldId:(ex?ex._id:k);
   if(old)S.locais.delete(old[0]);S.locais.set(k,Object.assign({_id:id},body));renderCad();
-  try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();return true}catch(e){return writeErr(e)}
+  try{await S.locCol.doc(id).set(body);if(old&&!sameKey&&oldId!==id)await S.locCol.doc(oldId).delete();if(!body.lat&&String(endereco||"").trim())geoAuto(nome);return true}catch(e){return writeErr(e)}
 }
+/* endereço novo ou alterado: calcula a posição no mapa sozinho, em segundo plano */
+function geoFaltando(){return[...S.locais.values()].filter(l=>l.nome&&String(l.endereco||"").trim()&&!temCoord(l)&&!(S.geoFalhou&&S.geoFalhou.has(l.nome+"|"+String(l.endereco).trim())))}
+function geoAuto(nome){clearTimeout(S.geoT);S.geoT=setTimeout(()=>geoRodar(nome),1200)}
+async function geoRodar(nome){if(S.geoBusy||S.readOnly){if(S.geoBusy)geoAuto(nome);return}const falt=geoFaltando();if(!falt.length)return;S.geoBusy=true;S.geoFalhou=S.geoFalhou||new Set();
+  try{const r=await API.call("apiGeo",[false]);(r.falhas||[]).forEach(n=>{const l=S.locais.get(locKey(n));if(l)S.geoFalhou.add(l.nome+"|"+String(l.endereco||"").trim())});
+    if((r.feitos||[]).length){API.refresh();toast("📍 "+(nome&&r.feitos.some(n=>norm(n)===norm(nome))?nome+" marcado no mapa":r.feitos.length===1?r.feitos[0]+" marcado no mapa":r.feitos.length+" endereços marcados no mapa"))}
+    if(nome&&(r.falhas||[]).some(n=>norm(n)===norm(nome)))toast("O Google não achou o endereço de "+nome+". Abra o Mapa e use “Marcar no mapa”.")}
+  catch(e){}finally{S.geoBusy=false}}
 /* rotas e repetições que usam um destino (lista aberta na própria aba Endereços) */
 async function carregarTodas(nome){const k=norm(nome);CAD.todas=CAD.todas||{};if(CAD.todas[k]||CAD.carregando)return;CAD.carregando=true;
   try{const r=await API.call("apiSearch",[{texto:nome}]);CAD.todas[k]=(r.itens||[]).map(x=>({id:x.id,r:clean(x.data)}))}catch(e){CAD.todas[k]=[];toast("Não foi possível carregar as rotas agora")}
@@ -3749,7 +3790,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.4";
+const VERSAO_TELA="9.6";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
