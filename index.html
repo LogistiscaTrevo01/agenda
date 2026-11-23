@@ -1352,61 +1352,145 @@ function mapErr(e){const m=String(e&&e.message||e||"");
   if(/TIPO/.test(m))return{code:"unsupported_type",message:m};
   if(/GRANDE/.test(m))return{code:"too_large",message:m};
   return{code:"unavailable",message:m}}
-const LEITURA={apiBatch:1,apiRev:1,apiQuery:1,apiGet:1,apiSearch:1,apiUso:1,apiInfo:1,ping:1};
 const MSG_CODIGO="O Google ainda está com o código antigo. No Apps Script: cole o Code.gs novo, salve e faça Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão → Implantar.";
 const MSG_ACESSO="Não foi possível acessar o Google. Confira a internet e se a implantação do Apps Script está com 'Quem pode acessar: Qualquer pessoa'.";
 async function post(fn,args){
+  const token=getTok();
   let r;
   try{
-    if(LEITURA[fn])r=await fetch(API_URL+"?fn="+encodeURIComponent(fn)+"&args="+encodeURIComponent(JSON.stringify(args))+"&token="+encodeURIComponent(getTok()),{credentials:"omit",redirect:"follow",cache:"no-store"});
-    else r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args,token:getTok()}),credentials:"omit",redirect:"follow",cache:"no-store"});
+    const options={method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args,token}),credentials:"omit",redirect:"follow",cache:"no-store"};
+    if((fn==="apiSync"||fn==="apiBatch")&&typeof AbortSignal!=="undefined"&&AbortSignal.timeout)options.signal=AbortSignal.timeout(30000);
+    r=await fetch(API_URL,options);
   }catch(e){throw{code:"unavailable",message:MSG_ACESSO}}
   if(!r.ok)throw{code:"unavailable",message:(r.status===404?"Link do Google não encontrado (404). Confira o endereço do Apps Script.":"O Google respondeu com erro "+r.status+".")};
   const txt=await r.text();
   if(/^\s*</.test(txt))throw{code:"unavailable",message:MSG_CODIGO};
   let j;try{j=JSON.parse(txt)}catch(e){throw{code:"unavailable",message:MSG_CODIGO}}
-  if(!j.ok){const er=mapErr(j.e);if(er.code==="auth"&&fn!=="login"){setTok("");window.dispatchEvent(new CustomEvent("agenda-auth"))}throw er}
+  if(!j.ok){const er=mapErr(j.e);if(er.code==="auth"&&fn!=="login"&&getTok()===token){setTok("");window.dispatchEvent(new CustomEvent("agenda-auth"))}throw er}
   return j.v;
 }
 /* leituras feitas ao mesmo tempo viram uma chamada só */
 let fila=[],tFila=null;
 function call(fn,args){
-  if(fn==="apiRev"||fn==="apiQuery"||fn==="apiGet")return new Promise((res,rej)=>{fila.push({fn,args,res,rej});if(!tFila)tFila=setTimeout(flush,20)});
+  if(fn==="apiRev"||fn==="apiQuery"||fn==="apiGet")return new Promise((res,rej)=>{fila.push({fn,args,res,rej});if(!tFila)tFila=setTimeout(flush,0)});
   return post(fn,args);
 }
-async function flush(){const it=fila;fila=[];tFila=null;
-  try{const out=await post("apiBatch",[it.map(x=>({fn:x.fn,args:x.args}))]);(out||[]).forEach((o,i)=>{if(!it[i])return;o.ok?it[i].res(o.v):it[i].rej(mapErr(o.e))})}
-  catch(e){it.forEach(x=>x.rej(e))}}
+async function flush(){
+  const items=fila.splice(0,30);
+  tFila=fila.length?setTimeout(flush,0):null;
+  try{
+    const result=await post("apiBatch",[items.map(({fn,args})=>({fn,args}))]);
+    items.forEach((item,i)=>{
+      const row=result&&result[i];
+      if(row&&row.ok)item.res(row.v);
+      else item.rej(mapErr(row?row.e:"Resposta incompleta do servidor"));
+    });
+  }catch(e){items.forEach(item=>item.rej(e))}
+}
 const callW=(fn,args)=>post(fn,args);
-let rev=null;const listeners=new Set();
+let rev=null;
+const listeners=new Set();
 function snapOf(rows){const docs=(rows||[]).map(r=>({id:r.id,exists:true,data:()=>r.data,metadata:{fromCache:false,hasPendingWrites:false}}));
   return{docs,size:docs.length,empty:!docs.length,docChanges:()=>[],metadata:{fromCache:false,hasPendingWrites:false}}}
 function newId(){const a="abcdefghijklmnopqrstuvwxyz0123456789";let s="";const r=new Uint8Array(20);crypto.getRandomValues(r);r.forEach(x=>s+=a[x%a.length]);return s}
-function listen(run){const L={run};listeners.add(L);run();return()=>listeners.delete(L)}
-function refreshAll(){listeners.forEach(L=>L.run())}
-/* confere novidades a cada 12 s enquanto alguém mexe; parado há mais de 10 min, a cada 60 s (economiza a cota diária do Google) */
-let ultUso=Date.now(),ultPoll=0;["pointerdown","keydown","wheel","touchstart"].forEach(ev=>addEventListener(ev,()=>{const parado=Date.now()-ultUso>600000;ultUso=Date.now();if(parado)poll()},{passive:true,capture:true}));
-async function poll(){if(document.hidden||!getTok())return;const ag=Date.now();if(ag-ultUso>600000&&ag-ultPoll<58000)return;ultPoll=ag;try{const v=await call("apiRev",[]);if(rev!==null&&v!==rev){rev=v;refreshAll()}else rev=v}catch(e){}}
-setInterval(poll,12000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
-window.addEventListener("focus",poll);
+let timer=null, busy=false, pending=false, generation=0, failures=0, ultUso=Date.now();
+["pointerdown","keydown","wheel","touchstart"].forEach(ev=>window.addEventListener(ev,()=>{const parado=Date.now()-ultUso>120000;ultUso=Date.now();if(parado)schedule(0)},{passive:true,capture:true}));
+/* sem Pusher: 4 s com alguém usando, 15 s com a tela parada há mais de 2 min.
+   com Pusher: 20 s de segurança (se um aviso se perder, a outra tela atualiza em até 20 s, não 60) */
+let pushOk=true;
+function intervalo(){return pushReady&&pushOk?20000:(Date.now()-ultUso>120000?15000:4000)}
+let configAfter=0;
+let pushStarted=false, pushReady=false, pushClient=null;
+let channel=null;
+try{channel=new BroadcastChannel("agenda-revisoes");channel.onmessage=()=>schedule(0)}catch(e){}
+function startPush(config){
+  if(!config||pushStarted)return;
+  pushStarted=true;
+  const script=document.createElement("script");
+  script.src="https://js.pusher.com/8.3.0/pusher.min.js";
+  script.onerror=()=>{pushStarted=false};
+  script.onload=()=>{
+    if(!getTok())return;
+    try{
+      pushClient=new window.Pusher(config.key,{cluster:config.cluster,forceTLS:true});
+      const sub=pushClient.subscribe("agenda-revisoes");
+      sub.bind("alteracao",()=>schedule(0));
+      sub.bind("pusher:subscription_succeeded",()=>{pushReady=true;schedule(0)});
+      pushClient.connection.bind("state_change",s=>{if(s.current!=="connected"){pushReady=false;schedule(0)}});
+    }catch(e){pushStarted=false}
+  };
+  document.head.appendChild(script);
+}
+function schedule(ms){
+  clearTimeout(timer);
+  if(document.hidden||!listeners.size||!getTok())return;
+  timer=setTimeout(sync,ms);
+}
+function listen(fn,args,accept,err){
+  const listener={fn,args,accept,err};
+  listeners.add(listener);refreshAll();
+  return()=>{listeners.delete(listener);generation++;schedule(0)};
+}
+function refreshAll(){generation++;rev=null;schedule(0)}
+function committed(){if(channel)channel.postMessage(1);schedule(0)}
+async function sync(){
+  if(busy){pending=true;return}
+  if(document.hidden||!getTok()||!listeners.size)return;
+  busy=true;
+  const version=generation, token=getTok(), t0=performance.now();
+  const watched=Array.from(listeners);
+  try{
+    const pedirCanal=!pushStarted && Date.now()>=configAfter;
+    const result=await post("apiSync",[rev,watched.map(({fn,args})=>({fn,args})),pedirCanal]);
+    if(version!==generation||token!==getTok())return;
+    if(pedirCanal)configAfter=Date.now()+300000;
+    if(result.canal)startPush(result.canal);
+    pushOk=result.push!==false;
+    if(result.itens){
+      if(result.itens.length!==watched.length)throw mapErr("Resposta incompleta do servidor");
+      let failed=false;
+      watched.forEach((l,i)=>{
+        if(!listeners.has(l))return;
+        const row=result.itens[i];
+        if(row.ok)l.accept(row.v,t0);
+        else{failed=true;if(l.err)l.err(mapErr(row.e))}
+      });
+      if(failed)throw mapErr("Uma consulta não foi concluída");
+    }
+    if(version===generation){
+      if(result.itens)window.dispatchEvent(new CustomEvent("agenda-dados-atualizados"));
+      rev=result.rev;
+    }
+    failures=0;
+  }catch(e){
+    failures=Math.min(failures+1,5);
+    if(rev===null&&version===generation)watched.forEach(l=>{if(l.err&&listeners.has(l))l.err(e)});
+  }finally{
+    busy=false;
+    const again=pending||version!==generation;pending=false;
+    schedule(again?0:failures?Math.min(60000,2000*2**failures):intervalo());
+  }
+}
+document.addEventListener("visibilitychange",()=>schedule(0));
+window.addEventListener("focus",()=>schedule(0));
+window.addEventListener("online",()=>schedule(0));
 function docRef(col,id){
   return{id,path:col+"/"+id,
     async get(){const r=await call("apiGet",[col,id]);return{id,exists:!!r,data:()=>r?r.data:undefined,metadata:{fromCache:false}}},
-    async set(body,esperado){const v=await callW("apiSet",[col,id,JSON.parse(JSON.stringify(body))].concat(esperado!==undefined?[esperado]:[]));rev=v},
-    async update(body){const r=await call("apiGet",[col,id]);if(!r)throw{code:"invalid_argument"};const v=await callW("apiSet",[col,id,Object.assign({},r.data,body)]);rev=v},
-    async delete(){const v=await callW("apiDelete",[col,id]);rev=v},
-    onSnapshot(next,err){return listen(async()=>{try{const r=await call("apiGet",[col,id]);next({id,exists:!!r,data:()=>r?r.data:undefined,metadata:{fromCache:false}})}catch(e){err&&err(e)}})}}
+    async set(body,esperado){await callW("apiSet",[col,id,JSON.parse(JSON.stringify(body))].concat(esperado!==undefined?[esperado]:[]));committed()},
+    async update(body){const r=await call("apiGet",[col,id]);if(!r)throw{code:"invalid_argument"};await callW("apiSet",[col,id,Object.assign({},r.data,body)].concat(r.data.atualizado!=null?[r.data.atualizado]:[]));committed()},
+    async delete(esperado){await callW("apiDelete",[col,id].concat(esperado!=null?[esperado]:[]));committed()},
+    onSnapshot(next,err){return listen("apiGet",[col,id],r=>next({id,exists:!!r,data:()=>r?r.data:undefined,metadata:{fromCache:false}}),err)}}
 }
 function query(col,filters){
   const q={
     where(f,op,v){return query(col,filters.concat([[f,op,v]]))},
     orderBy(){return q},limit(){return q},
     async get(){return snapOf(await call("apiQuery",[col,filters]))},
-    onSnapshot(next,err){return listen(async()=>{const t0=performance.now();try{const sn=snapOf(await call("apiQuery",[col,filters]));sn.t0=t0;next(sn)}catch(e){err&&err(e)}})},
+    onSnapshot(next,err){return listen("apiQuery",[col,filters],(rows,t0)=>{const sn=snapOf(rows);sn.t0=t0;next(sn)},err)},
     doc(id){return docRef(col,id||newId())},
     async add(d){const r=docRef(col,newId());await r.set(d);return r},
-    async setMany(docs){const v=await callW("apiSetMany",[col,JSON.parse(JSON.stringify(docs))]);rev=v}};
+    async setMany(docs){for(let i=0;i<docs.length;i+=200){await callW("apiSetMany",[col,docs.slice(i,i+200)]);committed()}}};
   return q;
 }
 const DB={collection:name=>query(name,[]),doc:path=>{const p=String(path).split("/");return docRef(p[0],p[1])}};
@@ -1426,7 +1510,7 @@ window.API={
   hasToken:()=>!!getTok(),
   async login(u,p,keep){let dev="";try{dev=localStorage.getItem("agenda.aparelho")||"";if(!dev){dev=newId();localStorage.setItem("agenda.aparelho",dev)}}catch(e){dev=newId()}
     const v=await post("login",[u,p,dev]);setTok(v.token,keep);rev=null;return v},
-  logout(){setTok("")},
+  logout(){setTok("");generation++;clearTimeout(timer);if(pushClient){try{pushClient.disconnect()}catch(e){}}pushClient=null;pushStarted=false;pushReady=false;configAfter=0;rev=null},
   call:(fn,args)=>post(fn,args||[]),
   refresh:refreshAll
 };
@@ -1704,20 +1788,10 @@ async function put(kind,id,body){
   return naFila(vk,async()=>{
     if(SEQ.get(vk)!==meu)return true; // já tem uma mudança mais nova deste mesmo item na fila: só ela precisa ir para o Google
     const extra={atualizado:new Date().toISOString()};if(kind==="rotas")extra.clienteKey=locKey(body.cliente);
-    const esperado=S.ver.has(vk)?S.ver.get(vk):undefined;
+    const esperado=S.ver.has(vk)?S.ver.get(vk):(kind==="rotas"&&/^ov-/.test(id)?"!novo":undefined);
     const ok=()=>{S.ver.set(vk,extra.atualizado);minha(vk,extra.atualizado);if(S.conflito){S.conflito=false;banner("")}return true};
     try{await col.doc(id).set(Object.assign({},body,extra),esperado);return ok()}
     catch(e){
-      /* "conflito" logo depois de uma gravação nossa: quase sempre é o Google que ainda não terminou de gravar a anterior.
-         Espera um pouco e confere: se a versão que está lá foi gravada por esta tela, grava por cima sem incomodar ninguém. */
-      if(e&&e.code==="conflict"&&MINHAS.has(vk)){
-        for(let t=0;t<3;t++){
-          await new Promise(r=>setTimeout(r,700*(t+1)));
-          let atual;try{const g=await col.doc(id).get();atual=g.exists?(g.data().atualizado||""):null}catch(x){continue}
-          if(atual!==null&&atual!==esperado&&!MINHAS.get(vk).has(atual))break; // foi outra pessoa de verdade
-          try{await col.doc(id).set(Object.assign({},body,extra),t===0&&atual!==null?atual:undefined);return ok()}catch(x){if(!(x&&x.code==="conflict")){WDONE.delete(vk);return writeErr(x)}}
-        }
-      }
       WDONE.delete(vk);return writeErr(e)}});
 }
 async function del(kind,id){
@@ -1725,7 +1799,7 @@ async function del(kind,id){
   map.delete(id);render();
   if(!col)return true;
   const vk=kind+":"+id;SEQ.set(vk,(SEQ.get(vk)||0)+1);
-  return naFila(vk,async()=>{try{await col.doc(id).delete();return true}catch(e){return writeErr(e)}});
+  return naFila(vk,async()=>{try{await col.doc(id).delete(S.ver.get(vk));S.ver.delete(vk);return true}catch(e){return writeErr(e)}});
 }
 function writeErr(e){
   const c=e&&e.code;
@@ -1777,8 +1851,10 @@ async function endSeriesFrom(sid,ds){
   return{sn,msg:ds<=s.inicio?"Repetição excluída":"Não repete mais a partir de "+ddmm(parseIso(ds))+(ov.length?" ("+ov.length+" dia(s) alterado(s) também saíram)":"")};
 }
 /* grava uma ocorrência como rota própria (exceção da série) */
+/* id fixo para a exceção de um dia: duas pessoas alterando o mesmo dia não criam duas rotas */
+function ovId(sid,ds){return"ov-"+sid+"-"+ds}
 async function saveOccurrence(item,f,existingId){
-  const id=existingId||newId(S.col);
+  const id=existingId||ovId(item.serie,item.serieData);
   const ok=await put("rotas",id,Object.assign(rotaBody(f),{serie:item.serie,serieData:item.serieData}));
   if(ok)await excludeDate(item.serie,item.serieData);
   return ok;
@@ -2005,6 +2081,7 @@ function openForm(id,preset){
     if(it.virtual)E={kind:"occ",id,item:it,sid:it.serie,date:it.serieData};
     else if(it.serie&&S.series.has(it.serie))E={kind:"override",id,item:it,sid:it.serie,date:it.serieData};
     else E={kind:"rota",id,item:it};
+    E.rotaVersao=S.ver.get("rotas:"+id);E.serieVersao=S.ver.get("series:"+E.sid);
     r=it;
   }else r=Object.assign({data:iso(S.anchor),caminhao:"Baú",ini:"08:00",fim:"09:00",status:"Agendado",auto:true},preset||{});
   pick("#fScope","one");
@@ -2016,7 +2093,7 @@ function openForm(id,preset){
 }
 function openSeries(sid){
   const s=S.series.get(sid);if(!s)return;
-  E={kind:"series",sid};pick("#fScope","all");
+  E={kind:"series",sid,serieVersao:S.ver.get("series:"+sid)};pick("#fScope","all");
   fillFields(Object.assign({},s,{data:s.inicio}));fillRec(s);
   $("#mTitle").textContent="Editar rota que se repete";applyMode();
   $("#scrim").classList.add("open");$("#scrim").setAttribute("aria-hidden","false");
@@ -2180,6 +2257,9 @@ $("#form").addEventListener("submit",async e=>{
   const recOn=$("#fRecWrap").style.display!=="none"&&!!rec.freq;
   const err=validate(f,rec,sm);
   if(err){const w=$("#fWarn");w.textContent=err;w.classList.add("show");return}
+  const rotaMudou=(E.kind==="rota"||E.kind==="override")&&(!S.rotas.has(E.id)||E.rotaVersao!==S.ver.get("rotas:"+E.id));
+  const serieMudou=E.sid&&(!S.series.has(E.sid)||E.serieVersao!==S.ver.get("series:"+E.sid));
+  if(rotaMudou||serieMudou){const w=$("#fWarn");w.textContent="A agenda mudou enquanto este formulário estava aberto. Copie suas anotações e reabra a rota para revisar a versão atual.";w.classList.add("show");return}
   E.saved=true;const cur=E;const prevAnchor=S.anchor;closeForm();
   const novos=cadastroPendente(f);
   let ok=false,msg="Rota salva",snaps=[];
@@ -2191,7 +2271,7 @@ $("#form").addEventListener("submit",async e=>{
     if(ok&&cur.kind==="rota")await del("rotas",cur.id);
     msg="Rota que se repete criada";
   }
-  else if(cur.kind==="occ"){const rid=newId(S.col);snaps=[snapDoc("rotas",rid),snapDoc("series",cur.sid)];ok=await saveOccurrence(cur.item,f,rid);msg="Só este dia foi alterado"}
+  else if(cur.kind==="occ"){const rid=ovId(cur.sid,cur.date);snaps=[snapDoc("rotas",rid),snapDoc("series",cur.sid)];ok=await saveOccurrence(cur.item,f,rid);msg="Só este dia foi alterado"}
   else if(cur.kind==="override"){snaps=[snapDoc("rotas",cur.id)];ok=await put("rotas",cur.id,Object.assign(rotaBody(f),{serie:cur.sid,serieData:cur.date}));msg="Só este dia foi alterado"}
   else{const id=cur.kind==="rota"?cur.id:newId(S.col);snaps=[snapDoc("rotas",id)];ok=await put("rotas",id,rotaBody(f));msg=cur.kind==="rota"?"Rota atualizada":"Rota lançada"}
   if(ok){offerUndo(msg,snaps);const d=parseIso(f.data);if(!sm&&(monday(d).getTime()!==monday(prevAnchor).getTime()||(S.view==="dia"&&iso(d)!==iso(prevAnchor)))){S.anchor=d;S._scrolled=false;subscribeWeek();render()}
@@ -2703,16 +2783,29 @@ async function dayItems(ds){
   const ov=ovSet(map);for(const[sid,s]of S.series)if(occurs(s,ds)&&!ov.has(sid+"|"+ds))map.set("s~"+sid+"~"+ds,virt(s,sid,ds));
   return[...map].map(([id,r])=>Object.assign({id},r)).sort((a,b)=>toMin(a.ini)-toMin(b.ini));
 }
+/* mensagem pensada para ler no celular: hora e cliente em destaque, trajeto numa linha, endereços só onde precisa ir, links curtos */
+const WA_NUM=["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"];
+const waNum=n=>n<=10?WA_NUM[n]:"*"+n+")*";
+const waGalpao=p=>/galpao/.test(norm(p.local))||(!!S.patio&&String(p.endereco||"").trim()===String(S.patio).trim());
+const waNome=p=>waGalpao(p)?"Galpão":(p.local||p.endereco||p.tipo);
+/* link curto: pela posição do pino quando ela é confiável; senão, pelo endereço */
+function waPos(p){const c=locCoord(p.local,p.endereco);return c&&c.geoPrec!=="aproximado"?(+(+c.lat).toFixed(6))+","+(+(+c.lng).toFixed(6)):""}
+function waLink(p){const c=waPos(p);return c?"https://maps.google.com/?q="+c:(p.endereco?mapsQ(p.endereco):"")}
+function waRotaLink(st){const ps=st.map(p=>waPos(p)||null);if(ps.length<2||ps.some(x=>!x))return"";
+  const u=[];ps.forEach(x=>{if(u[u.length-1]!==x)u.push(x)});return u.length>1&&u.length<=10?"https://www.google.com/maps/dir/"+u.join("/"):""}
 function waRoute(r,n,opt){
-  let t="*"+(n?n+") ":"")+r.ini+" às "+r.fim+" – "+(r.cliente||r.servico||"Rota")+"*\n";
-  if(r.cliente&&r.servico)t+="📝 "+r.servico+"\n";
-  if((r.residuos||[]).length)t+="♻️ Resíduo"+(r.residuos.length>1?"s":"")+": "+resText(r.residuos)+"\n";
-  if(r.mtr)t+="📄 MTR: "+r.mtr+"\n";
-  if(r.destino)t+="🏁 Destino: "+r.destino+"\n";
+  let t=(n?waNum(n)+" ":"")+"*"+r.ini+" – "+r.fim+"  |  "+String(r.cliente||r.servico||"Rota").toUpperCase()+"*\n";
+  if(opt.mot&&r.motorista)t+="👷 "+r.motorista+"\n";
+  const oq=[r.cliente&&r.servico?r.servico:"",(r.residuos||[]).length?resText(r.residuos):""].filter(Boolean).join(" · ");
+  if(oq)t+="♻️ "+oq+"\n";
+  if(r.mtr)t+="📄 MTR: "+mtrSplit(r.mtr).join(" / ")+"\n";
   const st=stopsOf(r);
-  if(st.length){t+="🛣️ Trajeto:\n";st.forEach((p,j)=>{t+="   "+(j+1)+". "+p.tipo+(p.local?": "+p.local:"")+"\n";if(opt.end&&p.endereco)t+="      "+p.endereco+"\n      📍 "+mapsQ(p.endereco)+"\n"})}
-  if(opt.end&&st.filter(p=>p.endereco).length>1){const ro=routeOne(r);if(ro.url)t+="🗺️ Trajeto desta rota: "+ro.url+"\n"}
-  if(opt.obs&&r.obs)t+="⚠️ Obs.: "+r.obs+"\n";
+  if(st.length>1)t+="🛣️ "+st.map(waNome).join(" ➜ ")+"\n";
+  if(r.destino)t+="🏁 Levar para: *"+r.destino+"*\n";
+  if(opt.end){const vist=new Set();st.filter(p=>p.endereco&&!waGalpao(p)).forEach(p=>{const k=norm(p.endereco);if(vist.has(k))return;vist.add(k);
+    t+="📍 "+waNome(p)+": "+p.endereco+"\n"+waLink(p)+"\n"})}
+  if(opt.end&&opt.so){const u=waRotaLink(st)||(st.filter(p=>p.endereco).length>1?routeOne(r).url:"");if(u)t+="🗺️ Caminho desta rota:\n"+u+"\n"}
+  if(opt.obs&&r.obs)t+="⚠️ *Atenção:* "+String(r.obs).trim()+"\n";
   return t;
 }
 function digits(t){let d=String(t||"").replace(/\D/g,"");if(!d)return"";if(d.length<=11)d="55"+d;return d}
@@ -2720,20 +2813,23 @@ async function waBuild(){
   const ds=$("#waData").value;if(!ds)return;const d=parseIso(ds);
   const opt={end:$("#waEnd").checked,obs:$("#waObs").checked,canc:$("#waCanc").checked};
   const dia=DAYL[d.getDay()]+", "+ddmm(d);let txt="";const mots=new Set();
-  if(WA.only){const r=WA.only;txt="*🚛 ROTA DO "+r.caminhao.toUpperCase()+" – "+dia.toUpperCase()+"*\n";if(r.motorista){txt+="👷 Motorista: "+r.motorista+"\n";mots.add(r.motorista)}
-    txt+="\n"+waRoute(r,0,opt);if(r.status==="Cancelado")txt="❌ *ROTA CANCELADA – NÃO IR*\n\n"+txt}
+  if(WA.only){const r=WA.only;txt="🚛 *"+(r.caminhao==="Baú"?"BAÚ":"POLI")+"  ·  "+dia.toUpperCase()+"*\n";if(r.motorista){txt+="👷 "+r.motorista+"\n";mots.add(r.motorista)}
+    txt+="━━━━━━━━━━━━━━\n\n"+waRoute(r,0,Object.assign({so:true},opt));if(r.status==="Cancelado")txt="❌ *ROTA CANCELADA – NÃO IR*\n\n"+txt}
   else{
     $("#waInfo").textContent="Carregando…";const items=await dayItems(ds);$("#waInfo").textContent="";
     const tr=picked("#waTruck");const trucks=tr?[tr]:TRUCKS.map(t=>t.k);
     trucks.forEach((tk,ti)=>{const rs=items.filter(r=>r.caminhao===tk);const ok=rs.filter(active),ca=rs.filter(r=>!active(r));
-      if(ti)txt+="\n━━━━━━━━━━━━━━\n\n";
-      txt+="*🚛 ROTAS DO "+tk.toUpperCase()+" – "+dia.toUpperCase()+"*\n";
+      if(ti)txt+="\n\n";
+      txt+="🚛 *"+(tk==="Baú"?"BAÚ":"POLI")+"  ·  "+dia.toUpperCase()+"*\n";
       const ms=[...new Set(ok.map(r=>r.motorista).filter(Boolean))];ms.forEach(m=>mots.add(m));
-      if(ms.length)txt+="👷 Motorista: "+ms.join(", ")+"\n";
-      if(!ok.length)txt+="\n(sem rotas neste dia)\n";
-      ok.forEach((r,i)=>{txt+="\n"+waRoute(r,i+1,opt)});
-      if(opt.end&&ok.length){const o=routeDay(ds,tk,rs);o.parts.forEach((p,i)=>{txt+="\n🗺️ Rota do dia completa"+(o.parts.length>1?" (parte "+(i+1)+" de "+o.parts.length+")":"")+": "+p.url+"\n"})}
-      if(opt.canc&&ca.length)txt+="\n❌ *CANCELADA"+(ca.length>1?"S":"")+" – NÃO IR:*\n"+ca.map(r=>"   "+r.ini+" – "+(r.cliente||r.servico)+"\n").join("");
+      if(ms.length===1)txt+="👷 "+ms[0]+"\n";
+      txt+=(ok.length?"📋 "+ok.length+" rota"+(ok.length>1?"s":""):"📋 Sem rotas neste dia")+"\n━━━━━━━━━━━━━━\n";
+      const o2=Object.assign({mot:ms.length>1},opt);
+      ok.forEach((r,i)=>{txt+="\n"+waRoute(r,i+1,o2)});
+      if(opt.end&&ok.length){const st=ok.flatMap(r=>stopsOf(r));const curto=waRotaLink(st);
+        if(curto)txt+="\n━━━━━━━━━━━━━━\n🗺️ *Rota do dia completa:*\n"+curto+"\n";
+        else{const o=routeDay(ds,tk,rs);if(o.parts.length)txt+="\n━━━━━━━━━━━━━━\n";o.parts.forEach((p,i)=>{txt+="🗺️ *Rota do dia completa"+(o.parts.length>1?" (parte "+(i+1)+" de "+o.parts.length+")":"")+":*\n"+p.url+"\n"})}}
+      if(opt.canc&&ca.length)txt+="\n❌ *CANCELADA"+(ca.length>1?"S":"")+" – NÃO IR:*\n"+ca.map(r=>"• "+r.ini+" – "+(r.cliente||r.servico)+"\n").join("");
     })}
   $("#waTxt").value=txt.trim();waLinks(mots);
 }
@@ -3210,6 +3306,7 @@ $("#planBody").addEventListener("click",async e=>{const b=e.target.closest("butt
     PL.copiados=null;planRender();planContar();return}
   if(b.dataset.plopen){const x=PL.L.find(y=>y.id===b.dataset.plopen);closeModal("scrimPlan");const id=b.dataset.plopen;if(S.items.has(id)){openForm(id);return}if(!x)return;goTo(x.r.data,id);let n=0;const t=setInterval(()=>{if(S.items.has(id)){clearInterval(t);openForm(id)}else if(++n>25)clearInterval(t)},300)}});
 /* ---------- Assistente (IA): contexto compacto da semana na tela ---------- */
+window.addEventListener("agenda-dados-atualizados",()=>{S.perK=null;S.conhT=0;PL.t=0;if(CAD.todas)CAD.todas={}});
 async function carregarConh(force){if(!force&&S.conh instanceof Map&&Date.now()-(S.conhT||0)<60000)return S.conh;
   try{const g=await S.db.collection("conhecimento").get();S.conh=new Map(g.docs.filter(d=>d.exists).map(d=>[d.id,Object.assign({nome:"",texto:""},d.data()||{})]));S.conhT=Date.now()}
   catch(e){if(!(S.conh instanceof Map))S.conh="erro"}return S.conh}
@@ -3232,7 +3329,7 @@ async function ctxIA(pergunta,historico){
   // Use o resumo curto apenas para consultas simples de escala em uma única data.
   const consultaSimples=dias.length===1 && /\b(caminh\w*|rotas?|coletas?|viagens|saidas?)\b/.test(pedido)
     && pedido.replace(/[?!.:,]/g," ").split(/\s+/).every(p=>!p||/^(quais|qual|quant[oa]s?|que|os?|as?|de|do|da|dos|das|para|pra|em|no|na|tem|ha|sao|estao|vao|sai|saem|sair|rodam|rodar|previst[oa]s?|agendad[oa]s?|caminhao|caminhoes|rotas?|coletas?|viagens|saidas?|hoje|amanha|ontem)$/.test(p));
-  if(consultaSimples){
+  if(consultaSimples){S.iaBuscaMs=0;
     const dia=iso(addDays(new Date(),{hoje:0,amanha:1,ontem:-1}[dias[0][1]]));
     const semana=weekDays().map(iso);
     const rotas=semana.includes(dia)&&S.iaSemanaCarregada===semana[0]
@@ -3241,13 +3338,20 @@ async function ctxIA(pergunta,historico){
     return ["Data consultada: "+dia+" · "+rotas.length+" rota(s) ativa(s).",
       ...rotas.map(r=>[r.ini,r.fim,r.caminhao,r.cliente,r.servico,r.destino,eff(r)].join(" | "))].join("\n");
   }
-  const L=[IA_APRENDER,"",ctxSemana()];const hoje=new Date();const hj=iso(hoje);const wd=weekDays();const wa=iso(wd[0]),wz=iso(wd[6]);
-  const conh=await carregarConh();
+  /* o que quase não muda vem primeiro (regras e base de conhecimento) e a semana vem depois:
+     o Gemini reaproveita o começo igual de perguntas seguidas e responde mais rápido */
+  const L=[IA_APRENDER];const hoje=new Date();const hj=iso(hoje);const wd=weekDays();const wa=iso(wd[0]),wz=iso(wd[6]);
+  const assunto=[...historico.filter(m=>m.role==="user").slice(-1).map(m=>norm(m.texto)),pedido].join(" ");
+  const querHist=/histor|ultim|costum|frequen|passad|anterio|recorr|quantas vezes|proxim|amanha|ontem|semana que vem|fora da semana|segunda|terca|quarta|quinta|sexta|sabado|domingo|\bdia \d|mes que vem|sem coleta|atrasad|\d{1,2}[/.-]\d/.test(assunto);
+  /* as duas buscas no Google saem juntas (antes era uma depois da outra) */
+  const tb=performance.now();const pa=iso(addDays(hoje,-60)),pz=iso(addDays(hoje,14));
+  const perP=querHist?rotasPeriodo(pa,pz).catch(e=>null):null;
+  const conh=await carregarConh();const perRaw=perP?await perP:null;S.iaBuscaMs=Math.round(performance.now()-tb);
   if(conh instanceof Map&&conh.size){L.push("","BASE DE CONHECIMENTO DA TREVO (regras por cliente e gerais):");
     [...conh.values()].sort((a,b)=>(/geral|pop|regra|caminh/i.test(b.nome)?1:0)-(/geral|pop|regra|caminh/i.test(a.nome)?1:0)||a.nome.localeCompare(b.nome,"pt")).forEach(t=>{L.push("### "+t.nome);L.push(String(t.texto||"").trim())})}
-  const assunto=[...historico.filter(m=>m.role==="user").slice(-1).map(m=>norm(m.texto)),pedido].join(" ");
-  if(!/histor|ultim|costum|frequen|passad|anterio|recorr|quantas vezes|proxim|amanha|ontem|semana que vem|fora da semana|segunda|terca|quarta|quinta|sexta|sabado|domingo|\bdia \d|mes que vem|sem coleta|atrasad|\d{1,2}[/.-]\d/.test(assunto))return L.join("\n");
-  try{const a=iso(addDays(hoje,-60)),z=iso(addDays(hoje,14));const per=rotasComRepeticoes(await rotasPeriodo(a,z),a,z);
+  L.push("",ctxSemana());
+  if(!querHist)return L.join("\n");
+  try{if(!perRaw)throw new Error("sem dados");const a=pa,z=pz;const per=rotasComRepeticoes(perRaw,a,z);
     const prox=per.filter(([,r])=>r.data>=hj&&(r.data<wa||r.data>wz));
     if(prox.length){L.push("","PRÓXIMAS 2 SEMANAS (fora da semana na tela, "+prox.length+" rotas):");
       prox.forEach(([,r])=>L.push("- "+DAYN[parseIso(r.data).getDay()].slice(0,3)+" "+ddmm(parseIso(r.data))+" · "+r.caminhao+" · "+r.ini+"–"+r.fim+" · "+(r.cliente||r.servico||"-")+" · destino: "+(r.destino||"-")+" · resíduos: "+(resText(r.residuos||[])||r.residuo||"-")+(r.serie?" · repete":"")))}
@@ -3312,9 +3416,9 @@ async function iaEnviar(txt){txt=String(txt||"").trim();if(!txt||S.iaBusy)return
     const ctx=await Promise.race([ctxIA(txt,hist),prazo]);
     const contextoMs=Date.now()-t0;
     if(contextoMs>=IA_PRAZO_MS)throw new Error("O prazo terminou ao preparar os dados da agenda.");
-    console.info("Júlia",{id,etapa:"contexto",ms:contextoMs});
+    console.info("Júlia",{id,etapa:"contexto",ms:contextoMs,buscaMs:S.iaBuscaMs||0,montagemMs:Math.max(0,contextoMs-(S.iaBuscaMs||0)),caracteres:ctx.length});
     etapa="aguardar a resposta do servidor";
-    const args=[{pergunta:txt,contexto:ctx,historico:hist,modo,id,contextoMs,restanteMs:IA_PRAZO_MS-contextoMs}];
+    const args=[{pergunta:txt,contexto:ctx,historico:hist,modo,id,contextoMs,buscaMs:S.iaBuscaMs||0,restanteMs:IA_PRAZO_MS-contextoMs}];
     const r=await Promise.race([API.call("apiIA",args),prazo]);
     const ap=[];const limpo=String(r.texto||"").replace(/\[\[\s*APRENDER\s*:\s*([^|\]]+?)\s*\|\s*([^\]]+?)\s*\]\]/gi,(m,t,x)=>{if(ap.length<3)ap.push({topico:t.trim(),texto:x.trim(),estado:""});return""}).replace(/\n{3,}/g,"\n\n").trim();
     console.info("Júlia",{id,etapa:"resposta",ms:Date.now()-t0,modelo:r.modelo});S.iaHist.push({role:"model",texto:limpo||"Anotado.",aprender:ap});$("#iaInfo").textContent=(r.modo==="pensar"?"🧠 ":"")+"Respondeu em "+Math.round((Date.now()-t0)/1000)+" s · "+r.usadasHoje+" de "+r.limite+" perguntas hoje · ela só sugere"}
@@ -3922,7 +4026,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.10";
+const VERSAO_TELA="9.12";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
