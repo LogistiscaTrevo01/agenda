@@ -2796,12 +2796,17 @@ function waRotaLink(st){const ps=st.map(p=>waPos(p)||null);if(ps.length<2||ps.so
 function waRoute(r,n,opt){
   let t=(n?waNum(n)+" ":"")+"*"+r.ini+" – "+r.fim+"  |  "+String(r.cliente||r.servico||"Rota").toUpperCase()+"*\n";
   if(opt.mot&&r.motorista)t+="👷 "+r.motorista+"\n";
-  const oq=[r.cliente&&r.servico?r.servico:"",(r.residuos||[]).length?resText(r.residuos):""].filter(Boolean).join(" · ");
-  if(oq)t+="♻️ "+oq+"\n";
+  /* serviço numa linha; resíduos na linha de baixo, recuados */
+  const sv=r.cliente&&r.servico?r.servico:"",rs=(r.residuos||[]).length?resText(r.residuos):"";
+  if(sv)t+="♻️ "+sv+"\n";
+  if(rs)t+=(sv?"      ":"♻️ ")+"Resíduo"+(r.residuos.length>1?"s":"")+": "+rs+"\n";
   if(r.mtr)t+="📄 MTR: "+mtrSplit(r.mtr).join(" / ")+"\n";
   const st=stopsOf(r);
   if(st.length>1)t+="🛣️ "+st.map(waNome).join(" ➜ ")+"\n";
-  if(r.destino)t+="🏁 Levar para: *"+r.destino+"*\n";
+  /* com parada de descarte no trajeto: "Descartar em"; sem: "Levar para" */
+  const desc=st.filter(p=>/^descarte/.test(norm(p.tipo))&&(p.local||p.endereco));
+  const dst=r.destino||desc.map(waNome).join("/");
+  if(dst)t+="🏁 "+(desc.length?"Descartar em":"Levar para")+": *"+dst+"*\n";
   if(opt.end){const vist=new Set();st.filter(p=>p.endereco&&!waGalpao(p)).forEach(p=>{const k=norm(p.endereco);if(vist.has(k))return;vist.add(k);
     t+="📍 "+waNome(p)+": "+p.endereco+"\n"+waLink(p)+"\n"})}
   if(opt.end&&opt.so){const u=waRotaLink(st)||(st.filter(p=>p.endereco).length>1?routeOne(r).url:"");if(u)t+="🗺️ Caminho desta rota:\n"+u+"\n"}
@@ -4028,7 +4033,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.13";
+const VERSAO_TELA="9.14";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
