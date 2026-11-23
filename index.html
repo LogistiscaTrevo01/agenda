@@ -3266,14 +3266,14 @@ async function abrirPlan(){openModal("scrimPlan");$("#planBody").innerHTML='<p c
   PL.L.forEach(x=>{if(!x.m)PL.sel.add(x.k)});planRender()}
 function planRender(){const L=(PL.L||[]).filter(x=>PL.mostrar||!x.m).sort((a,b)=>(a.r.data+a.r.caminhao+a.r.ini).localeCompare(b.r.data+b.r.caminhao+b.r.ini));
   const pend=(PL.L||[]).filter(x=>!x.m).length,lanc=(PL.L||[]).filter(x=>x.m&&!x.m.ign).length;
-  let h='<div class="pltop"><span>Rotas concluídas desde <input type="date" id="plDesde" value="'+planDesde()+'" aria-label="Desde"></span><b>'+pend+' a lançar</b><span class="hint">'+lanc+' já lançada(s)</span><span class="spacer"></span><label class="autochk"><input type="checkbox" id="plMostrar"'+(PL.mostrar?" checked":"")+'> <span>Mostrar as já lançadas</span></label></div>';
+  let h='<div class="pltop"><span>Rotas concluídas desde <input type="date" id="plDesde" value="'+planDesde()+'" aria-label="Desde"></span><b>'+pend+' a lançar</b><span class="hint">'+lanc+' já lançada(s)</span><span class="spacer"></span>'+(L.length?'<button type="button" class="btn sm" id="plTodas">'+(L.every(x=>PL.sel.has(x.k))?'☐ Desmarcar todas':'☑ Marcar todas')+'</button>':'')+'<label class="autochk"><input type="checkbox" id="plMostrar"'+(PL.mostrar?" checked":"")+'> <span>Mostrar as já lançadas</span></label></div>';
   if(PL.erro)h+='<div class="pldica">⚠ '+esc(PL.erro)+'</div>';
   if(!L.length)h+='<p class="audok">'+(pend?'':'Tudo lançado. 👍 ')+'Nenhuma rota concluída '+(PL.mostrar?'':'pendente ')+'neste período.</p>';
   L.forEach(x=>{const r=x.r,ln=planLinhas(r);const sem=!(r.residuos||[]).length,semM=!String(r.mtr||"").trim(),semC=!String(r.cliente||"").trim();
     const est=x.m?(x.m.ign?'<span class="plok">não vai para a planilha</span>':'<span class="plok">✓ lançada '+esc(ddmm(new Date(x.m.em)))+'</span>'):'';
     h+='<div class="plrota'+(x.m?(x.m.ign?" ign":" lanc"):"")+'"><div class="plh"><label><input type="checkbox" data-plk="'+esc(x.k)+'"'+(PL.sel.has(x.k)?" checked":"")+'> '+DAYN[parseIso(r.data).getDay()].slice(0,3)+' '+ddmm(parseIso(r.data))+' · <span class="pill '+truckCls(r.caminhao)+'">'+(r.caminhao==="Baú"?"Baú":"Poli")+'</span> '+esc(r.ini)+' · '+esc(r.cliente||r.servico||"Rota")+'</label>'+
       (semC?'<span class="plwarn">sem cliente</span>':'')+(sem?'<span class="plwarn">sem resíduo</span>':'')+(semM?'<span class="plwarn">sem MTR</span>':'')+est+
-      '<button type="button" class="btn sm ghost" data-plopen="'+esc(x.id)+'">Abrir rota</button>'+
+      (x.m?'':'<button type="button" class="btn sm" data-plum="'+esc(x.k)+'" title="Copia só as linhas desta rota">'+ic("copy")+' Copiar só esta</button>')+'<button type="button" class="btn sm ghost" data-plopen="'+esc(x.id)+'">Abrir rota</button>'+
       (x.m?'<button type="button" class="btn sm ghost" data-plvolta="'+esc(x.k)+'">Voltar para pendente</button>':'<button type="button" class="btn sm ghost" data-plign="'+esc(x.k)+'" title="Ex.: borracharia, oficina, serviço interno">Não vai para a planilha</button>')+'</div>'+
       '<div class="plwrap"><table class="pltab"><thead><tr>'+["Contrato","Parceiro","Serviço","Tipo","Qtd","Data","MTR","Observação"].map(c=>'<th>'+c+'</th>').join("")+'</tr></thead><tbody>'+
       ln.map(l=>'<tr>'+[l[0],l[1],l[2],l[3],l[5],l[8],l[10],l[11]].map(v=>'<td'+(v?'':' class="vz"')+'>'+(v?esc(v):'—')+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></div>'});
@@ -3291,7 +3291,9 @@ $("#planBody").addEventListener("change",e=>{
   if(e.target.id==="plMostrar"){PL.mostrar=e.target.checked;planRender();return}
   const k=e.target.dataset.plk;if(k){if(e.target.checked)PL.sel.add(k);else PL.sel.delete(k);PL.copiados=null;planRender()}});
 $("#planBody").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
-  if(b.id==="plCopiar"){const L=(PL.L||[]).filter(x=>PL.sel.has(x.k)&&(PL.mostrar||!x.m)).sort((a,c)=>(a.r.data+a.r.caminhao+a.r.ini).localeCompare(c.r.data+c.r.caminhao+c.r.ini));
+  if(b.id==="plTodas"){const V=(PL.L||[]).filter(x=>PL.mostrar||!x.m);const todas=V.every(x=>PL.sel.has(x.k));V.forEach(x=>todas?PL.sel.delete(x.k):PL.sel.add(x.k));PL.copiados=null;planRender();return}
+  if(b.dataset.plum){PL.sel=new Set([b.dataset.plum]);}
+  if(b.id==="plCopiar"||b.dataset.plum){const L=(PL.L||[]).filter(x=>PL.sel.has(x.k)&&(PL.mostrar||!x.m)).sort((a,c)=>(a.r.data+a.r.caminhao+a.r.ini).localeCompare(c.r.data+c.r.caminhao+c.r.ini));
     const tsv=L.flatMap(x=>planLinhas(x.r)).map(l=>l.map(v=>String(v).replace(/[\t\r\n]+/g," ")).join("\t")).join("\r\n");
     try{await navigator.clipboard.writeText(tsv)}catch(x){const t=document.createElement("textarea");t.value=tsv;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
     PL.copiados=L.map(x=>x.k);planRender();toast(L.flatMap(x=>planLinhas(x.r)).length+" linha(s) copiada(s)");return}
@@ -4026,7 +4028,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.12";
+const VERSAO_TELA="9.13";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
