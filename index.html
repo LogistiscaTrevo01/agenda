@@ -479,6 +479,7 @@ svg.pin{flex:none;display:inline-block;vertical-align:-3px}
 .viewer.open{display:flex}
 .vtop{display:flex;align-items:center;gap:12px;padding:10px 14px;font-weight:600}
 .vtop a{color:#cfe3ff;text-decoration:none;font-size:14px}
+.vtop .vbtn{width:auto;height:auto;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:#fff;color:#111;border:0;border-radius:8px;padding:6px 12px;font:600 14px system-ui,sans-serif;cursor:pointer}.vtop .vbtn[hidden]{display:none}.vmsg{font-size:12.5px;font-weight:400;opacity:.75}
 .vtop button{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:8px;width:36px;height:36px;font-size:16px}
 #vPos{opacity:.7;font-size:14px}
 .vbody{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 56px 16px}
@@ -1128,7 +1129,7 @@ body.mapopen .jbtn{display:none}
   </div>
 </div>
 <div class="viewer" id="viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Anexo">
-  <div class="vtop"><span id="vName"></span><span id="vPos"></span><div class="spacer"></div><a id="vOpen" target="_blank" rel="noopener">Abrir original ↗</a><button type="button" id="vClose" aria-label="Fechar">✕</button></div>
+  <div class="vtop"><span id="vName"></span><span id="vPos"></span><div class="spacer"></div><span id="vMsg" class="vmsg"></span><button type="button" id="vPrint" class="vbtn" hidden title="Imprimir este anexo">🖨 Imprimir</button><a id="vOpen" target="_blank" rel="noopener">Abrir original ↗</a><button type="button" id="vClose" aria-label="Fechar">✕</button></div>
   <div class="vbody" id="vBody"></div>
   <button type="button" class="vnav prev" id="vPrev" aria-label="Anterior">‹</button>
   <button type="button" class="vnav next" id="vNext" aria-label="Próximo">›</button>
@@ -2416,8 +2417,25 @@ async function anexarArquivos(files){
 let V={list:[],i:0};
 function openViewer(list,i){V={list,i};showView();$("#viewer").classList.add("open");$("#viewer").setAttribute("aria-hidden","false")}
 function closeViewer(){$("#viewer").classList.remove("open");$("#viewer").setAttribute("aria-hidden","true");$("#vBody").innerHTML=""}
+/* PDF: baixa o arquivo pela agenda e mostra no leitor de PDF do próprio navegador (texto selecionável, dá para copiar e imprimir).
+   No celular (sem leitor de PDF embutido) continua a prévia do Google Drive. */
+const PDFB=new Map();
+async function pdfBlob(a){if(PDFB.has(a.id))return PDFB.get(a.id);
+  const r=await API.call("apiArquivo",[a.id]);const bin=atob(r.b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([u],{type:"application/pdf"}));PDFB.set(a.id,url);return url}
+async function pdfLocal(a){if(!navigator.pdfViewerEnabled)return;$("#vMsg").textContent="Preparando para copiar e imprimir…";
+  try{const url=await pdfBlob(a);if(V.list[V.i]!==a)return;$("#vBody").innerHTML='<iframe id="vPdf" src="'+url+'" title="'+esc(a.nome)+'"></iframe>';$("#vMsg").textContent=""}
+  catch(e){if(V.list[V.i]===a)$("#vMsg").textContent=""}}
+function imprimirAnexo(){const a=V.list[V.i];if(!a)return;
+  if(isPdf(a)){const f=$("#vPdf");if(f){try{f.contentWindow.focus();f.contentWindow.print();return}catch(e){window.open(f.src,"_blank");return}}
+    window.open(driveView(a.id),"_blank");toast("No Google Drive, use o botão de imprimir (ou Ctrl+P)");return}
+  if(isImg(a)){const fr=document.createElement("iframe");fr.style.cssText="position:fixed;width:0;height:0;border:0;right:0;bottom:0";document.body.appendChild(fr);
+    const d=fr.contentDocument;d.open();d.write('<!doctype html><title>'+esc(a.nome)+'</title><style>@page{margin:10mm}body{margin:0;text-align:center}img{max-width:100%;max-height:270mm}</style><img src="'+esc("https://lh3.googleusercontent.com/d/"+encodeURIComponent(a.id)+"=w2000")+'">');d.close();
+    const im=d.querySelector("img");const vai=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(e){}setTimeout(()=>fr.remove(),60000)};if(im.complete)vai();else{im.onload=vai;im.onerror=()=>{fr.remove();toast("Não foi possível carregar a imagem para imprimir")}}}}
+$("#vPrint").addEventListener("click",imprimirAnexo);
 function showView(){const a=V.list[V.i];if(!a)return closeViewer();
   $("#vName").textContent=a.nome;$("#vPos").textContent=V.list.length>1?(V.i+1)+" de "+V.list.length:"";$("#vOpen").href=driveView(a.id);
+  $("#vPrint").hidden=!(isPdf(a)||isImg(a));$("#vMsg").textContent="";if(isPdf(a))setTimeout(()=>pdfLocal(a),0);
   const ifr='<iframe src="'+esc(drivePrev(a.id))+'" title="'+esc(a.nome)+'" allow="autoplay"></iframe>';
   /* vídeo: toca direto do arquivo (a prévia do Drive demora para "processar" vídeos novos) */
   $("#vBody").innerHTML=isImg(a)?'<img src="'+esc("https://lh3.googleusercontent.com/d/"+encodeURIComponent(a.id)+"=w2000")+'" alt="'+esc(a.nome)+'">':
@@ -4033,7 +4051,7 @@ $("#btnLogout").addEventListener("click",()=>{API.logout();location.reload()});
 /* ---------- atualização automática da tela ----------
    Ao abrir, confere se existe uma versão mais nova desta página no GitHub.
    Se existir, baixa e recarrega sozinha, sem precisar de Ctrl+Shift+R. */
-const VERSAO_TELA="9.14";
+const VERSAO_TELA="9.15";
 (async()=>{try{if(location.protocol!=="https:")return;
   const r=await fetch(location.pathname,{cache:"reload",credentials:"omit"});if(!r.ok)return;
   const m=(await r.text()).match(/const VERSAO_TELA="([^"]+)"/);
